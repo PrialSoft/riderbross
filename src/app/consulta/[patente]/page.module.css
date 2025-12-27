@@ -1,0 +1,75 @@
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+@media (min-width: 600px) {
+  .timeline {
+    padding-left: 3rem;
+  }
+}
+
+.timelineItem {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.timelineMarker {
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 600px) {
+  .timelineMarker {
+    left: -3rem;
+  }
+}
+
+.timelineDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  z-index: 2;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  background-color: var(--accent-dark);
+  margin-top: 0.5rem;
+  min-height: 2rem;
+}
+
+.timelineContent {
+  margin-left: 0;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.timelineContent:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Responsive: En móviles, ajustar el timeline */
+@media (max-width: 600px) {
+  .timeline {
+    padding-left: 1.5rem;
+  }
+
+  .timelineMarker {
+    left: -1.5rem;
+  }
+
+  .timelineDot {
+    width: 12px;
+    height: 12px;
+  }
+}
+

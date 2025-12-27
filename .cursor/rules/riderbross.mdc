@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+description: Reglas fundamentales para el desarrollo de la Web App RiderBross (Mantenimiento de Motos)
+globs: **/*.{ts,tsx,js,jsx,css,scss}
+---
+
+# RiderBross Project Rules
+
+Eres un experto en desarrollo Full Stack especializado en Next.js, TypeScript y Supabase. Tu objetivo es construir la plataforma de RiderBross, un taller de servicio técnico de motocicletas[cite: 1, 18].
+
+## 1. Stack Tecnológico & Estándares
+- **Framework:** Next.js 15+ (App Router) con **React Compiler** habilitado.
+- **Lenguaje:** TypeScript (Tipado estricto).
+- **Base de Datos & Auth:** Supabase (PostgreSQL).
+- **UI:** Material UI (MUI) con componentes de `@mui/material`.
+- **Estilos:** CSS Modules (`.module.css`) para componentes y `globals.css` para variables raíz.
+- **Fechas:** Usar **Dayjs** exclusivamente para toda lógica y formato de fechas.
+- **Tablas:** Usar el componente personalizado `DataTable` en `src/utils/ui/table/DataTable.tsx` (basado en `@tanstack/react-table`).
+
+## 2. Responsividad & Diseño (Mobile-First)
+- Toda la aplicación debe ser **Full Responsive**.
+- Priorizar la visualización en dispositivos móviles (iPhone/Android) ya que los clientes consultarán sus fichas desde allí.
+- Usar el sistema de Grid y Stack de MUI para layouts adaptables.
+- Los CSS Modules deben incluir media queries para ajustes finos.
+
+## 3. Lógica de Negocio: Fichas Técnicas (Basado en Informe Real)
+Al generar código para fichas técnicas u órdenes de servicio, incluir siempre los campos del reporte estándar de RiderBross[cite: 3, 6]:
+- **Datos del Vehículo:** Cliente, Teléfono, Email, Patente, Marca, Modelo y KM Actual[cite: 2].
+- **Servicios Aplicados:** Reemplazo de aceite (ej. Castrol Power 1), inspección de fugas, calibración de válvulas, limpieza de filtros[cite: 6].
+- **Estado de Batería (Numérico):** Valor en Off, Ignición, Ralentí y a 5.000 RPM[cite: 7].
+- **Checklist de Sistemas:** Iluminación (Posición, Alta/Baja, Giros, Freno, Instrumental, Patente), Transmisión (Cadena, ajuste, lubricación), Ruedas (PSI delanteros/traseros) y Frenos (Líquido y pastillas)[cite: 8, 9, 10, 11].
+- **Observaciones Técnicas:** Espacio para valores específicos de luz de válvulas (Admisión/Escape)[cite: 12, 14, 15].
+
+## 4. Estructura de Rutas
+- `app/`: Directorio principal.
+- `app/(public)/`: Landing page empresarial (80%) y búsqueda por patente abierta a todo público.
+- `app/(admin)/`: Dashboard de gestión protegido por Supabase Auth (20%).
+- `app/consulta/[patente]/`: Ruta pública para que el cliente vea su historial técnico.
+
+## 5. Exportación de Documentos
+- **PDF:** Implementar generación con `jsPDF` y `html2canvas`. El diseño debe replicar fielmente el informe técnico físico de RiderBross[cite: 3, 17].
+- **Excel:** Usar `exceljs` y `file-saver` para reportes administrativos de servicios realizados.
+
+## 6. Preferencias de Código
+- Preferir Functional Components y Server Actions.
+- Mantener los componentes pequeños y reutilizables.
+- Escribir código limpio y autodocumentado.

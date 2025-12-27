@@ -1,0 +1,31 @@
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar personalizado para la tabla */
+.tableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: var(--text-disabled);
+  border-radius: var(--border-radius-full);
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Responsive: En móviles, hacer que las celdas sean más compactas */
+@media (max-width: 600px) {
+  .tableContainer {
+    font-size: 0.875rem;
+  }
+}
+

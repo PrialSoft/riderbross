@@ -1,0 +1,49 @@
+.navLink {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--border-radius-md);
+  transition: all 0.3s ease;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  display: block;
+  outline: none;
+  border: none;
+}
+
+.navLink:focus,
+.navLink:focus-visible {
+  outline: none;
+  border: none;
+}
+
+.navLink:hover {
+  background-color: rgba(139, 26, 26, 0.2);
+  color: var(--primary);
+  text-shadow: 0 2px 6px rgba(139, 26, 26, 0.7);
+  transform: translateY(-2px);
+}
+
+.navLinkActive {
+  color: var(--primary);
+  font-weight: 700;
+  background-color: rgba(139, 26, 26, 0.15);
+  text-shadow: 0 2px 6px rgba(139, 26, 26, 0.7);
+}
+
+.navLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--primary), transparent);
+  border-radius: var(--border-radius-full);
+  transition: all 0.3s ease;
+}
+
