@@ -3,17 +3,6 @@
    Mobile-First Responsive Design
    ============================================ */
 
-/* Fuentes Personalizadas */
-@font-face {
-  font-family: 'Devil Breeze';
-  src: url('/fonts/DevilBreeze.woff2') format('woff2'),
-       url('/fonts/DevilBreeze.woff') format('woff'),
-       url('/fonts/DevilBreeze.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* CSS Reset y Variables Base */
 :root {
   /* Colores de Marca RiderBross - Basados en el Logo */
@@ -64,7 +53,7 @@
   --spacing-3xl: 4rem;     /* 64px */
   
   /* Tipografía */
-  --font-family-headings: 'Devil Breeze', 'Bebas Neue', 'Creepster', sans-serif;
+  --font-family-headings: 'Bebas Neue', 'Creepster', sans-serif;
   --font-family-body: var(--font-montserrat), 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-mono: 'Courier New', Courier, monospace;
   

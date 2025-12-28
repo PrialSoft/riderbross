@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar/Navbar";
 import MuiProvider from "@/components/providers/MuiProvider";
+import Navbar from "@/components/Navbar/NavbarWrapper";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -30,10 +30,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <MuiProvider>
           <Navbar />
-          <main style={{ minHeight: 'calc(100vh - 64px)' }}>
+          <main style={{ minHeight: 'calc(100vh - 64px)', position: 'relative', zIndex: 1 }}>
             {children}
           </main>
         </MuiProvider>

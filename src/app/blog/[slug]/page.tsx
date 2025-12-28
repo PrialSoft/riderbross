@@ -463,7 +463,7 @@ export default function BlogPostPage() {
               textDecoration: 'none',
               borderRadius: 'var(--border-radius-md)',
               fontWeight: 600,
-              transition: 'background-color 0.3s ease',
+              transition: 'all 0.5s ease',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--primary-dark)';

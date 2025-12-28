@@ -84,7 +84,7 @@ export default function BlogPage() {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  transition: 'all 0.5s ease',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: 'var(--shadow-xl)',
@@ -94,7 +94,13 @@ export default function BlogPage() {
                 <CardActionArea
                   component={Link}
                   href={`/blog/${post.slug}`}
-                  sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                  sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'stretch',
+                    transition: 'all 0.5s ease',
+                  }}
                 >
                   <CardContent sx={{ flexGrow: 1, p: 3 }}>
                     <Stack spacing={2}>

@@ -8,71 +8,62 @@ import {
   CardContent,
   Paper,
 } from '@mui/material';
-import {
-  Lightbulb as LucesIcon,
-  OilBarrel as AceiteIcon,
-  WaterDrop as RefrigeranteIcon,
-  Link as CadenaIcon,
-  StopCircle as FrenosIcon,
-  BatteryChargingFull as BateriaIcon,
-  FilterAlt as FiltrosIcon,
-} from '@mui/icons-material';
-import CircleIcon from '@mui/icons-material/Circle';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 const consejos = [
   {
     id: 'ruedas',
-    icon: <CircleIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-ruedas-trans.png',
     title: 'RUEDAS',
     description:
       'Revisión al menos una vez al mes y siempre que vayas a hacer un viaje largo de la presión del neumático, profundidad del dibujo y estado de la cubierta.',
   },
   {
     id: 'luces',
-    icon: <LucesIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-luces-trans.png',
     title: 'LUCES',
     description:
       'Revisión de todas las luces antes de ponerte en marcha para descartar si es de la bombilla o hay algún problema eléctrico.',
   },
   {
     id: 'aceite',
-    icon: <AceiteIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-aceite-trans.png',
     title: 'ACEITE',
     description:
       'Revisión del nivel de aceite una vez al mes, especialmente en verano, ya que se evapora por acción del calor. El nivel debe estar entre el máximo y el mínimo.',
   },
   {
     id: 'refrigerante',
-    icon: <RefrigeranteIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-regriferante-trans.png',
     title: 'LÍQUIDO REFRIGERANTE',
     description:
       'Revisión mensual del nivel, color y duración. El nivel de líquido refrigerante debe estar entre un máximo y un mínimo que medirás en el vaso de expansión que suele ser transparente.',
   },
   {
     id: 'cadena',
-    icon: <CadenaIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-cadena-trans.png',
     title: 'CADENA',
     description:
       'Con las cadenas hablamos de limpiar, engrasar y tensar. Si te olvidas de hacer cualquiera de las tres tendrás problemas, seguro.',
   },
   {
     id: 'frenos',
-    icon: <FrenosIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-frenos-trans.png',
     title: 'FRENOS',
     description:
       'Revisión integral de los frenos de tu moto incluirá latiguillos, pinzas, pistones, manetas, palanca, bomba, pastillas, discos y líquido.',
   },
   {
     id: 'bateria',
-    icon: <BateriaIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-bateria-trans.png',
     title: 'BATERÍA',
     description:
       'Revisión de su estado general y el nivel de carga. Es especialmente importante si la moto ha estado parado durante un período largo o si vas a realizar un viaje largo.',
   },
   {
     id: 'filtros',
-    icon: <FiltrosIcon sx={{ fontSize: 64 }} />,
+    icon: '/icons/icono-filtros-trans.png',
     title: 'FILTROS',
     description:
       'Pon un nuevo filtro de aceite cada vez que hagas un cambio de aceite. Con respecto al filtro del aire, respeta las indicaciones del fabricante para mantenerlo limpio y libre de polvo y suciedad. Si no, se obstruirá.',
@@ -218,7 +209,7 @@ export default function ConsejosPage() {
                   width: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  transition: 'all 0.5s ease',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: 'var(--shadow-xl)',
@@ -237,14 +228,25 @@ export default function ConsejosPage() {
                 >
                   <Box
                     sx={{
-                      color: 'var(--primary)',
                       mb: 2,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      width: 80,
+                      height: 80,
+                      position: 'relative',
                     }}
                   >
-                    {consejo.icon}
+                    <Image
+                      src={consejo.icon}
+                      alt={consejo.title}
+                      width={80}
+                      height={80}
+                      style={{
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 2px 8px rgba(139, 26, 26, 0.5))',
+                      }}
+                    />
                   </Box>
                   <Typography
                     variant="h5"

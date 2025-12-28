@@ -1,0 +1,48 @@
+.mainContent {
+  position: relative;
+  min-height: 100%;
+  background-image: url('/images/bg_home.png');
+  background-size: 100% auto;
+  background-position: center top;
+  background-attachment: scroll;
+  background-repeat: no-repeat;
+  overflow: visible;
+}
+
+.mainContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  background-image: url('/images/bg_home.png');
+  background-size: 100% auto;
+  background-position: center top;
+  background-attachment: scroll;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.mainContent::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(4, 0, 23, 0.85) 0%,
+    rgba(4, 0, 23, 0.9) 50%,
+    rgba(4, 0, 23, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+.mainContent > * {
+  position: relative;
+  z-index: 2;
+}
+
+

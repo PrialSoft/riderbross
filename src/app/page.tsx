@@ -207,7 +207,8 @@ export default function Home() {
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: 1.5,
-                    transition: 'box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease',
+                    transition: 'box-shadow 0.5s ease, background 0.5s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: 'translateY(0)',
                     '&:hover': {
                       boxShadow: '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
                       transform: 'translateY(-2px)',
@@ -247,7 +248,7 @@ export default function Home() {
                           height: '2px',
                           background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
                           borderRadius: 'var(--border-radius-full)',
-                          transition: 'opacity 0.3s ease, height 0.3s ease',
+                          transition: 'all 0.5s ease',
                         },
                       }}
                     >
@@ -285,7 +286,7 @@ export default function Home() {
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 1.5,
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.5s ease',
                   '&:hover': {
                     boxShadow: '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
                     transform: 'translateY(-2px)',
@@ -325,6 +326,7 @@ export default function Home() {
                         height: '2px',
                         background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
                         borderRadius: 'var(--border-radius-full)',
+                        transition: 'all 0.5s ease',
                       },
                     }}
                   >
@@ -362,7 +364,8 @@ export default function Home() {
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: 1.5,
-                    transition: 'box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease',
+                    transition: 'box-shadow 0.5s ease, background 0.5s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: 'translateY(0)',
                     '&:hover': {
                       boxShadow: '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
                       transform: 'translateY(-2px)',
@@ -402,7 +405,7 @@ export default function Home() {
                           height: '2px',
                           background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
                           borderRadius: 'var(--border-radius-full)',
-                          transition: 'opacity 0.3s ease, height 0.3s ease',
+                          transition: 'all 0.5s ease',
                         },
                       }}
                     >
@@ -467,7 +470,7 @@ export default function Home() {
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   color: 'white',
-                  transition: 'background-color 0.3s ease, color 0.3s ease, transform 0.3s ease',
+                  transition: 'all 0.5s ease',
                   '&:hover': {
                     backgroundColor: 'var(--primary-dark)',
                     color: 'white',
@@ -544,6 +547,11 @@ export default function Home() {
                         py: 1.5,
                         fontSize: { xs: '1rem', sm: '1.125rem' },
                         fontWeight: 600,
+                        transition: 'all 0.5s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 20px rgba(139, 26, 26, 0.4)',
+                        },
                       }}
                     >
                       Buscar
@@ -592,7 +600,8 @@ export default function Home() {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  transition: 'box-shadow 0.5s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateY(0)',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: 'var(--shadow-xl)',
@@ -680,6 +689,11 @@ export default function Home() {
                 px: 4,
                 py: 1.5,
                 fontSize: { xs: '1rem', md: '1.125rem' },
+                        transition: 'all 0.5s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 20px rgba(139, 26, 26, 0.4)',
+                },
               }}
             >
               Contactar

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import { supabase } from '@/lib/supabase/client';
+import AdminLogoutButton from '@/components/AdminLogoutButton/AdminLogoutButton';
 import styles from './Navbar.module.css';
 
 const navItems = [
@@ -29,7 +31,23 @@ const navItems = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAdmin(!!user);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAuth();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -61,7 +79,14 @@ export default function Navbar() {
         </Box>
         <IconButton 
           onClick={handleDrawerToggle}
-          sx={{ color: 'var(--text-primary)' }}
+          sx={{ 
+            color: 'var(--text-primary)',
+            transition: 'all 0.5s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(139, 26, 26, 0.2)',
+              transform: 'rotate(90deg)',
+            },
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -75,6 +100,7 @@ export default function Navbar() {
               selected={pathname === item.href}
               sx={{
                 py: 1.5,
+                transition: 'all 0.5s ease',
                 '&.Mui-selected': {
                   backgroundColor: 'rgba(139, 26, 26, 0.15)',
                   color: 'var(--primary)',
@@ -86,7 +112,8 @@ export default function Navbar() {
                   outline: 'none',
                 },
                 '&:hover': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.1)',
+                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
+                  transform: 'translateX(4px)',
                 },
               }}
             >
@@ -105,6 +132,86 @@ export default function Navbar() {
             </ListItemButton>
           </ListItem>
         ))}
+        {isAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              href="/admin/dashboard"
+              selected={pathname === '/admin/dashboard'}
+              sx={{
+                py: 1.5,
+                transition: 'all 0.5s ease',
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(139, 26, 26, 0.15)',
+                  color: 'var(--primary)',
+                },
+                '&:focus': {
+                  outline: 'none',
+                },
+                '&:focus-visible': {
+                  outline: 'none',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
+                  transform: 'translateX(4px)',
+                },
+              }}
+            >
+              <ListItemText 
+                primary="PORTAL"
+                primaryTypographyProps={{
+                  sx: {
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    fontWeight: 600,
+                    fontSize: '0.9375rem',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2)',
+                  }
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {!isAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              href="/admin/login"
+              sx={{
+                py: 1.5,
+                transition: 'all 0.5s ease',
+                backgroundColor: 'rgba(139, 26, 26, 0.2)',
+                border: '1px solid rgba(139, 26, 26, 0.4)',
+                mx: 1,
+                borderRadius: 'var(--border-radius-md)',
+                '&:hover': {
+                  backgroundColor: 'rgba(139, 26, 26, 0.3)',
+                  transform: 'translateX(4px)',
+                },
+              }}
+            >
+              <ListItemText 
+                primary="Iniciar Sesión"
+                primaryTypographyProps={{
+                  sx: {
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    fontWeight: 700,
+                    fontSize: '0.9375rem',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2)',
+                  }
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isAdmin && (
+          <ListItem disablePadding>
+            <Box sx={{ width: '100%', px: 2, py: 1 }}>
+              <AdminLogoutButton />
+            </Box>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -113,6 +220,7 @@ export default function Navbar() {
     <>
       <AppBar
         position="sticky"
+        suppressHydrationWarning
         sx={{
           backgroundColor: '#040017',
           backgroundImage: 'none',
@@ -163,8 +271,8 @@ export default function Navbar() {
                 style={{ 
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 2px 6px rgba(139, 26, 26, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2))',
-                  transition: 'all 0.3s ease',
-                }}
+                  transition: 'all 0.5s ease',
+              }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.filter = 'drop-shadow(0 4px 10px rgba(139, 26, 26, 0.7)) drop-shadow(0 0 14px rgba(255, 255, 255, 0.4))';
                   e.currentTarget.style.transform = 'scale(1.05)';
@@ -197,6 +305,31 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  href="/admin/dashboard"
+                  className={`${styles.navLink} ${
+                    pathname === '/admin/dashboard' ? styles.navLinkActive : ''
+                  }`}
+                >
+                  PORTAL
+                </Link>
+              )}
+              {!isAdmin && (
+                <Link
+                  href="/admin/login"
+                  className={styles.navLink}
+                  style={{
+                    backgroundColor: 'rgba(139, 26, 26, 0.2)',
+                    border: '1px solid rgba(139, 26, 26, 0.4)',
+                  }}
+                >
+                  Iniciar Sesión
+                </Link>
+              )}
+              {isAdmin && (
+                <AdminLogoutButton />
+              )}
             </Box>
 
             {/* Mobile menu button */}
@@ -205,7 +338,15 @@ export default function Navbar() {
               aria-label="open drawer"
               edge="end"
               onClick={handleDrawerToggle}
-              sx={{ display: { md: 'none' }, color: 'var(--text-primary)' }}
+              sx={{ 
+                display: { md: 'none' }, 
+                color: 'var(--text-primary)',
+                transition: 'all 0.5s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
+                  transform: 'scale(1.1)',
+                },
+              }}
             >
               <MenuIcon />
             </IconButton>

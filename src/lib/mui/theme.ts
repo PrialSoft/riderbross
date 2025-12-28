@@ -99,13 +99,36 @@ export const theme = createTheme({
           borderRadius: '8px',
           padding: '10px 24px',
           fontSize: '1rem',
+          transition: 'all 0.5s ease',
         },
         contained: {
           boxShadow: 'var(--shadow-md)',
-          transition: 'background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease',
+          transition: 'all 0.5s ease',
           '&:hover': {
             boxShadow: 'var(--shadow-lg)',
             transform: 'translateY(-2px)',
+          },
+        },
+        outlined: {
+          transition: 'all 0.5s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+          },
+        },
+        text: {
+          transition: 'all 0.5s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          transition: 'all 0.5s ease',
+          '&:hover': {
+            transform: 'scale(1.1)',
           },
         },
       },
@@ -115,6 +138,14 @@ export const theme = createTheme({
         root: {
           borderRadius: '12px',
           boxShadow: 'var(--shadow-md)',
+          transition: 'all 0.5s ease',
+        },
+      },
+    },
+    MuiCardActionArea: {
+      styleOverrides: {
+        root: {
+          transition: 'all 0.5s ease',
         },
       },
     },
