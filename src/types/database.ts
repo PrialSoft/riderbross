@@ -73,7 +73,6 @@ export interface Servicio {
   Comentario: string | null;
   fechaServicio: string;
   kmServicio: number;
-  tecnico: string | null;
   IdVehiculo: number | null;
   Vehiculo?: Vehiculo | null;
   DetallesServicio?: DetalleServicio[];
@@ -84,7 +83,6 @@ export interface ServicioWithRelations {
   Id: number;
   fechaServicio: string;
   kmServicio: number;
-  tecnico: string | null;
   Vehiculo?: {
     patente: string;
     Modelo: string | null;

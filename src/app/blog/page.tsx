@@ -122,7 +122,15 @@ export default function BlogPage() {
                             fontWeight: 700,
                             color: 'var(--text-primary)',
                             mb: 1,
-                            fontSize: { xs: '1.125rem', md: '1.25rem' },
+                            fontSize: { xs: '2.25rem', md: '2.5rem' },
+                            lineHeight: 1.25,
+                            letterSpacing: '-0.01em',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.55)',
+                            display: '-webkit-box',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
                           }}
                         >
                           {post.title}

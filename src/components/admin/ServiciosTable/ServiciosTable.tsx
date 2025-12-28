@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   Box,
@@ -9,19 +8,24 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Tooltip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import EmailIcon from '@mui/icons-material/Email';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { DataTable } from '@/utils/ui/table/DataTable';
 import { supabase } from '@/lib/supabase/client';
 import dayjs from '@/lib/dayjs';
+import jsPDF from 'jspdf';
 
 interface Servicio {
   id: number;
   fechaservicio?: string | null;
   kmservicio?: number | null;
-  tecnico?: string | null;
   calificacion?: number | null;
+  clienteNombre?: string | null;
+  clienteEmail?: string | null;
   Vehiculo: {
     patente: string;
     modelo: string;
@@ -31,15 +35,18 @@ interface Servicio {
   } | null;
 }
 
-export function ServiciosTable() {
-  const router = useRouter();
+export function ServiciosTable(props?: {
+  onEdit?: (id: number) => void;
+  onView?: (id: number) => void;
+  reloadToken?: number;
+}) {
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchServicios();
-  }, []);
+  }, [props?.reloadToken]);
 
   const fetchServicios = async () => {
     try {
@@ -58,13 +65,17 @@ export function ServiciosTable() {
         .map((s) => (s as { idvehiculo?: number | null }).idvehiculo)
         .filter((id): id is number => typeof id === 'number');
 
-      const vehiculosById = new Map<number, { id: number; patente: string; modelo: string | null; idmarca: number | null }>();
+      const vehiculosById = new Map<
+        number,
+        { id: number; patente: string; modelo: string | null; idmarca: number | null; idcliente: number | null }
+      >();
       const marcasById = new Map<number, { id: number; descripcion: string }>();
+      const clientesById = new Map<number, { id: number; apellidos: string; nombres: string; email: string }>();
 
       if (vehiculoIds.length > 0) {
         const { data: vehiculos, error: vehiculosError } = await supabase
           .from('vehiculo')
-          .select('id, patente, modelo, idmarca')
+          .select('id, patente, modelo, idmarca, idcliente')
           .in('id', vehiculoIds);
 
         if (vehiculosError) throw vehiculosError;
@@ -87,25 +98,49 @@ export function ServiciosTable() {
         }
       }
 
+      // Traer clientes para poder mostrar "Apellido, Nombre" y enviar email
+      const clienteIdsFromServicios = (serviciosBase ?? [])
+        .map((s) => (s as { idcliente?: number | null }).idcliente)
+        .filter((id): id is number => typeof id === 'number');
+
+      const clienteIdsFromVehiculos = Array.from(vehiculosById.values())
+        .map((v) => v.idcliente)
+        .filter((id): id is number => typeof id === 'number');
+
+      const clienteIds = Array.from(new Set([...clienteIdsFromServicios, ...clienteIdsFromVehiculos]));
+
+      if (clienteIds.length > 0) {
+        const { data: clientes, error: clientesErr } = await supabase
+          .from('clientes')
+          .select('id, apellidos, nombres, email')
+          .in('id', clienteIds);
+
+        if (clientesErr) throw clientesErr;
+        (clientes ?? []).forEach((c) => clientesById.set(c.id, c));
+      }
+
       const serviciosMapped: Servicio[] = (serviciosBase ?? []).map((s) => {
         const row = s as {
           id: number;
           fechaservicio?: string | null;
           kmservicio?: number | null;
-          tecnico?: string | null;
           calificacion?: number | null;
           idvehiculo?: number | null;
+          idcliente?: number | null;
         };
 
         const vehiculo = row.idvehiculo ? vehiculosById.get(row.idvehiculo) : undefined;
         const marca = vehiculo?.idmarca ? marcasById.get(vehiculo.idmarca) : undefined;
+        const clienteId = row.idcliente ?? vehiculo?.idcliente ?? null;
+        const cliente = typeof clienteId === 'number' ? clientesById.get(clienteId) : undefined;
 
         return {
           id: row.id,
           fechaservicio: row.fechaservicio,
           kmservicio: row.kmservicio,
-          tecnico: row.tecnico,
           calificacion: row.calificacion,
+          clienteNombre: cliente ? `${cliente.apellidos}, ${cliente.nombres}` : null,
+          clienteEmail: cliente?.email ?? null,
           Vehiculo: vehiculo
             ? {
                 patente: vehiculo.patente,
@@ -123,6 +158,49 @@ export function ServiciosTable() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const downloadPdf = (row: Servicio) => {
+    const doc = new jsPDF();
+    const vehiculo = row.Vehiculo;
+    const marcaModelo = vehiculo ? `${vehiculo.Marcas?.descripcion ?? ''} ${vehiculo.modelo ?? ''}`.trim() : '—';
+    const patente = vehiculo?.patente ?? '—';
+    const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
+    const km = typeof row.kmservicio === 'number' ? row.kmservicio.toLocaleString('es-AR') : '—';
+    const cliente = row.clienteNombre ?? '—';
+
+    doc.setFontSize(16);
+    doc.text('RiderBross - Servicio Técnico', 14, 18);
+    doc.setFontSize(11);
+    doc.text(`Servicio #${row.id}`, 14, 28);
+    doc.text(`Fecha: ${fecha}`, 14, 36);
+    doc.text(`KM Actual: ${km}`, 14, 44);
+    doc.text(`Vehículo: ${patente}`, 14, 52);
+    doc.text(`Marca/Modelo: ${marcaModelo}`, 14, 60);
+    doc.text(`Cliente: ${cliente}`, 14, 68);
+
+    const safePatente = patente.replace(/[^a-zA-Z0-9_-]+/g, '_');
+    doc.save(`servicio-${row.id}-${safePatente}.pdf`);
+  };
+
+  const sendEmail = (row: Servicio) => {
+    const to = row.clienteEmail?.trim();
+    if (!to) return;
+
+    const vehiculo = row.Vehiculo;
+    const patente = vehiculo?.patente ?? '—';
+    const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
+    const subject = encodeURIComponent(`RiderBross - Servicio ${patente} (${fecha})`);
+    const body = encodeURIComponent(
+      `Hola ${row.clienteNombre ?? ''}\n\n` +
+        `Te enviamos el resumen del servicio.\n` +
+        `- Servicio: #${row.id}\n` +
+        `- Patente: ${patente}\n` +
+        `- Fecha: ${fecha}\n\n` +
+        `Saludos,\nRiderBross`
+    );
+
+    window.location.href = `mailto:${encodeURIComponent(to)}?subject=${subject}&body=${body}`;
   };
 
   const columns: ColumnDef<Servicio>[] = [
@@ -145,6 +223,11 @@ export function ServiciosTable() {
       },
     },
     {
+      accessorKey: 'clienteNombre',
+      header: 'Cliente',
+      cell: ({ row }) => row.original.clienteNombre || '—',
+    },
+    {
       accessorKey: 'fechaservicio',
       header: 'Fecha',
       cell: ({ row }) => {
@@ -158,13 +241,6 @@ export function ServiciosTable() {
       cell: ({ row }) => {
         const km = row.original.kmservicio;
         return typeof km === 'number' ? km.toLocaleString('es-AR') : '—';
-      },
-    },
-    {
-      accessorKey: 'tecnico',
-      header: 'Técnico',
-      cell: ({ row }) => {
-        return row.original.tecnico || '—';
       },
     },
     {
@@ -189,11 +265,14 @@ export function ServiciosTable() {
       id: 'actions',
       header: 'Acciones',
       cell: ({ row }) => {
+        const hasEmail = Boolean(row.original.clienteEmail && row.original.clienteEmail.includes('@'));
         return (
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={() => router.push(`/admin/dashboard/servicios/${row.original.id}`)}
+              onClick={() => {
+                if (props?.onView) return props.onView(row.original.id);
+              }}
               sx={{
                 color: 'var(--primary)',
                 '&:hover': {
@@ -203,9 +282,38 @@ export function ServiciosTable() {
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>
+            <Tooltip title={hasEmail ? 'Enviar por email' : 'Cliente sin email'}>
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!hasEmail}
+                  onClick={() => sendEmail(row.original)}
+                  sx={{
+                    color: hasEmail ? 'var(--primary)' : 'rgba(255,255,255,0.35)',
+                    '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
+                  }}
+                >
+                  <EmailIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Descargar PDF">
+              <IconButton
+                size="small"
+                onClick={() => downloadPdf(row.original)}
+                sx={{
+                  color: 'var(--primary)',
+                  '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
+                }}
+              >
+                <PictureAsPdfIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             <IconButton
               size="small"
-              onClick={() => router.push(`/admin/dashboard/servicios/${row.original.id}/editar`)}
+              onClick={() => {
+                if (props?.onEdit) return props.onEdit(row.original.id);
+              }}
               sx={{
                 color: 'var(--text-secondary)',
                 '&:hover': {
@@ -237,6 +345,6 @@ export function ServiciosTable() {
     );
   }
 
-  return <DataTable columns={columns} data={servicios} searchPlaceholder="Buscar por patente, modelo, técnico..." />;
+  return <DataTable columns={columns} data={servicios} searchPlaceholder="Buscar por patente, vehículo o cliente..." />;
 }
 

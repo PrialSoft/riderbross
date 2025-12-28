@@ -22,8 +22,7 @@ import {
   People as ClientesIcon,
   TwoWheeler as VehiculosIcon,
   Category as MarcasIcon,
-  LocationOn as ProvinciasIcon,
-  CheckCircle as EstadosIcon,
+  FormatListBulleted as TiposServicioIcon,
 } from '@mui/icons-material';
 import styles from './DashboardShell.module.css';
 
@@ -35,8 +34,7 @@ const menuItems = [
   { label: 'Clientes', href: '/admin/dashboard/clientes', icon: ClientesIcon },
   { label: 'Vehículos', href: '/admin/dashboard/vehiculos', icon: VehiculosIcon },
   { label: 'Marcas', href: '/admin/dashboard/marcas', icon: MarcasIcon },
-  { label: 'Provincias', href: '/admin/dashboard/provincias', icon: ProvinciasIcon },
-  { label: 'Estados', href: '/admin/dashboard/estados', icon: EstadosIcon },
+  { label: 'Tipos de Servicio', href: '/admin/dashboard/tipos-servicio', icon: TiposServicioIcon },
 ];
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {

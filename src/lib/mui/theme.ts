@@ -158,6 +158,100 @@ export const theme = createTheme({
         },
       },
     },
+    // Dropdowns (Select / Menu) - mejorar contraste y legibilidad (evitar "transparencia confusa")
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: 'rgba(4, 0, 23, 0.98)',
+          border: '1px solid rgba(139, 26, 26, 0.35)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(10px)',
+        },
+        list: {
+          paddingTop: 6,
+          paddingBottom: 6,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: '#FFFFFF',
+          transition: 'background-color 0.2s ease, color 0.2s ease',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(139, 26, 26, 0.22)',
+          },
+          '&.Mui-selected:hover': {
+            backgroundColor: 'rgba(139, 26, 26, 0.30)',
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(139, 26, 26, 0.18)',
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: 'rgba(255,255,255,0.85)',
+        },
+      },
+    },
+    // Autocomplete (usa Popper/Paper distinto a Menu): igualar estilo al combo de Vehículos
+    MuiAutocomplete: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: 'rgba(4, 0, 23, 0.98)',
+          border: '1px solid rgba(139, 26, 26, 0.35)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(10px)',
+        },
+        groupLabel: {
+          backgroundColor: 'rgba(4, 0, 23, 0.98)',
+          color: 'rgba(255,255,255,0.85)',
+        },
+        groupUl: {
+          padding: 0,
+        },
+        listbox: {
+          paddingTop: 6,
+          paddingBottom: 6,
+          color: '#FFFFFF',
+          '& .MuiAutocomplete-option': {
+            transition: 'background-color 0.2s ease, color 0.2s ease',
+            '&[aria-selected="true"]': {
+              backgroundColor: 'rgba(139, 26, 26, 0.22)',
+            },
+            '&[aria-selected="true"].Mui-focused': {
+              backgroundColor: 'rgba(139, 26, 26, 0.30)',
+            },
+            '&.Mui-focused': {
+              backgroundColor: 'rgba(139, 26, 26, 0.18)',
+            },
+          },
+          '&::-webkit-scrollbar': {
+            width: 10,
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(255,255,255,0.06)',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(139, 26, 26, 0.55)',
+            borderRadius: 10,
+            border: '2px solid rgba(4,0,23,0.8)',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: 'rgba(139, 26, 26, 0.75)',
+          },
+        },
+        popupIndicator: {
+          color: 'rgba(255,255,255,0.85)',
+        },
+        clearIndicator: {
+          color: 'rgba(255,255,255,0.85)',
+        },
+      },
+    },
   },
 });
 

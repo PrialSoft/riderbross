@@ -92,7 +92,6 @@ export default async function AdminDashboardPage() {
       id: number;
       fechaservicio?: string | null;
       kmservicio?: number | null;
-      tecnico?: string | null;
       idvehiculo?: number | null;
     };
 
@@ -104,7 +103,6 @@ export default async function AdminDashboardPage() {
       // Si el esquema todavía no tiene estas columnas, renderizamos “—/0/N/A” y no crashea
       fechaServicio: row.fechaservicio ?? '',
       kmServicio: row.kmservicio ?? 0,
-      tecnico: row.tecnico ?? null,
       Vehiculo: vehiculo
         ? {
             patente: vehiculo.patente,

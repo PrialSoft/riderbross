@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   Box,
@@ -28,15 +27,17 @@ interface Vehiculo {
   } | null;
 }
 
-export function VehiculosTable() {
-  const router = useRouter();
+export function VehiculosTable(props?: {
+  onEdit?: (id: number) => void;
+  reloadToken?: number;
+}) {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchVehiculos();
-  }, []);
+  }, [props?.reloadToken]);
 
   const fetchVehiculos = async () => {
     try {
@@ -122,7 +123,9 @@ export function VehiculosTable() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={() => router.push(`/admin/dashboard/vehiculos/${row.original.id}/editar`)}
+              onClick={() => {
+                if (props?.onEdit) return props.onEdit(row.original.id);
+              }}
               sx={{
                 color: 'var(--primary)',
                 '&:hover': {

@@ -46,7 +46,7 @@ export function DataTable<TData, TValue>({
   data,
   searchable = true,
   searchPlaceholder = 'Buscar...',
-  pageSize = 10,
+  pageSize = 8,
   className,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState('');
@@ -140,7 +140,8 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                   sx={{
                     '&:hover': {
-                      backgroundColor: 'var(--accent)',
+                      // Evitar hover claro (var(--accent) es #F5F5F5) que pierde contraste en modo dark
+                      backgroundColor: 'rgba(139, 26, 26, 0.18)',
                     },
                   }}
                 >
@@ -185,9 +186,10 @@ export function DataTable<TData, TValue>({
         sx={{ mt: 2 }}
       >
         <Typography variant="body2" color="text.secondary">
-          Mostrando {table.getState().pagination.pageIndex * pageSize + 1} -{' '}
+          Mostrando{' '}
+          {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} -{' '}
           {Math.min(
-            (table.getState().pagination.pageIndex + 1) * pageSize,
+            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
             table.getFilteredRowModel().rows.length
           )}{' '}
           de {table.getFilteredRowModel().rows.length} resultados

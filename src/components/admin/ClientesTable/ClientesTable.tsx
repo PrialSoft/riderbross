@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   Box,
@@ -26,15 +25,17 @@ interface Cliente {
   } | null;
 }
 
-export function ClientesTable() {
-  const router = useRouter();
+export function ClientesTable(props?: {
+  onEdit?: (id: number) => void;
+  reloadToken?: number;
+}) {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchClientes();
-  }, []);
+  }, [props?.reloadToken]);
 
   const fetchClientes = async () => {
     try {
@@ -116,7 +117,9 @@ export function ClientesTable() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={() => router.push(`/admin/dashboard/clientes/${row.original.id}/editar`)}
+              onClick={() => {
+                if (props?.onEdit) return props.onEdit(row.original.id);
+              }}
               sx={{
                 color: 'var(--primary)',
                 '&:hover': {
