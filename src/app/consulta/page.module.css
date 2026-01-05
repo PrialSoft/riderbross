@@ -27,8 +27,47 @@
   left: 0;
   width: 100%;
   min-height: 100%;
-  background: linear-gradient(180deg, rgba(4, 0, 23, 0.7) 0%, rgba(4, 0, 23, 0.85) 100%);
+  background: linear-gradient(180deg, rgba(4, 0, 12, 0.7) 0%, rgba(4, 0, 12, 0.85) 100%);
   z-index: -1;
   pointer-events: none;
 }
 
+/* Estilos para Typography - Mayor especificidad para sobrescribir MUI */
+.pageTitle,
+.pageTitle.MuiTypography-root,
+.pageTitle.MuiTypography-h4 {
+  font-family: var(--font-family-headings) !important;
+  font-size: var(--font-size-3xl) !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  margin-bottom: var(--spacing-md) !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-width: 600px) {
+  .pageTitle,
+  .pageTitle.MuiTypography-root,
+  .pageTitle.MuiTypography-h4 {
+    font-size: var(--font-size-2xl) !important;
+  }
+}
+
+.pageSubtitle,
+.pageSubtitle.MuiTypography-root,
+.pageSubtitle.MuiTypography-body1 {
+  font-family: var(--font-family-body) !important;
+  font-size: var(--font-size-base) !important;
+  color: var(--text-secondary) !important;
+  margin-bottom: var(--spacing-sm) !important;
+  line-height: 1.5 !important;
+}
+
+.pageDescription,
+.pageDescription.MuiTypography-root,
+.pageDescription.MuiTypography-body1 {
+  font-family: var(--font-family-body) !important;
+  font-size: var(--font-size-base) !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.5 !important;
+}

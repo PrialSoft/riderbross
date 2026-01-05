@@ -80,7 +80,7 @@ export default function ConsejosPage() {
             sx={{
               textAlign: 'center',
               py: { xs: 6, md: 8 },
-              color: 'white',
+              color: 'var(--text-primary)',
             }}
           >
             <Typography

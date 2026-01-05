@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import { TiposServicioTable } from '@/components/admin/TiposServicioTable/TiposServicioTable';
 import TipoServicioForm from '@/components/admin/TipoServicioForm/TipoServicioForm';
@@ -13,6 +14,7 @@ type TipoServicioInitial = {
   nombre: string;
   referencia: string | null;
   idcategoriaservicio: number | null;
+  predeterminado?: boolean;
 };
 
 export default function TiposServicioManager() {
@@ -43,7 +45,7 @@ export default function TiposServicioManager() {
 
     const { data, error } = await supabase
       .from('tiposservicio')
-      .select('id, nombre, referencia, idcategoriaservicio')
+      .select('id, nombre, referencia, idcategoriaservicio, predeterminado')
       .eq('id', id)
       .maybeSingle();
 
@@ -79,19 +81,12 @@ export default function TiposServicioManager() {
         >
           Tipos de Servicio
         </Typography>
-        <Button
-          variant="contained"
+        <CustomButton
           startIcon={<AddIcon />}
           onClick={openCreate}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nuevo Tipo
-        </Button>
+        </CustomButton>
       </Box>
 
       <TiposServicioTable onEdit={openEdit} reloadToken={reloadToken} />
@@ -119,7 +114,7 @@ export default function TiposServicioManager() {
           }}
         >
           {title}
-          <IconButton onClick={close} sx={{ color: 'var(--text-secondary)' }}>
+          <IconButton onClick={close} sx={{ color: 'var(--text-primary)' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>

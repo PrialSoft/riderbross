@@ -12,6 +12,7 @@ import {
   People as ClientesIcon,
 } from '@mui/icons-material';
 import dayjs from '@/lib/dayjs';
+import { formatPatente } from '@/utils/patente';
 import type { ServicioWithRelations } from '@/types/database';
 
 export default async function AdminDashboardPage() {
@@ -177,7 +178,7 @@ export default async function AdminDashboardPage() {
           >
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <MotosIcon sx={{ fontSize: 48, color: 'var(--primary)', mr: 2 }} />
+                <MotosIcon sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }} />
                 <Box>
                   <Typography
                     variant="h4"
@@ -231,7 +232,7 @@ export default async function AdminDashboardPage() {
           >
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <FichasIcon sx={{ fontSize: 48, color: 'var(--primary)', mr: 2 }} />
+                <FichasIcon sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }} />
                 <Box>
                   <Typography
                     variant="h4"
@@ -286,7 +287,7 @@ export default async function AdminDashboardPage() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <ClientesIcon
-                  sx={{ fontSize: 48, color: 'var(--primary)', mr: 2 }}
+                  sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }}
                 />
                 <Box>
                   <Typography
@@ -372,7 +373,7 @@ export default async function AdminDashboardPage() {
                       mb: 0.5,
                     }}
                   >
-                    {servicioTyped.Vehiculo?.patente} -{' '}
+                    {servicioTyped.Vehiculo?.patente ? formatPatente(servicioTyped.Vehiculo.patente) : 'N/A'} -{' '}
                     {servicioTyped.Vehiculo?.Marcas?.Descripcion}{' '}
                     {servicioTyped.Vehiculo?.Modelo}
                   </Typography>

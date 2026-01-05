@@ -1,6 +1,7 @@
 .mainContent {
   position: relative;
   min-height: 100%;
+  background: var(--bg-primary);
   background-image: url('/images/bg_home.png');
   background-size: 100% auto;
   background-position: center top;
@@ -33,9 +34,9 @@
   min-height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(4, 0, 23, 0.85) 0%,
-    rgba(4, 0, 23, 0.9) 50%,
-    rgba(4, 0, 23, 0.85) 100%
+    rgba(4, 0, 12, 0.85) 0%,
+    rgba(4, 0, 12, 0.9) 50%,
+    rgba(4, 0, 12, 0.85) 100%
   );
   z-index: 1;
 }

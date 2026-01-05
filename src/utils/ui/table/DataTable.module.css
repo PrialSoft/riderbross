@@ -10,7 +10,7 @@
 }
 
 .tableContainer::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
 }
 
 .tableContainer::-webkit-scrollbar-thumb {

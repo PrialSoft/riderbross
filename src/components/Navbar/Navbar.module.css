@@ -2,10 +2,10 @@
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.875rem;
-  padding: 0.625rem 1.25rem;
+  font-size: var(--font-size-sm);
+  padding: 0.625rem var(--spacing-md);
   border-radius: var(--border-radius-md);
-  transition: all 0.5s ease;
+  transition: all var(--transition-base);
   position: relative;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -15,25 +15,26 @@
   border: none;
 }
 
+.navLink:focus-visible,
 .navLink:focus,
-.navLink:focus-visible {
-  outline: none;
-  border: none;
+.navLink:active {
+  outline: none !important;
+  border: none !important;
+  color: var(--text-primary);
 }
 
 .navLink:hover {
-  background-color: rgba(139, 26, 26, 0.2);
-  color: var(--primary);
-  text-shadow: 0 2px 6px rgba(139, 26, 26, 0.7);
+  background-color: rgba(139, 26, 26, 0.35);
+  text-shadow: 0 0 8px rgba(139, 26, 26, 0.9), 0 2px 8px rgba(139, 26, 26, 0.8), 0 0 15px rgba(139, 26, 26, 0.6);
   transform: translateY(-2px);
-  transition: all 0.5s ease;
+  box-shadow: 0 0 12px rgba(139, 26, 26, 0.4);
 }
 
 .navLinkActive {
-  color: var(--primary);
   font-weight: 700;
-  background-color: rgba(139, 26, 26, 0.15);
-  text-shadow: 0 2px 6px rgba(139, 26, 26, 0.7);
+  background-color: rgba(139, 26, 26, 0.3);
+  text-shadow: 0 0 8px rgba(139, 26, 26, 0.9), 0 2px 8px rgba(139, 26, 26, 0.8), 0 0 15px rgba(139, 26, 26, 0.6);
+  box-shadow: 0 0 12px rgba(139, 26, 26, 0.4);
 }
 
 .navLinkActive::after {
@@ -42,9 +43,252 @@
   bottom: 0;
   left: 1.25rem;
   right: 1.25rem;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(to right, transparent, var(--primary), transparent);
   border-radius: var(--border-radius-full);
-  transition: all 0.5s ease;
 }
 
+.logoLink {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-right: var(--spacing-xl);
+  outline: none;
+}
+
+@media (min-width: 900px) {
+  .logoLink {
+    flex-grow: 0;
+  }
+}
+
+.logoLink:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 4px;
+  border-radius: var(--border-radius-sm);
+}
+
+.logoImage {
+  object-fit: contain;
+  transition: filter var(--transition-base), transform var(--transition-base);
+}
+
+.logoLink:hover .logoImage,
+.logoLink:focus-visible .logoImage {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+  transform: scale(1.05);
+}
+
+.navLinkLogin {
+  background-color: rgba(139, 26, 26, 0.2);
+  border: 1px solid rgba(139, 26, 26, 0.4);
+  transition: all var(--transition-base);
+}
+
+.navLinkLogin:hover {
+  background-color: rgba(139, 26, 26, 0.3);
+  border-color: rgba(139, 26, 26, 0.6);
+  box-shadow: 0 0 12px rgba(139, 26, 26, 0.4);
+  transform: translateY(-2px);
+}
+
+.drawer {
+  text-align: center;
+  background-color: var(--bg-primary);
+  height: 100%;
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: 2px solid rgba(139, 26, 26, 0.3);
+}
+
+.drawerLogoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.drawerCloseButton {
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.drawerCloseButton:hover {
+  background-color: rgba(139, 26, 26, 0.2);
+  transform: rotate(90deg);
+}
+
+.drawerList {
+  padding: var(--spacing-sm) 0;
+}
+
+.drawerListItemButton {
+  padding: var(--spacing-lg) 0;
+  transition: all var(--transition-base);
+  outline: none;
+  border: none;
+}
+
+.drawerListItemButton:focus-visible,
+.drawerListItemButton:focus,
+.drawerListItemButton:active {
+  outline: none !important;
+  border: none !important;
+}
+
+.drawerListItemButton:hover {
+  background-color: rgba(139, 26, 26, 0.2);
+  transform: translateX(4px);
+}
+
+.drawerListItemButtonSelected {
+  background-color: rgba(139, 26, 26, 0.15);
+  color: var(--primary);
+}
+
+.drawerListItemText,
+.drawerListItemTextBold {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.9375rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.drawerListItemText {
+  font-weight: 600;
+}
+
+.drawerListItemTextBold {
+  font-weight: 700;
+}
+
+.drawerAdminLogoutContainer {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.drawerLoginButton {
+  padding: var(--spacing-lg) 0;
+  margin: 0 var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  background-color: #8b1a1a33;
+  border: 1px solid #8b1a1a66;
+  transition: all var(--transition-base);
+}
+
+.drawerLoginButton:hover {
+  background-color: rgba(139, 26, 26, 0.3);
+  transform: translateX(4px);
+}
+
+.drawerLogoImage {
+  object-fit: contain;
+}
+
+.appBar {
+  background-color: var(--bg-primary) !important;
+  background-image: none !important;
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  transition: box-shadow var(--transition-base);
+}
+
+.appBarScrolled {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.appBar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, rgba(139, 26, 26, 0.3) 15%, rgba(139, 26, 26, 0.6) 30%, rgba(139, 26, 26, 0.8) 50%, rgba(139, 26, 26, 0.6) 70%, rgba(139, 26, 26, 0.3) 85%, transparent 100%);
+  box-shadow: 0 0 8px rgba(139, 26, 26, 0.4);
+}
+
+.toolbar {
+  min-height: 64px;
+  padding: 0 var(--spacing-md);
+  transition: min-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+.appBarScrolledToolbar {
+  min-height: 56px !important;
+  padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 600px) {
+  .toolbar {
+    min-height: 72px;
+    padding: 0 var(--spacing-lg);
+  }
+
+  .appBarScrolledToolbar {
+    min-height: 64px !important;
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+.desktopNav {
+  flex-grow: 1;
+  display: none;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+@media (min-width: 900px) {
+  .desktopNav {
+    display: flex;
+  }
+}
+
+@media (min-width: 1200px) {
+  .desktopNav {
+    gap: var(--spacing-md);
+  }
+}
+
+.mobileMenuButton {
+  display: block !important;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.mobileMenuButton:hover {
+  background-color: rgba(139, 26, 26, 0.2);
+  transform: scale(1.1);
+}
+
+@media (min-width: 900px) {
+  .mobileMenuButton {
+    display: none !important;
+  }
+}
+
+.drawerComponent {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .drawerComponent {
+    display: none;
+  }
+}
+
+.drawerPaper {
+  box-sizing: border-box;
+  width: 280px;
+  background-color: var(--bg-primary);
+}

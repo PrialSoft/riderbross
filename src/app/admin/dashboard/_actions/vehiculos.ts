@@ -9,13 +9,14 @@ export async function createVehiculo(input: {
   anio: string | null; // YYYY-MM-DD
   kmactual: number | null;
   idcliente: number | null;
-  commentarioprivado?: string | null;
+  comentarioPrivado?: string | null;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) throw new Error('No autorizado');
 
-  const patente = input.patente.trim().toUpperCase();
+  // Limpiar patente: solo letras y números, sin guiones ni caracteres especiales
+  const patente = input.patente.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   if (!patente) throw new Error('Patente es obligatoria');
 
   const { error } = await supabase.from('vehiculo').insert({
@@ -25,7 +26,7 @@ export async function createVehiculo(input: {
     anio: input.anio || null,
     kmactual: input.kmactual ?? 0,
     idcliente: input.idcliente ?? null,
-    commentarioprivado: input.commentarioprivado?.trim() || null,
+    comentarioPrivado: input.comentarioPrivado?.trim() || null,
   });
 
   if (error) throw new Error(error.message);
@@ -40,7 +41,7 @@ export async function updateVehiculo(
     anio: string | null; // YYYY-MM-DD
     kmactual: number | null;
     idcliente: number | null;
-    commentarioprivado?: string | null;
+    comentarioPrivado?: string | null;
   }
 ) {
   const supabase = await createClient();
@@ -49,7 +50,8 @@ export async function updateVehiculo(
 
   if (!Number.isFinite(id) || id <= 0) throw new Error('ID inválido');
 
-  const patente = input.patente.trim().toUpperCase();
+  // Limpiar patente: solo letras y números, sin guiones ni caracteres especiales
+  const patente = input.patente.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   if (!patente) throw new Error('Patente es obligatoria');
 
   const { error } = await supabase
@@ -61,7 +63,7 @@ export async function updateVehiculo(
       anio: input.anio || null,
       kmactual: input.kmactual ?? 0,
       idcliente: input.idcliente ?? null,
-      commentarioprivado: input.commentarioprivado?.trim() || null,
+      comentarioPrivado: input.comentarioPrivado?.trim() || null,
     })
     .eq('id', id);
 

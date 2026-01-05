@@ -32,6 +32,7 @@ const navItems = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -49,85 +50,56 @@ export default function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(scrollPosition > 10);
+    };
+
+    // Verificar posición inicial
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', backgroundColor: '#040017', height: '100%' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '1.5rem 1rem',
-          borderBottom: '2px solid rgba(139, 26, 26, 0.3)',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+    <Box onClick={handleDrawerToggle} className={styles.drawer}>
+      <Box className={styles.drawerHeader}>
+        <Box className={styles.drawerLogoContainer}>
           <Image
             src="/images/Logo.png"
             alt="RiderBross Logo"
             width={120}
             height={40}
             priority
-            style={{ 
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 2px 6px rgba(139, 26, 26, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2))',
-            }}
+            className={styles.drawerLogoImage}
           />
         </Box>
         <IconButton 
           onClick={handleDrawerToggle}
-          sx={{ 
-            color: 'var(--text-primary)',
-            transition: 'all 0.5s ease',
-            '&:hover': {
-              backgroundColor: 'rgba(139, 26, 26, 0.2)',
-              transform: 'rotate(90deg)',
-            },
-          }}
+          className={styles.drawerCloseButton}
         >
           <CloseIcon />
         </IconButton>
       </Box>
-      <List sx={{ py: 1 }}>
+      <List className={styles.drawerList}>
         {navItems.map((item) => (
           <ListItem key={item.href} disablePadding>
             <ListItemButton
               component={Link}
               href={item.href}
               selected={pathname === item.href}
-              sx={{
-                py: 1.5,
-                transition: 'all 0.5s ease',
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.15)',
-                  color: 'var(--primary)',
-                },
-                '&:focus': {
-                  outline: 'none',
-                },
-                '&:focus-visible': {
-                  outline: 'none',
-                },
-                '&:hover': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                  transform: 'translateX(4px)',
-                },
-              }}
+              className={styles.drawerListItemButton}
+              classes={{ selected: styles.drawerListItemButtonSelected }}
             >
               <ListItemText 
                 primary={item.label}
-                primaryTypographyProps={{
-                  sx: {
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    fontWeight: 600,
-                    fontSize: '0.9375rem',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2)',
-                  }
-                }}
+                classes={{ primary: styles.drawerListItemText }}
               />
             </ListItemButton>
           </ListItem>
@@ -138,36 +110,12 @@ export default function Navbar() {
               component={Link}
               href="/admin/dashboard"
               selected={pathname === '/admin/dashboard'}
-              sx={{
-                py: 1.5,
-                transition: 'all 0.5s ease',
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.15)',
-                  color: 'var(--primary)',
-                },
-                '&:focus': {
-                  outline: 'none',
-                },
-                '&:focus-visible': {
-                  outline: 'none',
-                },
-                '&:hover': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                  transform: 'translateX(4px)',
-                },
-              }}
+              className={styles.drawerListItemButton}
+              classes={{ selected: styles.drawerListItemButtonSelected }}
             >
               <ListItemText 
                 primary="PORTAL"
-                primaryTypographyProps={{
-                  sx: {
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    fontWeight: 600,
-                    fontSize: '0.9375rem',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2)',
-                  }
-                }}
+                classes={{ primary: styles.drawerListItemText }}
               />
             </ListItemButton>
           </ListItem>
@@ -177,37 +125,18 @@ export default function Navbar() {
             <ListItemButton
               component={Link}
               href="/admin/login"
-              sx={{
-                py: 1.5,
-                transition: 'all 0.5s ease',
-                backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                border: '1px solid rgba(139, 26, 26, 0.4)',
-                mx: 1,
-                borderRadius: 'var(--border-radius-md)',
-                '&:hover': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.3)',
-                  transform: 'translateX(4px)',
-                },
-              }}
+              className={styles.drawerLoginButton}
             >
               <ListItemText 
                 primary="Iniciar Sesión"
-                primaryTypographyProps={{
-                  sx: {
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    fontWeight: 700,
-                    fontSize: '0.9375rem',
-                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.2)',
-                  }
-                }}
+                classes={{ primary: styles.drawerListItemTextBold }}
               />
             </ListItemButton>
           </ListItem>
         )}
         {isAdmin && (
           <ListItem disablePadding>
-            <Box sx={{ width: '100%', px: 2, py: 1 }}>
+            <Box className={styles.drawerAdminLogoutContainer}>
               <AdminLogoutButton />
             </Box>
           </ListItem>
@@ -221,79 +150,41 @@ export default function Navbar() {
       <AppBar
         position="sticky"
         suppressHydrationWarning
-        sx={{
-          backgroundColor: '#040017',
-          backgroundImage: 'none',
-          color: 'var(--text-primary)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-          borderBottom: 'none',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1100,
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '2px',
-            background: 'linear-gradient(to right, transparent 0%, rgba(139, 26, 26, 0.3) 15%, rgba(139, 26, 26, 0.6) 30%, rgba(139, 26, 26, 0.8) 50%, rgba(139, 26, 26, 0.6) 70%, rgba(139, 26, 26, 0.3) 85%, transparent 100%)',
-            boxShadow: '0 0 8px rgba(139, 26, 26, 0.4)',
-          },
-        }}
+        classes={{ root: `${styles.appBar} ${isScrolled ? styles.appBarScrolled : ''}` }}
       >
         <Container maxWidth="xl">
           <Toolbar 
             disableGutters 
-            sx={{ 
-              minHeight: { xs: '64px', sm: '72px' },
-              px: { xs: 2, sm: 3 },
+            className={styles.toolbar}
+            sx={{
+              minHeight: {
+                xs: isScrolled ? 90 : 110,
+                sm: isScrolled ? 110 : 120,
+              },
+              px: {
+                xs: 2,
+                sm: 3,
+              },
+              transition: 'min-height 0.3s ease-in-out, padding 0.3s ease-in-out',
             }}
           >
             {/* Logo/Brand */}
-            <Box
-              component={Link}
+            <Link
               href="/"
-              sx={{
-                flexGrow: { xs: 1, md: 0 },
-                display: 'flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                mr: { md: 4 },
-              }}
+              className={styles.logoLink}
             >
               <Image
                 src="/images/Logo.png"
                 alt="RiderBross Logo"
-                width={140}
-                height={45}
+                width={120}
+                height={38}
                 priority
-                style={{ 
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 2px 6px rgba(139, 26, 26, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2))',
-                  transition: 'all 0.5s ease',
-              }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.filter = 'drop-shadow(0 4px 10px rgba(139, 26, 26, 0.7)) drop-shadow(0 0 14px rgba(255, 255, 255, 0.4))';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.filter = 'drop-shadow(0 2px 6px rgba(139, 26, 26, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2))';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className={styles.logoImage}
               />
-            </Box>
+            </Link>
 
             {/* Desktop Navigation */}
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: { xs: 'none', md: 'flex' },
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                gap: { md: 0.5, lg: 1 },
-              }}
-            >
+            <Box className={styles.desktopNav}>
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -318,11 +209,7 @@ export default function Navbar() {
               {!isAdmin && (
                 <Link
                   href="/admin/login"
-                  className={styles.navLink}
-                  style={{
-                    backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                    border: '1px solid rgba(139, 26, 26, 0.4)',
-                  }}
+                  className={`${styles.navLink} ${styles.navLinkLogin}`}
                 >
                   Iniciar Sesión
                 </Link>
@@ -338,15 +225,7 @@ export default function Navbar() {
               aria-label="open drawer"
               edge="end"
               onClick={handleDrawerToggle}
-              sx={{ 
-                display: { md: 'none' }, 
-                color: 'var(--text-primary)',
-                transition: 'all 0.5s ease',
-                '&:hover': {
-                  backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                  transform: 'scale(1.1)',
-                },
-              }}
+              className={styles.mobileMenuButton}
             >
               <MenuIcon />
             </IconButton>
@@ -361,19 +240,13 @@ export default function Navbar() {
         onClose={handleDrawerToggle}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
+          disableScrollLock: false,
         }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: 280,
-            backgroundColor: '#040017',
-          },
-        }}
+        className={styles.drawerComponent}
+        classes={{ paper: styles.drawerPaper }}
       >
         {drawer}
       </Drawer>
     </>
   );
 }
-

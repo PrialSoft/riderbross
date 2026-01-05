@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { DataTable } from '@/utils/ui/table/DataTable';
+import { formatPatente } from '@/utils/patente';
 import { supabase } from '@/lib/supabase/client';
 
 interface Vehiculo {
@@ -18,6 +19,7 @@ interface Vehiculo {
   modelo: string | null;
   anio: string | null;
   kmactual: number;
+  comentarioPrivado: string | null;
   marcas: {
     descripcion: string;
   } | null;
@@ -52,6 +54,7 @@ export function VehiculosTable(props?: {
           modelo,
           anio,
           kmactual,
+          "comentarioPrivado",
           marcas (
             descripcion
           ),
@@ -76,6 +79,9 @@ export function VehiculosTable(props?: {
     {
       accessorKey: 'patente',
       header: 'Patente',
+      cell: ({ row }) => {
+        return formatPatente(row.original.patente);
+      },
     },
     {
       accessorKey: 'marcas.descripcion',
@@ -116,6 +122,13 @@ export function VehiculosTable(props?: {
       },
     },
     {
+      accessorKey: 'comentarioPrivado',
+      header: 'Comentario Privado',
+      cell: ({ row }) => {
+        return row.original.comentarioPrivado || 'N/A';
+      },
+    },
+    {
       id: 'actions',
       header: 'Acciones',
       cell: ({ row }) => {
@@ -127,7 +140,7 @@ export function VehiculosTable(props?: {
                 if (props?.onEdit) return props.onEdit(row.original.id);
               }}
               sx={{
-                color: 'var(--primary)',
+                color: 'var(--text-primary)',
                 '&:hover': {
                   backgroundColor: 'rgba(139, 26, 26, 0.1)',
                 },

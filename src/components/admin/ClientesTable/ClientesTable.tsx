@@ -20,6 +20,7 @@ interface Cliente {
   telefono: number | null;
   dni: number;
   localidad: string | null;
+  comentarioPrivado: string | null;
   provincias: {
     descripcion: string;
   } | null;
@@ -52,6 +53,7 @@ export function ClientesTable(props?: {
           telefono,
           dni,
           localidad,
+          "comentarioPrivado",
           provincias (
             descripcion
           )
@@ -60,9 +62,42 @@ export function ClientesTable(props?: {
 
       if (fetchError) throw fetchError;
 
-      setClientes(data || []);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar clientes');
+      // Mapear los datos para asegurar que provincias sea un objeto o null
+      const clientesMapped: Cliente[] = (data || []).map((c: {
+        id: number;
+        nombres: string;
+        apellidos: string;
+        email: string;
+        telefono: number | null;
+        dni: number;
+        localidad: string | null;
+        comentarioPrivado: string | null;
+        provincias: { descripcion: string } | { descripcion: string }[] | null;
+      }): Cliente => {
+        let provinciasNormalized: { descripcion: string } | null = null;
+        if (Array.isArray(c.provincias) && c.provincias.length > 0) {
+          provinciasNormalized = c.provincias[0];
+        } else if (c.provincias && !Array.isArray(c.provincias)) {
+          provinciasNormalized = c.provincias;
+        }
+
+        return {
+          id: c.id,
+          nombres: c.nombres,
+          apellidos: c.apellidos,
+          email: c.email,
+          telefono: c.telefono,
+          dni: c.dni,
+          localidad: c.localidad,
+          comentarioPrivado: c.comentarioPrivado,
+          provincias: provinciasNormalized,
+        };
+      });
+
+      setClientes(clientesMapped);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar clientes';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -110,6 +145,13 @@ export function ClientesTable(props?: {
       },
     },
     {
+      accessorKey: 'comentarioPrivado',
+      header: 'Comentario Privado',
+      cell: ({ row }) => {
+        return row.original.comentarioPrivado || 'N/A';
+      },
+    },
+    {
       id: 'actions',
       header: 'Acciones',
       cell: ({ row }) => {
@@ -121,7 +163,7 @@ export function ClientesTable(props?: {
                 if (props?.onEdit) return props.onEdit(row.original.id);
               }}
               sx={{
-                color: 'var(--primary)',
+                color: 'var(--text-primary)',
                 '&:hover': {
                   backgroundColor: 'rgba(139, 26, 26, 0.1)',
                 },

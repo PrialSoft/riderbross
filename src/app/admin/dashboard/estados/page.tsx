@@ -1,5 +1,6 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { EstadosTable } from '@/components/admin/EstadosTable/EstadosTable';
 
 export default function EstadosPage() {
@@ -26,21 +27,12 @@ export default function EstadosPage() {
         >
           Estados
         </Typography>
-        <Button
-          variant="contained"
+        <CustomButton
           startIcon={<AddIcon />}
           href="/admin/dashboard/estados/nuevo"
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': {
-              backgroundColor: 'rgba(139, 26, 26, 0.9)',
-            },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nuevo Estado
-        </Button>
+        </CustomButton>
       </Box>
 
       <EstadosTable />

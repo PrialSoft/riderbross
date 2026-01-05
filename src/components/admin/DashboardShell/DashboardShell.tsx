@@ -44,7 +44,11 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
   // Altura del Navbar global (RootLayout). El Drawer es fixed y si no lo offseteamos,
   // el primer ítem queda tapado por el Navbar.
-  const topOffset = { xs: 64, sm: 72 };
+  // Valores actualizados para coincidir con la altura real del Navbar:
+  // xs: 110px (sin scroll) / 90px (con scroll)
+  // sm: 120px (sin scroll) / 110px (con scroll)
+  // Usamos los valores máximos para asegurar que siempre esté visible
+  const topOffset = { xs: 110, sm: 120 };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -55,8 +59,12 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       <Toolbar
         sx={{
           minHeight: '72px !important',
-          backgroundColor: 'rgba(139, 26, 26, 0.1)',
+          backgroundColor: 'rgba(139, 26, 26, 0.15) !important',
           borderBottom: '1px solid rgba(139, 26, 26, 0.2)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          backdropFilter: 'blur(10px)',
         }}
       >
         <Typography
@@ -91,7 +99,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                   transition: 'all 0.5s ease',
                   '&.Mui-selected': {
                     backgroundColor: 'rgba(139, 26, 26, 0.2)',
-                    color: 'var(--primary)',
+                    color: 'var(--text-primary)',
                     borderLeft: '3px solid var(--primary)',
                     '&:hover': {
                       backgroundColor: 'rgba(139, 26, 26, 0.25)',
@@ -101,12 +109,13 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                     backgroundColor: 'rgba(139, 26, 26, 0.1)',
                     transform: 'translateX(4px)',
                   },
+                  color: 'var(--text-primary)',
                 }}
               >
                 <ListItemIcon
                   sx={{
                     minWidth: 40,
-                    color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                    color: 'var(--text-primary)',
                   }}
                 >
                   <Icon />
@@ -117,6 +126,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                     sx: {
                       fontWeight: isActive ? 700 : 500,
                       fontFamily: 'var(--font-family-body)',
+                      color: 'var(--text-primary)',
                     },
                   }}
                 />
@@ -144,14 +154,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
+            zIndex: 1200,
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
               top: topOffset,
-              height: { xs: 'calc(100% - 64px)', sm: 'calc(100% - 72px)' },
+              height: { xs: 'calc(100vh - 110px)', sm: 'calc(100vh - 120px)' },
               overflowY: 'auto',
               backgroundColor: '#040017',
               borderRight: '1px solid rgba(139, 26, 26, 0.2)',
+              position: 'fixed',
             },
           }}
         >
@@ -161,14 +173,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           variant="permanent"
           sx={{
             display: { xs: 'none', md: 'block' },
+            zIndex: 100,
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
               top: topOffset,
-              height: { xs: 'calc(100% - 64px)', sm: 'calc(100% - 72px)' },
+              height: { xs: 'calc(100vh - 110px)', sm: 'calc(100vh - 120px)' },
               overflowY: 'auto',
               backgroundColor: '#040017',
               borderRight: '1px solid rgba(139, 26, 26, 0.2)',
+              position: 'fixed',
             },
           }}
           open
@@ -193,7 +207,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             alignItems: 'center',
             gap: 1,
             position: 'sticky',
-            top: topOffset,
+            top: { xs: 110, sm: 120 },
             zIndex: 2,
             mb: 2,
             px: 1,

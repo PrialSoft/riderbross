@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import {
   Alert,
   Box,
-  Button,
+  Checkbox,
   CircularProgress,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Paper,
@@ -16,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import { createTipoServicio, updateTipoServicio } from '@/app/admin/dashboard/tipos-servicio/actions';
 
@@ -24,12 +26,13 @@ type CategoriaRow = { id: number; nombre: string };
 export default function TipoServicioForm(props: {
   mode: 'create' | 'edit';
   onSuccess?: () => void;
-  initial?: { id: number; nombre: string; referencia: string | null; idcategoriaservicio: number | null };
+  initial?: { id: number; nombre: string; referencia: string | null; idcategoriaservicio: number | null; predeterminado?: boolean };
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState(props.initial?.nombre ?? '');
   const [referencia, setReferencia] = useState(props.initial?.referencia ?? '');
   const [idCategoria, setIdCategoria] = useState<number | ''>(props.initial?.idcategoriaservicio ?? '');
+  const [predeterminado, setPredeterminado] = useState(props.initial?.predeterminado ?? false);
 
   const [categorias, setCategorias] = useState<CategoriaRow[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
@@ -70,6 +73,7 @@ export default function TipoServicioForm(props: {
         nombre,
         referencia: referencia.trim() ? referencia.trim() : null,
         idcategoriaservicio: idCategoria === '' ? null : Number(idCategoria),
+        predeterminado,
       };
 
       if (props.mode === 'create') {
@@ -155,21 +159,24 @@ export default function TipoServicioForm(props: {
           fullWidth
         />
 
-        <Button
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={predeterminado}
+              onChange={(e) => setPredeterminado(e.target.checked)}
+              disabled={saving}
+            />
+          }
+          label="Predeterminado (se carga automáticamente con 'Servicio General')"
+        />
+
+        <CustomButton
           type="submit"
-          variant="contained"
           startIcon={saving ? undefined : <SaveIcon />}
           disabled={!canSubmit}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-            justifySelf: 'start',
-          }}
         >
           {saving ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
-        </Button>
+        </CustomButton>
       </Box>
     </Paper>
   );

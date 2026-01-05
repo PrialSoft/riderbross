@@ -7,9 +7,12 @@ import {
   Alert,
   Autocomplete,
   Box,
-  Button,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Divider,
   FormControl,
   InputLabel,
@@ -24,9 +27,9 @@ import {
 } from '@mui/material';
 import type { AutocompleteRenderGroupParams } from '@mui/material/Autocomplete';
 import SaveIcon from '@mui/icons-material/Save';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import AddIcon from '@mui/icons-material/Add';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -34,8 +37,9 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import dayjs from '@/lib/dayjs';
 import { supabase } from '@/lib/supabase/client';
 import { createServicio, updateServicio } from '@/app/admin/dashboard/_actions/servicios';
+import { formatPatente } from '@/utils/patente';
 
-type VehiculoRow = { id: number; patente: string; modelo: string | null };
+type VehiculoRow = { id: number; patente: string; modelo: string | null; comentarioPrivado: string | null };
 type ClienteRow = {
   id: number;
   apellidos: string;
@@ -45,6 +49,7 @@ type ClienteRow = {
   idprovincia: number | null;
   localidad: string | null;
   direccion: string | null;
+  comentarioPrivado: string | null;
 };
 type MarcaRow = { id: number; descripcion: string };
 type ProvinciaRow = { id: number; descripcion: string };
@@ -52,6 +57,7 @@ type TipoServicioRow = {
   id: number;
   nombre: string;
   idcategoriaservicio: number | null;
+  predeterminado: boolean;
   categoriasservicio?: { nombre: string } | null;
   categoriaNombre?: string | null;
 };
@@ -104,7 +110,7 @@ export default function ServicioForm(props: {
       >
         <Typography
           variant="overline"
-          sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 800, letterSpacing: '0.08em' }}
+          sx={{ color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '0.08em' }}
         >
           {params.group}
         </Typography>
@@ -219,6 +225,17 @@ export default function ServicioForm(props: {
   const selectedCliente = useMemo(() => {
     return idCliente ? clientesById.get(idCliente) ?? null : null;
   }, [idCliente, clientesById]);
+  
+  // Comentarios privados del vehículo y cliente seleccionados
+  const comentarioPrivadoVehiculo = useMemo(() => {
+    if (idVehiculo === '') return null;
+    const vehiculo = vehiculos.find((v) => v.id === Number(idVehiculo));
+    return vehiculo?.comentarioPrivado || null;
+  }, [idVehiculo, vehiculos]);
+  
+  const comentarioPrivadoCliente = useMemo(() => {
+    return selectedCliente?.comentarioPrivado || null;
+  }, [selectedCliente]);
 
   const selectedClienteDireccion = useMemo(() => {
     if (!selectedCliente) return '—';
@@ -229,7 +246,8 @@ export default function ServicioForm(props: {
     return parts.length > 0 ? parts.join(' - ') : '—';
   }, [selectedCliente, provinciasById]);
 
-  const [bulkTipos, setBulkTipos] = useState<TipoServicioRow[]>([]);
+  const [showTipoServicioDialog, setShowTipoServicioDialog] = useState(false);
+  const [selectedTiposForDialog, setSelectedTiposForDialog] = useState<TipoServicioRow[]>([]);
 
   const [detalles, setDetalles] = useState<DetalleServicioDraft[]>(() => {
     const fromInitial = props.initial?.detalles ?? [];
@@ -284,15 +302,15 @@ export default function ServicioForm(props: {
           { data: marcasData, error: marcasErr },
           { data: provinciasData, error: provinciasErr },
         ] = await Promise.all([
-          supabase.from('vehiculo').select('id, patente, modelo, idcliente, idmarca').order('patente', { ascending: true }),
+          supabase.from('vehiculo').select('id, patente, modelo, idcliente, idmarca, "comentarioPrivado"').order('patente', { ascending: true }),
           supabase
             .from('tiposservicio')
-            .select('id, nombre, idcategoriaservicio')
+            .select('id, nombre, idcategoriaservicio, predeterminado')
             .order('nombre', { ascending: true }),
           supabase.from('estados').select('id, descripcion').order('descripcion', { ascending: true }),
           supabase
             .from('clientes')
-            .select('id, apellidos, nombres, telefono, email, idprovincia, localidad, direccion')
+            .select('id, apellidos, nombres, telefono, email, idprovincia, localidad, direccion, "comentarioPrivado"')
             .order('apellidos', { ascending: true }),
           supabase.from('marcas').select('id, descripcion').order('descripcion', { ascending: true }),
           supabase.from('provincias').select('id, descripcion').order('descripcion', { ascending: true }),
@@ -485,8 +503,8 @@ export default function ServicioForm(props: {
     setDetalles((prev) => prev.map((d) => (d.key === key ? { ...d, ...patch } : d)));
   };
 
-  const addBulk = () => {
-    if (bulkTipos.length === 0) return;
+  const handleAddSelectedTipos = () => {
+    if (selectedTiposForDialog.length === 0) return;
     if (!headerReadyForDetalles) {
       setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
       return;
@@ -497,10 +515,10 @@ export default function ServicioForm(props: {
       next.forEach((d) => {
         if (typeof d.idtiposervicio === 'number') existing.add(d.idtiposervicio);
       });
-      bulkTipos.forEach((t) => {
+      selectedTiposForDialog.forEach((t) => {
         if (existing.has(t.id)) return; // no duplicar tipos ya agregados
         next.push({
-          key: `bulk-${next.length}`,
+          key: `tipo-${next.length}`,
           idtiposervicio: t.id,
           proximoenkm: '',
           comentario: '',
@@ -511,7 +529,8 @@ export default function ServicioForm(props: {
       });
       return next;
     });
-    setBulkTipos([]);
+    setSelectedTiposForDialog([]);
+    setShowTipoServicioDialog(false);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -618,7 +637,7 @@ export default function ServicioForm(props: {
             const marca = v.idmarca ? marcasById.get(v.idmarca) : undefined;
             const cliLabel = cli ? `${cli.apellidos}, ${cli.nombres}` : 'Sin cliente';
             const marcaModelo = `${marca?.descripcion ?? ''} ${v.modelo ?? ''}`.trim();
-            return `${v.patente} — ${cliLabel}${marcaModelo ? ` — ${marcaModelo}` : ''}`;
+            return `${formatPatente(v.patente)} — ${cliLabel}${marcaModelo ? ` — ${marcaModelo}` : ''}`;
           }}
           renderOption={(props, option) => {
             const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
@@ -632,7 +651,7 @@ export default function ServicioForm(props: {
                 {...rest}
                 sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
               >
-                <Typography sx={{ fontWeight: 800, color: 'var(--text-primary)' }}>{option.patente}</Typography>
+                <Typography sx={{ fontWeight: 800, color: 'var(--text-primary)' }}>{formatPatente(option.patente)}</Typography>
                 <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                   {cli ? `${cli.apellidos}, ${cli.nombres}` : 'Sin cliente'}
                   {marcaModelo ? ` • ${marcaModelo}` : ''}
@@ -661,7 +680,7 @@ export default function ServicioForm(props: {
         >
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 900, color: 'rgba(255,255,255,0.92)', letterSpacing: '0.02em', mb: 1 }}
+            sx={{ fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '0.02em', mb: 1 }}
           >
             Datos del Cliente
           </Typography>
@@ -726,6 +745,63 @@ export default function ServicioForm(props: {
               </Typography>
             </Box>
           </Box>
+          
+          {/* Comentarios privados dentro del cuadro de Datos del Cliente */}
+          {(comentarioPrivadoVehiculo || comentarioPrivadoCliente) && (
+            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(139, 26, 26, 0.2)' }}>
+              <Typography
+                variant="caption"
+                sx={{ 
+                  color: 'var(--text-secondary)', 
+                  display: 'block', 
+                  mb: 1,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Comentarios Privados
+              </Typography>
+              
+              {comentarioPrivadoVehiculo && (
+                <Box sx={{ mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block', mb: 0.5 }}>
+                    Vehículo
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: 'var(--error)',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      lineHeight: 1.5,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {comentarioPrivadoVehiculo}
+                  </Typography>
+                </Box>
+              )}
+              
+              {comentarioPrivadoCliente && (
+                <Box>
+                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block', mb: 0.5 }}>
+                    Cliente
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: 'var(--error)',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      lineHeight: 1.5,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {comentarioPrivadoCliente}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
         </Paper>
 
         <Paper
@@ -739,7 +815,7 @@ export default function ServicioForm(props: {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'rgba(255,255,255,0.92)', mb: 0.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'var(--text-primary)', mb: 0.5 }}>
                 Foto del Vehículo
               </Typography>
               <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
@@ -748,15 +824,9 @@ export default function ServicioForm(props: {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Button
+              <CustomButton
                 component="label"
-                variant="outlined"
                 startIcon={<PhotoCameraIcon />}
-                sx={{
-                  borderColor: 'rgba(139, 26, 26, 0.4)',
-                  color: 'var(--text-primary)',
-                  '&:hover': { borderColor: 'rgba(139, 26, 26, 0.7)' },
-                }}
               >
                 Adjuntar foto
                 <input
@@ -801,10 +871,9 @@ export default function ServicioForm(props: {
                     })();
                   }}
                 />
-              </Button>
+              </CustomButton>
 
-              <Button
-                variant="outlined"
+              <CustomButton
                 startIcon={<DeleteForeverIcon />}
                 disabled={fotoAction !== 'set' && fotoAction !== 'clear' && !fotoPreviewUrl}
                 onClick={() => {
@@ -812,14 +881,9 @@ export default function ServicioForm(props: {
                   setFotoPreviewUrl(null);
                   setFotoAction('clear');
                 }}
-                sx={{
-                  borderColor: 'rgba(255, 107, 107, 0.45)',
-                  color: '#ff6b6b',
-                  '&:hover': { borderColor: 'rgba(255, 107, 107, 0.8)' },
-                }}
               >
                 Quitar
-              </Button>
+              </CustomButton>
             </Box>
           </Box>
 
@@ -926,7 +990,7 @@ export default function ServicioForm(props: {
                     size="small"
                     onClick={() => setShowDetalleNotas((v) => !v)}
                     sx={{
-                      color: 'var(--text-secondary)',
+                      color: 'var(--text-primary)',
                       border: '1px solid rgba(139, 26, 26, 0.25)',
                       borderRadius: '10px',
                     }}
@@ -936,102 +1000,176 @@ export default function ServicioForm(props: {
                   </IconButton>
                 </span>
               </Tooltip>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => addDetalle()}
-                startIcon={<AddIcon />}
-                disabled={!headerReadyForDetalles}
-                sx={{
-                  borderColor: 'rgba(139, 26, 26, 0.4)',
-                  color: 'var(--text-primary)',
-                  '&:hover': { borderColor: 'rgba(139, 26, 26, 0.7)' },
-                }}
-              >
-                Agregar fila
-              </Button>
             </Box>
           </Box>
 
+          {/* Botones para agregar tipos de servicio */}
           <Box
             sx={{
               display: 'grid',
-              gap: 1,
-              gridTemplateColumns: { xs: '1fr', md: '1fr auto' },
-              alignItems: 'start',
+              gap: 2,
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
             }}
           >
-            <Autocomplete
-              multiple
-              options={tiposServicio}
-              value={bulkTipos}
-              onChange={(_, v) => setBulkTipos(v)}
-              groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
-              getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
-              loading={loadingRefs}
-              renderGroup={renderTipoGroup}
+            <CustomButton
+              onClick={() => {
+                if (!headerReadyForDetalles) {
+                  setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
+                  return;
+                }
+                // Servicio General: cargar tipos de servicio con predeterminado = true
+                const tiposPredeterminados = tiposServicio.filter((t) => t.predeterminado === true);
+                if (tiposPredeterminados.length === 0) {
+                  setError('No hay tipos de servicio predeterminados configurados');
+                  return;
+                }
+                setDetalles((prev) => {
+                  const next = [...prev];
+                  const existing = new Set<number>();
+                  next.forEach((d) => {
+                    if (typeof d.idtiposervicio === 'number') existing.add(d.idtiposervicio);
+                  });
+                  tiposPredeterminados.forEach((t) => {
+                    if (existing.has(t.id)) return; // no duplicar tipos ya agregados
+                    next.push({
+                      key: `pred-${next.length}`,
+                      idtiposervicio: t.id,
+                      proximoenkm: '',
+                      comentario: '',
+                      idestado: null,
+                      recomendacion: '',
+                    });
+                    existing.add(t.id);
+                  });
+                  return next;
+                });
+              }}
               disabled={!headerReadyForDetalles}
-              disableCloseOnSelect
-              renderOption={(props, option, { selected }) => {
-                const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
-                return (
-                  <Box
-                    component="li"
-                    key={key}
-                    {...rest}
-                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                      <Checkbox
-                        checked={selected}
-                        size="small"
-                        sx={{
-                          p: 0,
-                          color: 'rgba(255,255,255,0.7)',
-                          '&.Mui-checked': { color: 'var(--primary)' },
-                        }}
-                      />
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
-                        <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                          {option.categoriaNombre || 'Sin categoría'}
-                        </Typography>
+            >
+              Servicio General
+            </CustomButton>
+            <CustomButton
+              onClick={() => {
+                if (!headerReadyForDetalles) {
+                  setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
+                  return;
+                }
+                // Servicio Específico: abrir modal/dialog para seleccionar tipos de servicio
+                setShowTipoServicioDialog(true);
+              }}
+              disabled={!headerReadyForDetalles}
+            >
+              Servicio Específico
+            </CustomButton>
+            <CustomButton
+              onClick={() => {
+                if (!headerReadyForDetalles) {
+                  setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
+                  return;
+                }
+                // Servicio Personalizado: agregar detalle sin tipo, solo con comentario personalizado
+                addDetalle({ idtiposervicio: null });
+              }}
+              disabled={!headerReadyForDetalles}
+            >
+              Servicio Personalizado
+            </CustomButton>
+          </Box>
+
+          {/* Dialog para seleccionar tipos de servicio específicos */}
+          <Dialog
+            open={showTipoServicioDialog}
+            onClose={() => {
+              setShowTipoServicioDialog(false);
+              setSelectedTiposForDialog([]);
+            }}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{
+              sx: {
+                background: 'linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.95) 50%, rgba(44, 62, 80, 0.15) 100%)',
+                backdropFilter: 'blur(15px)',
+              },
+            }}
+          >
+            <DialogTitle sx={{ color: 'var(--text-primary)', fontWeight: 700 }}>
+              Seleccionar Tipos de Servicio Específicos
+            </DialogTitle>
+            <DialogContent>
+              <Autocomplete
+                multiple
+                options={tiposServicio}
+                value={selectedTiposForDialog}
+                onChange={(_, v) => setSelectedTiposForDialog(v)}
+                groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
+                getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
+                loading={loadingRefs}
+                renderGroup={renderTipoGroup}
+                disableCloseOnSelect
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...rest}
+                      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        <Checkbox
+                          checked={selected}
+                          size="small"
+                          sx={{
+                            p: 0,
+                            color: 'var(--text-secondary)',
+                            '&.Mui-checked': { color: 'var(--primary)' },
+                          }}
+                        />
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
+                          <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                            {option.categoriaNombre || 'Sin categoría'}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                );
-              }}
-              renderInput={(params) => <TextField {...params} label="Agregar varios tipos de servicio" />}
-              filterOptions={(options, state) => {
-                const input = state.inputValue.toLowerCase();
-                return options
-                  .filter((o) => !selectedTipoIds.has(o.id))
-                  .filter((o) => {
-                    if (!input) return true;
-                    const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
-                    return label.includes(input);
-                  });
-              }}
-            />
-            <Button
-              variant="contained"
-              onClick={addBulk}
-              disabled={bulkTipos.length === 0}
-              sx={{
-                backgroundColor: 'var(--primary)',
-                color: 'var(--text-primary)',
-                '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-                height: { xs: 'auto', md: 56 },
-              }}
-            >
-              Agregar
-            </Button>
-          </Box>
+                  );
+                }}
+                renderInput={(params) => <TextField {...params} label="Buscar tipos de servicio" />}
+                filterOptions={(options, state) => {
+                  const input = state.inputValue.toLowerCase();
+                  return options
+                    .filter((o) => !selectedTipoIds.has(o.id))
+                    .filter((o) => {
+                      if (!input) return true;
+                      const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
+                      return label.includes(input);
+                    });
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <CustomButton
+                onClick={() => {
+                  setShowTipoServicioDialog(false);
+                  setSelectedTiposForDialog([]);
+                }}
+              >
+                Cancelar
+              </CustomButton>
+              <CustomButton
+                onClick={handleAddSelectedTipos}
+                disabled={selectedTiposForDialog.length === 0}
+              >
+                Agregar ({selectedTiposForDialog.length})
+              </CustomButton>
+            </DialogActions>
+          </Dialog>
 
           <Box sx={{ display: 'grid', gap: 1.25 }}>
             {detalles.length === 0 ? (
               <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
-                Tip: podés seleccionar varios tipos arriba y presionar “Agregar” para cargar 40–50 ítems rápido.
+                Seleccioná un tipo de servicio usando los botones arriba.
               </Typography>
             ) : (
               groupedDetalles.map(({ group, items }) => (
@@ -1047,7 +1185,7 @@ export default function ServicioForm(props: {
                   >
                     <Typography
                       variant="subtitle2"
-                      sx={{ fontWeight: 900, color: 'rgba(255,255,255,0.92)', letterSpacing: '0.02em' }}
+                      sx={{ fontWeight: 900, color: 'var(--primary)', letterSpacing: '0.02em' }}
                     >
                       {group}
                     </Typography>
@@ -1067,7 +1205,7 @@ export default function ServicioForm(props: {
                         elevation={0}
                         sx={{
                           p: 1.5,
-                          backgroundColor: 'rgba(4, 0, 23, 0.55)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
                           border: '1px solid rgba(139, 26, 26, 0.15)',
                           borderRadius: 'var(--border-radius-md)',
                         }}
@@ -1171,7 +1309,7 @@ export default function ServicioForm(props: {
                               <IconButton
                                 size="small"
                                 onClick={() => duplicateDetalle(d.key)}
-                                sx={{ color: 'var(--text-secondary)' }}
+                                sx={{ color: 'var(--text-primary)' }}
                               >
                                 <ContentCopyIcon fontSize="small" />
                               </IconButton>
@@ -1180,7 +1318,7 @@ export default function ServicioForm(props: {
                               <IconButton
                                 size="small"
                                 onClick={() => removeDetalle(d.key)}
-                                sx={{ color: '#ff6b6b' }}
+                                sx={{ color: 'var(--text-primary)' }}
                               >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
@@ -1226,21 +1364,13 @@ export default function ServicioForm(props: {
           </Box>
         </Box>
 
-        <Button
+        <CustomButton
           type="submit"
-          variant="contained"
           startIcon={saving ? undefined : <SaveIcon />}
           disabled={!canSubmit}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-            justifySelf: 'start',
-          }}
         >
           {saving ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
-        </Button>
+        </CustomButton>
       </Box>
     </Paper>
   );

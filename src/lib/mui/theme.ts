@@ -93,6 +93,17 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          // Permitir que los CSS modules sobrescriban los estilos de MUI
+          // Cuando hay un className personalizado, los estilos de MUI tienen menor prioridad
+          '&[class*="module"]': {
+            // Los estilos del CSS module tendrán prioridad
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
@@ -176,7 +187,7 @@ export const theme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          color: '#FFFFFF',
+          color: 'var(--text-primary)',
           transition: 'background-color 0.2s ease, color 0.2s ease',
           '&.Mui-selected': {
             backgroundColor: 'rgba(139, 26, 26, 0.22)',
@@ -193,7 +204,7 @@ export const theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         icon: {
-          color: 'rgba(255,255,255,0.85)',
+          color: 'var(--text-secondary)',
         },
       },
     },
@@ -208,7 +219,7 @@ export const theme = createTheme({
         },
         groupLabel: {
           backgroundColor: 'rgba(4, 0, 23, 0.98)',
-          color: 'rgba(255,255,255,0.85)',
+          color: 'var(--text-secondary)',
         },
         groupUl: {
           padding: 0,
@@ -216,7 +227,7 @@ export const theme = createTheme({
         listbox: {
           paddingTop: 6,
           paddingBottom: 6,
-          color: '#FFFFFF',
+          color: 'var(--text-primary)',
           '& .MuiAutocomplete-option': {
             transition: 'background-color 0.2s ease, color 0.2s ease',
             '&[aria-selected="true"]': {
@@ -245,10 +256,10 @@ export const theme = createTheme({
           },
         },
         popupIndicator: {
-          color: 'rgba(255,255,255,0.85)',
+          color: 'var(--text-secondary)',
         },
         clearIndicator: {
-          color: 'rgba(255,255,255,0.85)',
+          color: 'var(--text-secondary)',
         },
       },
     },

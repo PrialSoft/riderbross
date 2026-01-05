@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import { ClientesTable } from '@/components/admin/ClientesTable/ClientesTable';
 import ClienteForm from '@/components/admin/ClienteForm/ClienteForm';
@@ -19,7 +20,7 @@ type ClienteInitial = {
   localidad: string | null;
   direccion: string | null;
   fechanacimiento: string | null;
-  commentarioprivado?: string | null;
+  comentarioPrivado?: string | null;
 };
 
 export default function ClientesManager() {
@@ -50,7 +51,7 @@ export default function ClientesManager() {
 
     const { data, error } = await supabase
       .from('clientes')
-      .select('id, nombres, apellidos, email, dni, telefono, idprovincia, localidad, direccion, fechanacimiento, commentarioprivado')
+      .select('id, nombres, apellidos, email, dni, telefono, idprovincia, localidad, direccion, fechanacimiento, "comentarioPrivado"')
       .eq('id', id)
       .maybeSingle();
 
@@ -84,19 +85,12 @@ export default function ClientesManager() {
         >
           Clientes
         </Typography>
-        <Button
-          variant="contained"
+        <CustomButton
           startIcon={<AddIcon />}
           onClick={openCreate}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nuevo Cliente
-        </Button>
+        </CustomButton>
       </Box>
 
       <ClientesTable onEdit={openEdit} reloadToken={reloadToken} />

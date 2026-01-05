@@ -7,11 +7,11 @@ import {
   Box,
   Typography,
   TextField,
-  Button,
   Paper,
   Alert,
   CircularProgress,
 } from '@mui/material';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import styles from './page.module.css';
 
@@ -186,25 +186,16 @@ export default function AdminLoginPage() {
                 }}
               />
 
-              <Button
+              <CustomButton
                 type="submit"
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                sx={{
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  backgroundColor: 'var(--primary)',
-                  color: 'var(--text-primary)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(139, 26, 26, 0.9)',
-                  },
-                  transition: 'all 0.5s ease',
-                }}
+                isLoading={loading}
+                size="large"
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Iniciar Sesión'}
-              </Button>
+                Iniciar Sesión
+              </CustomButton>
             </form>
           </Paper>
         </Box>

@@ -6,6 +6,7 @@ export async function createTipoServicio(input: {
   nombre: string;
   referencia: string | null;
   idcategoriaservicio: number | null;
+  predeterminado: boolean;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -18,6 +19,7 @@ export async function createTipoServicio(input: {
     nombre,
     referencia: input.referencia?.trim() || null,
     idcategoriaservicio: input.idcategoriaservicio ?? null,
+    predeterminado: input.predeterminado ?? false,
   });
 
   if (error) throw new Error(error.message);
@@ -27,6 +29,7 @@ export async function updateTipoServicio(id: number, input: {
   nombre: string;
   referencia: string | null;
   idcategoriaservicio: number | null;
+  predeterminado: boolean;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -41,6 +44,7 @@ export async function updateTipoServicio(id: number, input: {
       nombre,
       referencia: input.referencia?.trim() || null,
       idcategoriaservicio: input.idcategoriaservicio ?? null,
+      predeterminado: input.predeterminado ?? false,
     })
     .eq('id', id);
 

@@ -10,7 +10,7 @@
   left: 0;
   width: 100%;
   min-height: 100%;
-  background: #040017;
+  background: var(--bg-primary);
   background-image: url('/images/bg_home.png');
   background-size: 100% auto;
   background-position: center top;
@@ -27,7 +27,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(4, 0, 23, 0.7) 0%, rgba(4, 0, 23, 0.85) 100%);
+  background: linear-gradient(180deg, rgba(4, 0, 12, 0.7) 0%, rgba(4, 0, 12, 0.85) 100%);
   z-index: -1;
   pointer-events: none;
 }
@@ -57,6 +57,155 @@
   z-index: 1;
 }
 
+.heroContainer {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 900px) {
+  .heroContainer {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.heroContent {
+  text-align: center;
+  padding-top: 0;
+  padding-bottom: 2rem;
+  color: var(--text-primary);
+  position: relative;
+  z-index: 2;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .heroContent {
+    padding-bottom: 3rem;
+  }
+}
+
+.heroLogoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .heroLogoContainer {
+    margin-bottom: 2.5rem;
+  }
+}
+
+.heroLogo {
+  max-width: 95%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)) drop-shadow(0 2px 10px rgba(250, 250, 250, 0.3));
+  position: relative;
+  z-index: 2;
+}
+
+.heroTitle {
+  margin-bottom: 0;
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+  font-family: var(--font-family-body);
+  text-transform: uppercase;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(139, 26, 26, 0.6);
+  position: relative;
+  z-index: 2;
+  line-height: 1.2;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: center;
+  white-space: normal;
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .heroTitle {
+    margin-top: 0.5rem;
+    font-size: 2.5rem;
+    white-space: nowrap;
+  }
+}
+
+.contentSection {
+  background-color: transparent;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  position: relative;
+}
+
+@media (min-width: 900px) {
+  .contentSection {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.contentBox {
+  background: linear-gradient(135deg, rgba(139, 26, 26, 0.2) 0%, rgba(4, 0, 23, 0.95) 50%, rgba(44, 62, 80, 0.2) 100%);
+  backdrop-filter: blur(15px);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 26, 26, 0.1);
+  position: relative;
+  z-index: 3;
+}
+
+@media (min-width: 900px) {
+  .contentBox {
+    padding: 2rem;
+  }
+}
+
+.contentText {
+  margin-bottom: 0;
+  font-weight: 400;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+@media (min-width: 600px) {
+  .contentText {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .contentText {
+    font-size: 1.75rem;
+  }
+}
+
 .pilaresSection {
   background: transparent;
   position: relative;
@@ -77,6 +226,424 @@
     radial-gradient(circle at 80% 80%, rgba(139, 26, 26, 0.15) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
+}
+
+.pilaresContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .pilaresContainer {
+    flex-direction: row;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.pilarCardWrapper {
+  flex: 0 1 auto;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .pilarCardWrapper {
+    flex: 1;
+  }
+}
+
+.pilarCard {
+  background: linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.9) 50%, rgba(44, 62, 80, 0.15) 100%);
+  backdrop-filter: blur(15px);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 26, 26, 0.1);
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  transition: box-shadow var(--transition-base), background var(--transition-base), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+@media (min-width: 900px) {
+  .pilarCard {
+    padding: 1.5rem;
+  }
+}
+
+.pilarCard:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2);
+  transform: translateY(-2px);
+}
+
+.pilarCard:hover .pilarCardTitle {
+  text-shadow: 0 0 15px rgba(139, 26, 26, 1), 0 2px 12px rgba(139, 26, 26, 0.9), 0 0 25px rgba(139, 26, 26, 0.7);
+}
+
+.pilarCard:hover .pilarCardTitle::after {
+  box-shadow: 0 0 12px rgba(139, 26, 26, 0.8);
+}
+
+.pilarCardIcon {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 900px) {
+  .pilarCardIcon {
+    font-size: 1.5rem;
+  }
+}
+
+.pilarCardContent {
+  flex: 1;
+}
+
+.pilarCardTitle {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: var(--font-size-xl) !important;
+  font-family: var(--font-family-body);
+  position: relative;
+  padding-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(139, 26, 26, 0.8), 0 2px 8px rgba(139, 26, 26, 0.7), 0 0 20px rgba(139, 26, 26, 0.5);
+  transition: all var(--transition-base);
+}
+
+@media (min-width: 900px) {
+  .pilarCardTitle {
+    font-size: var(--font-size-2xl) !important;
+  }
+}
+
+.pilarCardTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--primary), transparent);
+  border-radius: var(--border-radius-full);
+  transition: all var(--transition-base);
+  box-shadow: 0 0 8px rgba(139, 26, 26, 0.6);
+}
+
+.pilarCardTitle:hover {
+  text-shadow: 0 0 15px rgba(139, 26, 26, 1), 0 2px 12px rgba(139, 26, 26, 0.9), 0 0 25px rgba(139, 26, 26, 0.7);
+}
+
+.pilarCardText {
+  color: var(--text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+@media (min-width: 900px) {
+  .pilarCardText {
+    font-size: 1.125rem;
+  }
+}
+
+.contactBox {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+}
+
+.contactCard {
+  background: linear-gradient(135deg, rgba(139, 26, 26, 0.2) 0%, rgba(4, 0, 23, 0.95) 50%, rgba(44, 62, 80, 0.2) 100%);
+  backdrop-filter: blur(15px);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 26, 26, 0.1);
+  text-align: center;
+}
+
+@media (min-width: 900px) {
+  .contactCard {
+    padding: 2rem;
+  }
+}
+
+.contactTitle {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+}
+
+@media (min-width: 900px) {
+  .contactTitle {
+    font-size: 1.5rem;
+  }
+}
+
+.contactButton {
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+@media (min-width: 900px) {
+  .contactButton {
+    font-size: 1.125rem;
+  }
+}
+
+.contactButton:hover {
+  background-color: var(--primary);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.searchForm {
+  max-width: 600px;
+  margin: 10% auto;
+
+}
+
+.searchCard {
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  padding: 1rem;
+}
+
+@media (min-width: 600px) {
+  .searchCard {
+    padding: 1.5rem;
+  }
+}
+
+.searchTitle {
+  margin-bottom: 1rem !important;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.searchButton {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all var(--transition-base);
+}
+
+@media (min-width: 600px) {
+  .searchButton {
+    font-size: 1.125rem;
+  }
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 26, 26, 0.4);
+}
+
+.servicesSection {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 900px) {
+  .servicesSection {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+/* Selector específico para sobrescribir estilos de MUI */
+.servicesTitle,
+.servicesTitle.MuiTypography-root {
+  text-align: center !important;
+  margin-bottom: 3rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  font-size: var(--font-size-3xl) !important;
+  font-family: var(--font-family-body) !important;
+}
+
+@media (min-width: 600px) {
+  .servicesTitle,
+  .servicesTitle.MuiTypography-root {
+    font-size: var(--font-size-4xl) !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .servicesTitle {
+    font-size: 3rem;
+  }
+}
+
+.servicesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 900px) {
+  .servicesContainer {
+    flex-direction: row;
+  }
+}
+
+.serviceCardWrapper {
+  flex: 0 1 auto;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .serviceCardWrapper {
+    flex: 1;
+  }
+}
+
+/* Selector específico para sobrescribir estilos de MUI Card */
+.serviceCard,
+.serviceCard.MuiCard-root {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: box-shadow var(--transition-base), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(0) !important;
+}
+
+.serviceCard:hover,
+.serviceCard.MuiCard-root:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+/* Selector específico para sobrescribir estilos de MUI CardContent */
+.serviceCardContent,
+.serviceCardContent.MuiCardContent-root {
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 2rem !important;
+}
+
+.serviceIcon {
+  color: var(--text-primary) !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Selector específico para sobrescribir estilos de MUI */
+.serviceTitle,
+.serviceTitle.MuiTypography-root {
+  margin-bottom: 1rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  font-size: 1.375rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.3 !important;
+}
+
+@media (min-width: 600px) {
+  .serviceTitle,
+  .serviceTitle.MuiTypography-root {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .serviceTitle,
+  .serviceTitle.MuiTypography-root {
+    font-size: 1.75rem !important;
+  }
+}
+
+.ctaSection {
+  background-color: var(--bg-primary);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 900px) {
+  .ctaSection {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.ctaContent {
+  text-align: center;
+}
+
+.ctaTitle {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ctaText {
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+@media (min-width: 900px) {
+  .ctaText {
+    font-size: 1.125rem;
+  }
+}
+
+.ctaButton {
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 1rem;
+  transition: all var(--transition-base);
+}
+
+@media (min-width: 900px) {
+  .ctaButton {
+    font-size: 1.125rem;
+  }
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 26, 26, 0.4);
+}
+
+.serviceIconSize {
+  font-size: 2.5rem !important;
+}
+
+@media (min-width: 600px) {
+  .serviceIconSize {
+    font-size: 2.5rem !important;
+  }
 }
 
 /* Animación suave para el buscador */

@@ -12,7 +12,7 @@ export async function createCliente(input: {
   localidad: string | null;
   direccion: string | null;
   fechanacimiento: string | null; // YYYY-MM-DD
-  commentarioprivado?: string | null;
+  comentarioPrivado?: string | null;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -39,7 +39,7 @@ export async function createCliente(input: {
     localidad: input.localidad?.trim() || null,
     direccion: input.direccion?.trim() || null,
     fechanacimiento: input.fechanacimiento || null,
-    commentarioprivado: input.commentarioprivado?.trim() || null,
+    comentarioPrivado: input.comentarioPrivado?.trim() || null,
   });
 
   if (error) throw new Error(error.message);
@@ -57,7 +57,7 @@ export async function updateCliente(
     localidad: string | null;
     direccion: string | null;
     fechanacimiento: string | null; // YYYY-MM-DD
-    commentarioprivado?: string | null;
+    comentarioPrivado?: string | null;
   }
 ) {
   const supabase = await createClient();
@@ -89,7 +89,7 @@ export async function updateCliente(
       localidad: input.localidad?.trim() || null,
       direccion: input.direccion?.trim() || null,
       fechanacimiento: input.fechanacimiento || null,
-      commentarioprivado: input.commentarioprivado?.trim() || null,
+      comentarioPrivado: input.comentarioPrivado?.trim() || null,
     })
     .eq('id', id);
 

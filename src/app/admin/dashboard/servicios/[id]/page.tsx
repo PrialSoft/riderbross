@@ -25,28 +25,18 @@ export default async function ServicioDetallePage({
       </Typography>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
-        <Button
+        <CustomButton
           variant="contained"
           startIcon={<PrintIcon />}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-          }}
         >
           Imprimir (PDF)
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           variant="outlined"
           startIcon={<EmailIcon />}
-          sx={{
-            borderColor: 'rgba(139, 26, 26, 0.4)',
-            color: 'var(--text-primary)',
-            '&:hover': { borderColor: 'rgba(139, 26, 26, 0.7)' },
-          }}
         >
           Enviar por Email
-        </Button>
+        </CustomButton>
       </Stack>
 
       <Paper

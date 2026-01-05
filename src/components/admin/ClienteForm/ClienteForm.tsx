@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   FormControl,
   InputLabel,
@@ -16,6 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import dayjs from '@/lib/dayjs';
 import { supabase } from '@/lib/supabase/client';
 import { createCliente, updateCliente } from '@/app/admin/dashboard/_actions/clientes';
@@ -36,7 +36,7 @@ export default function ClienteForm(props: {
     localidad: string | null;
     direccion: string | null;
     fechanacimiento: string | null; // YYYY-MM-DD
-    commentarioprivado?: string | null;
+    comentarioPrivado?: string | null;
   };
 }) {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function ClienteForm(props: {
   const [idProvincia, setIdProvincia] = useState<number | ''>(props.initial?.idprovincia ?? '');
   const [localidad, setLocalidad] = useState(props.initial?.localidad ?? '');
   const [direccion, setDireccion] = useState(props.initial?.direccion ?? '');
-  const [comentarioPrivado, setComentarioPrivado] = useState(props.initial?.commentarioprivado ?? '');
+  const [comentarioPrivado, setComentarioPrivado] = useState(props.initial?.comentarioPrivado ?? '');
   const [fechaNacimiento, setFechaNacimiento] = useState(
     props.initial?.fechanacimiento ? dayjs(props.initial.fechanacimiento).format('YYYY-MM-DD') : ''
   );
@@ -114,7 +114,7 @@ export default function ClienteForm(props: {
         localidad: localidad.trim() ? localidad.trim() : null,
         direccion: direccion.trim() ? direccion.trim() : null,
         fechanacimiento: fechaNacimiento.trim() ? fechaNacimiento.trim() : null,
-        commentarioprivado: comentarioPrivado.trim() ? comentarioPrivado.trim() : null,
+        comentarioPrivado: comentarioPrivado.trim() ? comentarioPrivado.trim() : null,
       };
 
       if (props.mode === 'create') {
@@ -232,21 +232,13 @@ export default function ClienteForm(props: {
           placeholder="Notas internas (no visibles para el cliente)"
         />
 
-        <Button
+        <CustomButton
           type="submit"
-          variant="contained"
           startIcon={saving ? undefined : <SaveIcon />}
           disabled={!canSubmit}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-            justifySelf: 'start',
-          }}
         >
           {saving ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
-        </Button>
+        </CustomButton>
       </Box>
     </Paper>
   );

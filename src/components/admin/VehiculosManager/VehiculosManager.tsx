@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import { VehiculosTable } from '@/components/admin/VehiculosTable/VehiculosTable';
 import VehiculoForm from '@/components/admin/VehiculoForm/VehiculoForm';
@@ -16,7 +17,7 @@ type VehiculoInitial = {
   anio: string | null;
   kmactual: number | null;
   idcliente: number | null;
-  commentarioprivado?: string | null;
+  comentarioPrivado?: string | null;
 };
 
 export default function VehiculosManager() {
@@ -47,7 +48,7 @@ export default function VehiculosManager() {
 
     const { data, error } = await supabase
       .from('vehiculo')
-      .select('id, patente, idmarca, modelo, anio, kmactual, idcliente, commentarioprivado')
+      .select('id, patente, idmarca, modelo, anio, kmactual, idcliente, "comentarioPrivado"')
       .eq('id', id)
       .maybeSingle();
 
@@ -80,19 +81,12 @@ export default function VehiculosManager() {
         >
           Vehículos
         </Typography>
-        <Button
-          variant="contained"
+        <CustomButton
           startIcon={<AddIcon />}
           onClick={openCreate}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nuevo Vehículo
-        </Button>
+        </CustomButton>
       </Box>
 
       <VehiculosTable onEdit={openEdit} reloadToken={reloadToken} />
@@ -120,7 +114,7 @@ export default function VehiculosManager() {
           }}
         >
           {title}
-          <IconButton onClick={close} sx={{ color: 'var(--text-secondary)' }}>
+          <IconButton onClick={close} sx={{ color: 'var(--text-primary)' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>

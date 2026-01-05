@@ -27,7 +27,7 @@
   left: 0;
   width: 100%;
   min-height: 100%;
-  background: linear-gradient(180deg, rgba(4, 0, 23, 0.7) 0%, rgba(4, 0, 23, 0.85) 100%);
+  background: linear-gradient(180deg, rgba(4, 0, 12, 0.7) 0%, rgba(4, 0, 12, 0.85) 100%);
   z-index: -1;
   pointer-events: none;
 }
@@ -43,3 +43,190 @@
   z-index: 1;
 }
 
+.heroContent {
+  text-align: center;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  color: var(--text-primary);
+}
+
+@media (min-width: 900px) {
+  .heroContent {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.heroTitle,
+.heroTitle.MuiTypography-root,
+.heroTitle.MuiTypography-h1 {
+  margin-bottom: 1rem !important;
+  font-weight: 700 !important;
+  font-size: 2rem !important;
+  font-family: var(--font-family-body) !important;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(139, 26, 26, 0.6) !important;
+  color: var(--text-primary) !important;
+}
+
+@media (min-width: 600px) {
+  .heroTitle,
+  .heroTitle.MuiTypography-root,
+  .heroTitle.MuiTypography-h1 {
+    font-size: 2.5rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .heroTitle,
+  .heroTitle.MuiTypography-root,
+  .heroTitle.MuiTypography-h1 {
+    font-size: 3rem !important;
+  }
+}
+
+.heroSubtitle,
+.heroSubtitle.MuiTypography-root,
+.heroSubtitle.MuiTypography-h5 {
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  font-family: var(--font-family-body) !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  color: var(--text-secondary) !important;
+}
+
+@media (min-width: 600px) {
+  .heroSubtitle,
+  .heroSubtitle.MuiTypography-root,
+  .heroSubtitle.MuiTypography-h5 {
+    font-size: 1.25rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .heroSubtitle,
+  .heroSubtitle.MuiTypography-root,
+  .heroSubtitle.MuiTypography-h5 {
+    font-size: 1.5rem !important;
+  }
+}
+
+.postsContainer {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 900px) {
+  .postsContainer {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+.postCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-base);
+}
+
+.postCard:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.postCardAction {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: all var(--transition-base);
+}
+
+.postCardContent {
+  flex-grow: 1;
+  padding: 1.5rem;
+}
+
+.postCategory {
+  background-color: var(--primary);
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.postTitle,
+.postTitle.MuiTypography-root,
+.postTitle.MuiTypography-h5 {
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 2.25rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.55) !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+@media (min-width: 900px) {
+  .postTitle,
+  .postTitle.MuiTypography-root,
+  .postTitle.MuiTypography-h5 {
+    font-size: 2.5rem !important;
+  }
+}
+
+.postExcerpt,
+.postExcerpt.MuiTypography-root,
+.postExcerpt.MuiTypography-body2 {
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1rem !important;
+  color: var(--text-secondary) !important;
+}
+
+@media (min-width: 900px) {
+  .postExcerpt,
+  .postExcerpt.MuiTypography-root,
+  .postExcerpt.MuiTypography-body2 {
+    font-size: 0.9375rem !important;
+  }
+}
+
+.postFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.postDateContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.postDateIcon {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.postDate,
+.postDate.MuiTypography-root,
+.postDate.MuiTypography-caption {
+  font-size: 0.875rem !important;
+  color: var(--text-secondary) !important;
+}
+
+.postArrow {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}

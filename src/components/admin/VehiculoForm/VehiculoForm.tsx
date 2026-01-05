@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   FormControl,
   InputLabel,
@@ -16,6 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import CustomButton from '@/utils/ui/button/CustomButton';
+import { formatPatente } from '@/utils/patente';
 import dayjs from '@/lib/dayjs';
 import { supabase } from '@/lib/supabase/client';
 import { createVehiculo, updateVehiculo } from '@/app/admin/dashboard/_actions/vehiculos';
@@ -34,28 +35,11 @@ export default function VehiculoForm(props: {
     anio: string | null;
     kmactual: number | null;
     idcliente: number | null;
-    commentarioprivado?: string | null;
+    comentarioPrivado?: string | null;
   };
 }) {
   const router = useRouter();
 
-  const formatPatente = (value: string) => {
-    const raw = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-
-    // Regla pedida:
-    // - si contiene 7 caracteres -> ##-###-## (asumimos 7 dígitos)
-    // - si contiene 6 caracteres -> ###-###
-    if (raw.length === 7) {
-      // Aplicamos la máscara siempre que haya 7 caracteres "limpios"
-      return `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5, 7)}`;
-    }
-
-    if (raw.length === 6) {
-      return `${raw.slice(0, 3)}-${raw.slice(3, 6)}`;
-    }
-
-    return raw;
-  };
 
   const formatKm = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -77,7 +61,7 @@ export default function VehiculoForm(props: {
   const [anio, setAnio] = useState(props.initial?.anio ? dayjs(props.initial.anio).format('YYYY') : '');
   const [kmActual, setKmActual] = useState(props.initial?.kmactual ? formatKm(String(props.initial.kmactual)) : '');
   const [idCliente, setIdCliente] = useState<number | ''>(props.initial?.idcliente ?? '');
-  const [comentarioPrivado, setComentarioPrivado] = useState(props.initial?.commentarioprivado ?? '');
+  const [comentarioPrivado, setComentarioPrivado] = useState(props.initial?.comentarioPrivado ?? '');
 
   const [marcas, setMarcas] = useState<MarcaRow[]>([]);
   const [clientes, setClientes] = useState<ClienteRow[]>([]);
@@ -120,15 +104,18 @@ export default function VehiculoForm(props: {
       const kmNum = parseKmToNumberOrNull(kmActual);
       if (kmActual.trim().length > 0 && kmNum === null) throw new Error('KM actual inválido');
 
+      // Limpiar patente antes de guardar: solo letras y números, sin guiones ni caracteres especiales
+      const patenteClean = patente.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      
       const payload = {
-        patente: formatPatente(patente).trim(),
+        patente: patenteClean,
         idmarca: idMarca === '' ? null : Number(idMarca),
         modelo: modelo.trim() ? modelo.trim() : null,
         // Columna en BD es DATE: guardamos solo el año como YYYY-01-01
         anio: anio.trim() ? `${anio.trim()}-01-01` : null,
         kmactual: kmNum ?? 0,
         idcliente: idCliente === '' ? null : Number(idCliente),
-        commentarioprivado: comentarioPrivado.trim() ? comentarioPrivado.trim() : null,
+        comentarioPrivado: comentarioPrivado.trim() ? comentarioPrivado.trim() : null,
       };
 
       if (props.mode === 'create') {
@@ -249,21 +236,13 @@ export default function VehiculoForm(props: {
           placeholder="Notas internas (no visibles para el cliente)"
         />
 
-        <Button
+        <CustomButton
           type="submit"
-          variant="contained"
           startIcon={saving ? undefined : <SaveIcon />}
           disabled={!canSubmit}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-            justifySelf: 'start',
-          }}
         >
           {saving ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
-        </Button>
+        </CustomButton>
       </Box>
     </Paper>
   );

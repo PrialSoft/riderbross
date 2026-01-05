@@ -191,7 +191,7 @@ export default function BlogPostPage() {
             sx={{
               textAlign: 'center',
               py: { xs: 4, md: 6 },
-              color: 'white',
+              color: 'var(--text-primary)',
             }}
           >
             <Link
@@ -200,7 +200,7 @@ export default function BlogPostPage() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: 'white',
+                color: 'var(--text-primary)',
                 textDecoration: 'none',
                 marginBottom: '2rem',
                 fontSize: '0.9375rem',
@@ -213,7 +213,7 @@ export default function BlogPostPage() {
               label={blogPost.category}
               sx={{
                 backgroundColor: 'var(--primary)',
-                color: 'white',
+                color: 'var(--text-primary)',
                 fontWeight: 600,
                 mb: 2,
               }}
@@ -310,7 +310,7 @@ export default function BlogPostPage() {
                   component="h2"
                   sx={{
                     fontWeight: 700,
-                    color: 'white',
+                    color: 'var(--text-primary)',
                     fontSize: { xs: '1.5rem', md: '1.75rem' },
                   }}
                 >
@@ -320,7 +320,7 @@ export default function BlogPostPage() {
               <Typography
                 variant="body1"
                 sx={{
-                  color: 'rgba(255, 255, 255, 0.9)',
+                  color: 'var(--text-secondary)',
                   fontSize: { xs: '0.9375rem', md: '1rem' },
                   lineHeight: 1.7,
                   mb: 3,
@@ -459,17 +459,17 @@ export default function BlogPostPage() {
               display: 'inline-block',
               padding: '0.75rem 2rem',
               backgroundColor: 'var(--primary)',
-              color: 'white',
+              color: 'var(--text-primary)',
               textDecoration: 'none',
               borderRadius: 'var(--border-radius-md)',
               fontWeight: 600,
               transition: 'all 0.5s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary-dark)';
+              e.currentTarget.style.backgroundColor = 'var(--primary)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--primary)';
+              e.currentTarget.style.backgroundColor = 'var(--secondary)';
             }}
           >
             Contactar

@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { supabase } from '@/lib/supabase/client';
+import CustomButton from '@/utils/ui/button/CustomButton';
 
 export default function AdminLogoutButton() {
   const router = useRouter();
@@ -15,19 +15,14 @@ export default function AdminLogoutButton() {
   };
 
   return (
-    <Button
+    <CustomButton
       onClick={handleLogout}
       startIcon={<LogoutIcon />}
-      sx={{
-        color: 'var(--text-primary)',
-        '&:hover': {
-          backgroundColor: 'rgba(139, 26, 26, 0.1)',
-        },
-        transition: 'all 0.5s ease',
-      }}
+      variant="text"
+      color="white"
     >
       Cerrar Sesión
-    </Button>
+    </CustomButton>
   );
 }
 

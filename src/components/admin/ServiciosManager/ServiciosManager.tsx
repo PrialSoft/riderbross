@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
 import { ServiciosTable } from '@/components/admin/ServiciosTable/ServiciosTable';
 import ServicioForm from '@/components/admin/ServicioForm/ServicioForm';
@@ -99,19 +100,13 @@ export default function ServiciosManager() {
         >
           Servicios
         </Typography>
-        <Button
+        <CustomButton
           variant="contained"
           startIcon={<AddIcon />}
           onClick={openCreate}
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.9)' },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nuevo Servicio
-        </Button>
+        </CustomButton>
       </Box>
 
       <ServiciosTable onEdit={openEdit} reloadToken={reloadToken} />

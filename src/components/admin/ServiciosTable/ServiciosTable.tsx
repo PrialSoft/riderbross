@@ -15,6 +15,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EmailIcon from '@mui/icons-material/Email';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { DataTable } from '@/utils/ui/table/DataTable';
+import { formatPatente } from '@/utils/patente';
 import { supabase } from '@/lib/supabase/client';
 import dayjs from '@/lib/dayjs';
 import jsPDF from 'jspdf';
@@ -164,7 +165,7 @@ export function ServiciosTable(props?: {
     const doc = new jsPDF();
     const vehiculo = row.Vehiculo;
     const marcaModelo = vehiculo ? `${vehiculo.Marcas?.descripcion ?? ''} ${vehiculo.modelo ?? ''}`.trim() : '—';
-    const patente = vehiculo?.patente ?? '—';
+    const patente = vehiculo?.patente ? formatPatente(vehiculo.patente) : '—';
     const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
     const km = typeof row.kmservicio === 'number' ? row.kmservicio.toLocaleString('es-AR') : '—';
     const cliente = row.clienteNombre ?? '—';
@@ -188,7 +189,7 @@ export function ServiciosTable(props?: {
     if (!to) return;
 
     const vehiculo = row.Vehiculo;
-    const patente = vehiculo?.patente ?? '—';
+    const patente = vehiculo?.patente ? formatPatente(vehiculo.patente) : '—';
     const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
     const subject = encodeURIComponent(`RiderBross - Servicio ${patente} (${fecha})`);
     const body = encodeURIComponent(
@@ -209,7 +210,7 @@ export function ServiciosTable(props?: {
       header: 'Patente',
       cell: ({ row }) => {
         const vehiculo = row.original.Vehiculo;
-        return vehiculo ? vehiculo.patente : 'N/A';
+        return vehiculo ? formatPatente(vehiculo.patente) : 'N/A';
       },
     },
     {
@@ -274,7 +275,7 @@ export function ServiciosTable(props?: {
                 if (props?.onView) return props.onView(row.original.id);
               }}
               sx={{
-                color: 'var(--primary)',
+                color: 'var(--text-primary)',
                 '&:hover': {
                   backgroundColor: 'rgba(139, 26, 26, 0.1)',
                 },
@@ -289,7 +290,7 @@ export function ServiciosTable(props?: {
                   disabled={!hasEmail}
                   onClick={() => sendEmail(row.original)}
                   sx={{
-                    color: hasEmail ? 'var(--primary)' : 'rgba(255,255,255,0.35)',
+                    color: hasEmail ? 'var(--text-primary)' : 'var(--text-disabled)',
                     '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
                   }}
                 >
@@ -302,7 +303,7 @@ export function ServiciosTable(props?: {
                 size="small"
                 onClick={() => downloadPdf(row.original)}
                 sx={{
-                  color: 'var(--primary)',
+                  color: 'var(--text-primary)',
                   '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
                 }}
               >
@@ -315,7 +316,7 @@ export function ServiciosTable(props?: {
                 if (props?.onEdit) return props.onEdit(row.original.id);
               }}
               sx={{
-                color: 'var(--text-secondary)',
+                color: 'var(--text-primary)',
                 '&:hover': {
                   backgroundColor: 'rgba(139, 26, 26, 0.1)',
                 },

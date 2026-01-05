@@ -1,5 +1,6 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CustomButton from '@/utils/ui/button/CustomButton';
 import { MarcasTable } from '@/components/admin/MarcasTable/MarcasTable';
 
 export default function MarcasPage() {
@@ -26,21 +27,12 @@ export default function MarcasPage() {
         >
           Marcas
         </Typography>
-        <Button
-          variant="contained"
+        <CustomButton
           startIcon={<AddIcon />}
           href="/admin/dashboard/marcas/nuevo"
-          sx={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--text-primary)',
-            '&:hover': {
-              backgroundColor: 'rgba(139, 26, 26, 0.9)',
-            },
-            transition: 'all 0.5s ease',
-          }}
         >
           Nueva Marca
-        </Button>
+        </CustomButton>
       </Box>
 
       <MarcasTable />
