@@ -12,6 +12,7 @@ type TipoServicioRow = {
   nombre: string;
   referencia: string | null;
   idcategoriaservicio: number | null;
+  predeterminado: boolean;
   categoriasservicio?: { nombre: string } | null;
 };
 
@@ -36,6 +37,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
             nombre,
             referencia,
             idcategoriaservicio,
+            predeterminado,
             categoriasservicio ( nombre )
           `
           )
@@ -67,6 +69,11 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
         cell: ({ row }) => row.original.referencia || '—',
       },
       {
+        accessorKey: 'predeterminado',
+        header: 'Predeterminado',
+        cell: ({ row }) => (row.original.predeterminado ? 'Sí' : 'No'),
+      },
+      {
         id: 'actions',
         header: 'Acciones',
         cell: ({ row }) => (
@@ -77,7 +84,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
                 if (props?.onEdit) return props.onEdit(row.original.id);
               }}
               sx={{
-                color: 'var(--primary)',
+                color: 'var(--text-primary)',
                 '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
               }}
             >

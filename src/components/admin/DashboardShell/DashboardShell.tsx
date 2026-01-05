@@ -21,7 +21,6 @@ import {
   Build as ServiciosIcon,
   People as ClientesIcon,
   TwoWheeler as VehiculosIcon,
-  Category as MarcasIcon,
   FormatListBulleted as TiposServicioIcon,
 } from '@mui/icons-material';
 import styles from './DashboardShell.module.css';
@@ -33,7 +32,6 @@ const menuItems = [
   { label: 'Servicios', href: '/admin/dashboard/servicios', icon: ServiciosIcon },
   { label: 'Clientes', href: '/admin/dashboard/clientes', icon: ClientesIcon },
   { label: 'Vehículos', href: '/admin/dashboard/vehiculos', icon: VehiculosIcon },
-  { label: 'Marcas', href: '/admin/dashboard/marcas', icon: MarcasIcon },
   { label: 'Tipos de Servicio', href: '/admin/dashboard/tipos-servicio', icon: TiposServicioIcon },
 ];
 
