@@ -386,7 +386,6 @@ export default async function AdminDashboardPage() {
                   >
                     Fecha: {fecha}
                     {km !== null ? ` | KM: ${km}` : ''}
-                    {servicioTyped.tecnico ? ` | Técnico: ${servicioTyped.tecnico}` : ''}
                   </Typography>
                 </Box>
               );
