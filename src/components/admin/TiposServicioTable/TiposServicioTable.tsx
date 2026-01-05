@@ -44,7 +44,20 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
           .order('nombre', { ascending: true });
 
         if (qErr) throw qErr;
-        setData((rows as TipoServicioRow[]) ?? []);
+        
+        // Mapear los datos para asegurar el tipo correcto
+        const mappedRows: TipoServicioRow[] = ((rows as unknown[]) ?? []).map((row: any) => ({
+          id: row.id,
+          nombre: row.nombre,
+          referencia: row.referencia ?? null,
+          idcategoriaservicio: row.idcategoriaservicio ?? null,
+          predeterminado: row.predeterminado ?? false,
+          categoriasservicio: Array.isArray(row.categoriasservicio)
+            ? row.categoriasservicio[0] ?? null
+            : row.categoriasservicio ?? null,
+        }));
+        
+        setData(mappedRows);
       } catch (e: unknown) {
         const err = e as { message?: string };
         setError(err?.message || 'Error al cargar tipos de servicio');
