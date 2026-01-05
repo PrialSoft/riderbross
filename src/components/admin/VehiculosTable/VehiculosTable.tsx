@@ -67,7 +67,19 @@ export function VehiculosTable(props?: {
 
       if (fetchError) throw fetchError;
 
-      setVehiculos(data || []);
+      // Mapear los datos para asegurar el tipo correcto
+      const mappedVehiculos: Vehiculo[] = ((data as unknown[]) ?? []).map((row: any) => ({
+        id: row.id,
+        patente: row.patente,
+        modelo: row.modelo ?? null,
+        anio: row.anio ?? null,
+        kmactual: row.kmactual ?? 0,
+        comentarioPrivado: row.comentarioPrivado ?? null,
+        marcas: Array.isArray(row.marcas) ? (row.marcas[0] ?? null) : (row.marcas ?? null),
+        clientes: Array.isArray(row.clientes) ? (row.clientes[0] ?? null) : (row.clientes ?? null),
+      }));
+
+      setVehiculos(mappedVehiculos);
     } catch (err: any) {
       setError(err.message || 'Error al cargar vehículos');
     } finally {
