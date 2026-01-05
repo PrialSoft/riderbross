@@ -1,6 +1,7 @@
-import { Box, Paper, Typography, Stack, Button } from '@mui/material';
+import { Box, Paper, Typography, Stack } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import EmailIcon from '@mui/icons-material/Email';
+import CustomButton from '@/utils/ui/button/CustomButton';
 
 export default async function ServicioDetallePage({
   params,
