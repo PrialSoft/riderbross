@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ColumnDef } from '@tanstack/react-table';
 import {
@@ -60,7 +60,7 @@ interface VehiculoInfo {
   } | null;
 }
 
-export default function ConsultaPage() {
+function ConsultaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patenteParam = searchParams.get('patente');
@@ -488,5 +488,28 @@ export default function ConsultaPage() {
         ) : null}
       </Container>
     </Box>
+  );
+}
+
+export default function ConsultaPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box className={styles.pageWrapper}>
+          <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 }, position: 'relative', zIndex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <CircularProgress size={48} />
+                <Typography color="text.secondary" sx={{ mt: 2 }}>
+                  Cargando...
+                </Typography>
+              </Box>
+            </Box>
+          </Container>
+        </Box>
+      }
+    >
+      <ConsultaPageContent />
+    </Suspense>
   );
 }
