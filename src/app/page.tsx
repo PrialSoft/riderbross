@@ -155,7 +155,7 @@ export default function Home() {
                   <TextField
                     fullWidth
                     label="Patente"
-                    placeholder="Ej: ABC-123 o AB-345-CD"
+                    placeholder="Ej: A-111-BBB O AAA-111"
                     value={patente}
                     onChange={(e) => {
                       const raw = e.target.value;

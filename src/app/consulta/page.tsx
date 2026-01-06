@@ -394,7 +394,7 @@ function ConsultaPageContent() {
             <TextField
               fullWidth
               size="small"
-              placeholder="Ingrese la patente (ej: ABC-123 o 12-345-67)"
+              placeholder="Ingrese la patente (Ej: A-111-BBB O AAA-111)"
               value={searchTerm}
               onChange={(event) => {
                 const raw = event.target.value;
