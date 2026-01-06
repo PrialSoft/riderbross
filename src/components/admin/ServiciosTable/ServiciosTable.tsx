@@ -18,7 +18,7 @@ import { DataTable } from '@/utils/ui/table/DataTable';
 import { formatPatente } from '@/utils/patente';
 import { supabase } from '@/lib/supabase/client';
 import dayjs from '@/lib/dayjs';
-import jsPDF from 'jspdf';
+import { generateServicePdf } from '@/utils/pdf/generateServicePdf';
 
 interface Servicio {
   id: number;
@@ -161,27 +161,13 @@ export function ServiciosTable(props?: {
     }
   };
 
-  const downloadPdf = (row: Servicio) => {
-    const doc = new jsPDF();
-    const vehiculo = row.Vehiculo;
-    const marcaModelo = vehiculo ? `${vehiculo.Marcas?.descripcion ?? ''} ${vehiculo.modelo ?? ''}`.trim() : '—';
-    const patente = vehiculo?.patente ? formatPatente(vehiculo.patente) : '—';
-    const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
-    const km = typeof row.kmservicio === 'number' ? row.kmservicio.toLocaleString('es-AR') : '—';
-    const cliente = row.clienteNombre ?? '—';
-
-    doc.setFontSize(16);
-    doc.text('RiderBross - Servicio Técnico', 14, 18);
-    doc.setFontSize(11);
-    doc.text(`Servicio #${row.id}`, 14, 28);
-    doc.text(`Fecha: ${fecha}`, 14, 36);
-    doc.text(`KM Actual: ${km}`, 14, 44);
-    doc.text(`Vehículo: ${patente}`, 14, 52);
-    doc.text(`Marca/Modelo: ${marcaModelo}`, 14, 60);
-    doc.text(`Cliente: ${cliente}`, 14, 68);
-
-    const safePatente = patente.replace(/[^a-zA-Z0-9_-]+/g, '_');
-    doc.save(`servicio-${row.id}-${safePatente}.pdf`);
+  const downloadPdf = async (row: Servicio) => {
+    try {
+      await generateServicePdf(row.id);
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar el PDF. Por favor, intente nuevamente.');
+    }
   };
 
   const sendEmail = (row: Servicio) => {

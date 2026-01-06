@@ -23,7 +23,6 @@ type ServicioInitial = {
     proximoenkm: number | null;
     comentario: string | null;
     idestado: number | null;
-    recomendacion: string | null;
   }>;
 };
 
@@ -63,7 +62,7 @@ export default function ServiciosManager() {
         .maybeSingle(),
       supabase
         .from('detallesservicio')
-        .select('id, idtiposervicio, proximoenkm, comentario, idestado, recomendacion')
+        .select('id, idtiposervicio, proximoenkm, comentario, idestado')
         .eq('idservicio', id)
         .order('id', { ascending: true }),
     ]);

@@ -7,6 +7,10 @@ export async function createTipoServicio(input: {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
+  resultadotipovalor: boolean;
+  resultadotipoporcentaje: boolean;
+  resultadotipoestado: boolean;
+  proximoenkm: boolean;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -20,6 +24,10 @@ export async function createTipoServicio(input: {
     referencia: input.referencia?.trim() || null,
     idcategoriaservicio: input.idcategoriaservicio ?? null,
     predeterminado: input.predeterminado ?? false,
+    resultadotipovalor: input.resultadotipovalor ?? false,
+    resultadotipoporcentaje: input.resultadotipoporcentaje ?? false,
+    resultadotipoestado: input.resultadotipoestado ?? false,
+    proximoenkm: input.proximoenkm ?? false,
   });
 
   if (error) throw new Error(error.message);
@@ -30,6 +38,10 @@ export async function updateTipoServicio(id: number, input: {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
+  resultadotipovalor: boolean;
+  resultadotipoporcentaje: boolean;
+  resultadotipoestado: boolean;
+  proximoenkm: boolean;
 }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -45,6 +57,10 @@ export async function updateTipoServicio(id: number, input: {
       referencia: input.referencia?.trim() || null,
       idcategoriaservicio: input.idcategoriaservicio ?? null,
       predeterminado: input.predeterminado ?? false,
+      resultadotipovalor: input.resultadotipovalor ?? false,
+      resultadotipoporcentaje: input.resultadotipoporcentaje ?? false,
+      resultadotipoestado: input.resultadotipoestado ?? false,
+      proximoenkm: input.proximoenkm ?? false,
     })
     .eq('id', id);
 

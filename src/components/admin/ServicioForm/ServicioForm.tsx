@@ -15,11 +15,15 @@ import {
   DialogActions,
   Divider,
   FormControl,
+  FormControlLabel,
+  FormLabel,
   InputLabel,
   IconButton,
   Link,
   MenuItem,
   Paper,
+  Radio,
+  RadioGroup,
   Select,
   TextField,
   Tooltip,
@@ -29,7 +33,6 @@ import type { AutocompleteRenderGroupParams } from '@mui/material/Autocomplete';
 import SaveIcon from '@mui/icons-material/Save';
 import CustomButton from '@/utils/ui/button/CustomButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -58,6 +61,10 @@ type TipoServicioRow = {
   nombre: string;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
+  resultadotipovalor: boolean;
+  resultadotipoporcentaje: boolean;
+  resultadotipoestado: boolean;
+  proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
   categoriaNombre?: string | null;
 };
@@ -69,7 +76,11 @@ type DetalleServicioDraft = {
   proximoenkm: string; // mostrado con separador
   comentario: string;
   idestado: number | null;
-  recomendacion: string;
+  resultadovalor: string;
+  resultadoporcentaje: string;
+  resultadoestadoOk: boolean;
+  resultadoestadoRegular: boolean;
+  resultadoestadoMalo: boolean;
 };
 
 export default function ServicioForm(props: {
@@ -89,7 +100,6 @@ export default function ServicioForm(props: {
       proximoenkm: number | null;
       comentario: string | null;
       idestado: number | null;
-      recomendacion: string | null;
     }>;
   };
 }) {
@@ -194,8 +204,9 @@ export default function ServicioForm(props: {
     props.initial?.fechaservicio ? dayjs(props.initial.fechaservicio).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
   );
   const [kmServicio, setKmServicio] = useState(props.initial?.kmservicio ? formatKm(String(props.initial.kmservicio)) : '');
-  const [calificacion, setCalificacion] = useState<number | ''>(props.initial?.calificacion ?? '');
+  const [calificacion, setCalificacion] = useState<number | ''>(props.initial?.calificacion ?? 5);
   const [comentario, setComentario] = useState(props.initial?.comentario ?? '');
+  const [proximoKmReferencia, setProximoKmReferencia] = useState('');
 
   const [vehiculos, setVehiculos] = useState<Array<VehiculoRow & { idcliente: number | null; idmarca: number | null }>>([]);
   const [clientes, setClientes] = useState<ClienteRow[]>([]);
@@ -247,25 +258,35 @@ export default function ServicioForm(props: {
   }, [selectedCliente, provinciasById]);
 
   const [showTipoServicioDialog, setShowTipoServicioDialog] = useState(false);
+  const [showTipoServicioPersonalizadoDialog, setShowTipoServicioPersonalizadoDialog] = useState(false);
   const [selectedTiposForDialog, setSelectedTiposForDialog] = useState<TipoServicioRow[]>([]);
+  const [selectedTiposForPersonalizadoDialog, setSelectedTiposForPersonalizadoDialog] = useState<TipoServicioRow[]>([]);
 
   const [detalles, setDetalles] = useState<DetalleServicioDraft[]>(() => {
     const fromInitial = props.initial?.detalles ?? [];
-    return fromInitial.map((d, idx) => ({
-      key: `init-${d.id ?? idx}`,
-      idtiposervicio: d.idtiposervicio ?? null,
-      proximoenkm: d.proximoenkm ? formatKm(String(d.proximoenkm)) : '',
-      comentario: d.comentario ?? '',
-      idestado: d.idestado ?? null,
-      recomendacion: d.recomendacion ?? '',
-    }));
+    return fromInitial.map((d, idx) => {
+      // Mapear idestado a los checkboxes
+      const idestado = d.idestado ?? 1; // Por defecto Ok (id 1)
+      return {
+        key: `init-${d.id ?? idx}`,
+        idtiposervicio: d.idtiposervicio ?? null,
+        proximoenkm: d.proximoenkm ? formatKm(String(d.proximoenkm)) : '',
+        comentario: d.comentario ?? '',
+        idestado: idestado,
+        resultadovalor: '',
+        resultadoporcentaje: '',
+        resultadoestadoOk: idestado === 1,
+        resultadoestadoRegular: idestado === 2,
+        resultadoestadoMalo: idestado === 3,
+      };
+    });
   });
 
   const [loadingVehiculos, setLoadingVehiculos] = useState(true);
   const [loadingRefs, setLoadingRefs] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDetalleNotas, setShowDetalleNotas] = useState(true);
+  const [showDetalleNotas, setShowDetalleNotas] = useState(false);
 
   // Foto del servicio (vehículo)
   const [fotoBase64, setFotoBase64] = useState<string | null>(null); // base64 sin prefix
@@ -305,7 +326,7 @@ export default function ServicioForm(props: {
           supabase.from('vehiculo').select('id, patente, modelo, idcliente, idmarca, "comentarioPrivado"').order('patente', { ascending: true }),
           supabase
             .from('tiposservicio')
-            .select('id, nombre, idcategoriaservicio, predeterminado')
+            .select('id, nombre, idcategoriaservicio, predeterminado, resultadotipovalor, resultadotipoporcentaje, resultadotipoestado, proximoenkm')
             .order('nombre', { ascending: true }),
           supabase.from('estados').select('id, descripcion').order('descripcion', { ascending: true }),
           supabase
@@ -340,8 +361,12 @@ export default function ServicioForm(props: {
           setIdCliente(v?.idcliente ?? null);
         }
 
-        const tiposBase = ((tiposData as TipoServicioRow[]) ?? []).map((t) => ({
+        const tiposBase = ((tiposData as Array<TipoServicioRow & { resultadotipovalor?: boolean; resultadotipoporcentaje?: boolean; resultadotipoestado?: boolean; proximoenkm?: boolean }>) ?? []).map((t) => ({
           ...t,
+          resultadotipovalor: t.resultadotipovalor ?? false,
+          resultadotipoporcentaje: t.resultadotipoporcentaje ?? false,
+          resultadotipoestado: t.resultadotipoestado ?? false,
+          proximoenkm: t.proximoenkm ?? false,
           categoriaNombre: null as string | null,
         }));
 
@@ -479,7 +504,11 @@ export default function ServicioForm(props: {
         proximoenkm: '',
         comentario: '',
         idestado: null,
-        recomendacion: '',
+        resultadovalor: '',
+        resultadoporcentaje: '',
+        resultadoestadoOk: false,
+        resultadoestadoRegular: false,
+        resultadoestadoMalo: false,
         ...partial,
       },
     ]);
@@ -487,17 +516,6 @@ export default function ServicioForm(props: {
 
   const removeDetalle = (key: string) => setDetalles((prev) => prev.filter((d) => d.key !== key));
 
-  const duplicateDetalle = (key: string) => {
-    setDetalles((prev) => {
-      const idx = prev.findIndex((d) => d.key === key);
-      if (idx < 0) return prev;
-      const src = prev[idx];
-      const copy: DetalleServicioDraft = { ...src, key: `dup-${prev.length}` };
-      const next = [...prev];
-      next.splice(idx + 1, 0, copy);
-      return next;
-    });
-  };
 
   const setDetalle = (key: string, patch: Partial<DetalleServicioDraft>) => {
     setDetalles((prev) => prev.map((d) => (d.key === key ? { ...d, ...patch } : d)));
@@ -523,7 +541,11 @@ export default function ServicioForm(props: {
           proximoenkm: '',
           comentario: '',
           idestado: null,
-          recomendacion: '',
+          resultadovalor: '',
+          resultadoporcentaje: '',
+          resultadoestadoOk: false,
+          resultadoestadoRegular: false,
+          resultadoestadoMalo: false,
         });
         existing.add(t.id);
       });
@@ -531,6 +553,40 @@ export default function ServicioForm(props: {
     });
     setSelectedTiposForDialog([]);
     setShowTipoServicioDialog(false);
+  };
+
+  const handleAddSelectedTiposPersonalizado = () => {
+    if (selectedTiposForPersonalizadoDialog.length === 0) return;
+    if (!headerReadyForDetalles) {
+      setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
+      return;
+    }
+    setDetalles((prev) => {
+      const next = [...prev];
+      const existing = new Set<number>();
+      next.forEach((d) => {
+        if (typeof d.idtiposervicio === 'number') existing.add(d.idtiposervicio);
+      });
+      selectedTiposForPersonalizadoDialog.forEach((t) => {
+        if (existing.has(t.id)) return; // no duplicar tipos ya agregados
+        next.push({
+          key: `tipo-${next.length}`,
+          idtiposervicio: t.id,
+          proximoenkm: '',
+          comentario: '',
+          idestado: null,
+          resultadovalor: '',
+          resultadoporcentaje: '',
+          resultadoestadoOk: false,
+          resultadoestadoRegular: false,
+          resultadoestadoMalo: false,
+        });
+        existing.add(t.id);
+      });
+      return next;
+    });
+    setSelectedTiposForPersonalizadoDialog([]);
+    setShowTipoServicioPersonalizadoDialog(false);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -553,13 +609,22 @@ export default function ServicioForm(props: {
         throw new Error('Ningún "Próximo (km)" puede ser menor que el KM Actual de la cabecera');
       }
 
-      const detallesPayload = detalles.map((d) => ({
-        idtiposervicio: d.idtiposervicio ?? null,
-        proximoenkm: parseKmToNumberOrNull(d.proximoenkm),
-        comentario: d.comentario.trim() ? d.comentario.trim() : null,
-        idestado: d.idestado ?? null,
-        recomendacion: d.recomendacion.trim() ? d.recomendacion.trim() : null,
-      }));
+      const detallesPayload = detalles.map((d) => {
+        // Determinar idestado basado en los checkboxes de resultado estado
+        let finalIdestado = d.idestado;
+        if (d.resultadoestadoOk) finalIdestado = 1;
+        else if (d.resultadoestadoRegular) finalIdestado = 2;
+        else if (d.resultadoestadoMalo) finalIdestado = 3;
+        
+        return {
+          idtiposervicio: d.idtiposervicio ?? null,
+          proximoenkm: parseKmToNumberOrNull(d.proximoenkm),
+          comentario: d.comentario.trim() ? d.comentario.trim() : null,
+          idestado: finalIdestado,
+          resultadovalor: d.resultadovalor.trim() ? d.resultadovalor.trim() : null,
+          resultadoporcentaje: d.resultadoporcentaje.trim() ? d.resultadoporcentaje.trim() : null,
+        };
+      });
 
       const payload = {
         idvehiculo: Number(idVehiculo),
@@ -983,8 +1048,70 @@ export default function ServicioForm(props: {
               Detalles del Servicio ({detalles.length})
             </Typography>
 
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Tooltip title={showDetalleNotas ? 'Ocultar comentarios y recomendaciones' : 'Mostrar comentarios y recomendaciones'}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Campo Próximo Km. Referencia con botón Aplicar */}
+              <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                <TextField
+                  label="Próx. Km Ref."
+                  value={proximoKmReferencia}
+                  onChange={(e) => {
+                    const value = formatKm(e.target.value);
+                    setProximoKmReferencia(value);
+                  }}
+                  inputProps={{ inputMode: 'numeric' }}
+                  disabled={!headerReadyForDetalles}
+                  size="small"
+                  sx={{ width: 130 }}
+                  error={
+                    proximoKmReferencia !== '' &&
+                    kmHeader !== null &&
+                    parseKmToNumberOrNull(proximoKmReferencia) !== null &&
+                    (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
+                  }
+                  helperText={
+                    proximoKmReferencia !== '' &&
+                    kmHeader !== null &&
+                    parseKmToNumberOrNull(proximoKmReferencia) !== null &&
+                    (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
+                      ? 'Debe ser mayor al KM Actual'
+                      : ''
+                  }
+                  FormHelperTextProps={{ sx: { margin: 0, fontSize: '0.65rem', position: 'absolute', top: '100%', whiteSpace: 'nowrap' } }}
+                />
+                <CustomButton
+                  size="small"
+                  onClick={() => {
+                    if (!proximoKmReferencia.trim()) {
+                      setError('Ingresá un valor en Próximo Km. Referencia');
+                      return;
+                    }
+                    const valorRef = parseKmToNumberOrNull(proximoKmReferencia);
+                    if (valorRef === null) {
+                      setError('El valor de Próximo Km. Referencia no es válido');
+                      return;
+                    }
+                    if (kmHeader !== null && valorRef <= kmHeader) {
+                      setError('El Próximo Km. Referencia debe ser mayor al KM Actual');
+                      return;
+                    }
+                    // Aplicar a todos los detalles que tengan proximoenkm habilitado
+                    setDetalles((prev) =>
+                      prev.map((d) => {
+                        const tipo = d.idtiposervicio ? tiposServicio.find((t) => t.id === d.idtiposervicio) : null;
+                        if (tipo?.proximoenkm) {
+                          return { ...d, proximoenkm: proximoKmReferencia };
+                        }
+                        return d;
+                      })
+                    );
+                  }}
+                  disabled={!headerReadyForDetalles || !proximoKmReferencia.trim()}
+                  sx={{ minWidth: 'auto', px: 1.5, py: 0.5, height: '40px' }}
+                >
+                  Aplicar
+                </CustomButton>
+              </Box>
+              <Tooltip title={showDetalleNotas ? 'Ocultar comentarios' : 'Mostrar comentarios'}>
                 <span>
                   <IconButton
                     size="small"
@@ -994,7 +1121,7 @@ export default function ServicioForm(props: {
                       border: '1px solid rgba(139, 26, 26, 0.25)',
                       borderRadius: '10px',
                     }}
-                    aria-label={showDetalleNotas ? 'Ocultar comentarios y recomendaciones' : 'Mostrar comentarios y recomendaciones'}
+                    aria-label={showDetalleNotas ? 'Ocultar comentarios' : 'Mostrar comentarios'}
                   >
                     {showDetalleNotas ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
                   </IconButton>
@@ -1037,7 +1164,11 @@ export default function ServicioForm(props: {
                       proximoenkm: '',
                       comentario: '',
                       idestado: null,
-                      recomendacion: '',
+                      resultadovalor: '',
+                      resultadoporcentaje: '',
+                      resultadoestadoOk: false,
+                      resultadoestadoRegular: false,
+                      resultadoestadoMalo: false,
                     });
                     existing.add(t.id);
                   });
@@ -1067,8 +1198,8 @@ export default function ServicioForm(props: {
                   setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
                   return;
                 }
-                // Servicio Personalizado: agregar detalle sin tipo, solo con comentario personalizado
-                addDetalle({ idtiposervicio: null });
+                // Servicio Personalizado: abrir modal/dialog para seleccionar tipos de servicio de la categoría "Servicio Personalizado"
+                setShowTipoServicioPersonalizadoDialog(true);
               }}
               disabled={!headerReadyForDetalles}
             >
@@ -1111,7 +1242,7 @@ export default function ServicioForm(props: {
                   return (
                     <Box
                       component="li"
-                      key={key}
+                      key={option.id}
                       {...rest}
                       sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
                     >
@@ -1135,6 +1266,7 @@ export default function ServicioForm(props: {
                     </Box>
                   );
                 }}
+                getOptionKey={(option) => option.id}
                 renderInput={(params) => <TextField {...params} label="Buscar tipos de servicio" />}
                 filterOptions={(options, state) => {
                   const input = state.inputValue.toLowerCase();
@@ -1166,6 +1298,97 @@ export default function ServicioForm(props: {
             </DialogActions>
           </Dialog>
 
+          {/* Dialog para seleccionar tipos de servicio personalizados */}
+          <Dialog
+            open={showTipoServicioPersonalizadoDialog}
+            onClose={() => {
+              setShowTipoServicioPersonalizadoDialog(false);
+              setSelectedTiposForPersonalizadoDialog([]);
+            }}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{
+              sx: {
+                background: 'linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.95) 50%, rgba(44, 62, 80, 0.15) 100%)',
+                backdropFilter: 'blur(15px)',
+              },
+            }}
+          >
+            <DialogTitle sx={{ color: 'var(--text-primary)', fontWeight: 700 }}>
+              Seleccionar Tipos de Servicio Personalizados
+            </DialogTitle>
+            <DialogContent>
+              <Autocomplete
+                multiple
+                options={tiposServicio.filter((t) => t.categoriaNombre === 'SERVICIO PERSONALIZADO')}
+                value={selectedTiposForPersonalizadoDialog}
+                onChange={(_, v) => setSelectedTiposForPersonalizadoDialog(v)}
+                groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
+                getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
+                loading={loadingRefs}
+                renderGroup={renderTipoGroup}
+                disableCloseOnSelect
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
+                  return (
+                    <Box
+                      component="li"
+                      key={option.id}
+                      {...rest}
+                      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        <Checkbox
+                          checked={selected}
+                          size="small"
+                          sx={{
+                            p: 0,
+                            color: 'var(--text-secondary)',
+                            '&.Mui-checked': { color: 'var(--primary)' },
+                          }}
+                        />
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
+                          <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                            {option.categoriaNombre || 'Sin categoría'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  );
+                }}
+                getOptionKey={(option) => option.id}
+                renderInput={(params) => <TextField {...params} label="Buscar tipos de servicio personalizados" />}
+                filterOptions={(options, state) => {
+                  const input = state.inputValue.toLowerCase();
+                  return options
+                    .filter((o) => !selectedTipoIds.has(o.id))
+                    .filter((o) => {
+                      if (!input) return true;
+                      const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
+                      return label.includes(input);
+                    });
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <CustomButton
+                onClick={() => {
+                  setShowTipoServicioPersonalizadoDialog(false);
+                  setSelectedTiposForPersonalizadoDialog([]);
+                }}
+              >
+                Cancelar
+              </CustomButton>
+              <CustomButton
+                onClick={handleAddSelectedTiposPersonalizado}
+                disabled={selectedTiposForPersonalizadoDialog.length === 0}
+              >
+                Agregar ({selectedTiposForPersonalizadoDialog.length})
+              </CustomButton>
+            </DialogActions>
+          </Dialog>
+
           <Box sx={{ display: 'grid', gap: 1.25 }}>
             {detalles.length === 0 ? (
               <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
@@ -1178,14 +1401,14 @@ export default function ServicioForm(props: {
                     sx={{
                       px: 2,
                       py: 1,
-                      backgroundColor: 'rgba(4, 0, 23, 0.65)',
+                      background: 'linear-gradient(to right, var(--bg-secondary), var(--bg-primary))',
                       border: '1px solid rgba(139, 26, 26, 0.18)',
                       borderRadius: 'var(--border-radius-md)',
                     }}
                   >
                     <Typography
                       variant="subtitle2"
-                      sx={{ fontWeight: 900, color: 'var(--primary)', letterSpacing: '0.02em' }}
+                      sx={{ fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '0.02em' }}
                     >
                       {group}
                     </Typography>
@@ -1198,122 +1421,165 @@ export default function ServicioForm(props: {
 
                     // idx global para el label
                     const idxGlobal = detalles.findIndex((x) => x.key === d.key);
+                    
+                    // Determinar qué campos mostrar según el tipo de servicio
+                    const showProximoenkm = tipoValue?.proximoenkm ?? false;
+                    const showResultadoValor = tipoValue?.resultadotipovalor ?? false;
+                    const showResultadoPorcentaje = tipoValue?.resultadotipoporcentaje ?? false;
+                    const showResultadoEstado = tipoValue?.resultadotipoestado ?? false;
 
                     return (
-                      <Paper
+                      <Box
                         key={d.key}
-                        elevation={0}
                         sx={{
-                          p: 1.5,
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                          border: '1px solid rgba(139, 26, 26, 0.15)',
-                          borderRadius: 'var(--border-radius-md)',
+                          display: 'flex',
+                          gap: 2,
+                          alignItems: 'flex-start',
+                          flexWrap: { xs: 'wrap', md: 'nowrap' },
                         }}
                       >
-                        <Box
+                        <Paper
+                          elevation={0}
                           sx={{
-                            display: 'grid',
+                            p: 1.5,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            border: '1px solid rgba(139, 26, 26, 0.15)',
+                            borderRadius: 'var(--border-radius-md)',
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
                             gap: 1.25,
-                            gridTemplateColumns: { xs: '1fr', md: '1.4fr 0.6fr 0.9fr auto' },
-                            alignItems: 'center',
+                            position: 'relative',
                           }}
                         >
-                          <Autocomplete
-                            options={tiposServicio}
-                            value={tipoValue}
-                            onChange={(_, v) => {
-                              if (!v) return setDetalle(d.key, { idtiposervicio: null });
-                              const alreadyUsed = detalles.some(
-                                (x) =>
-                                  x.key !== d.key && typeof x.idtiposervicio === 'number' && x.idtiposervicio === v.id
-                              );
-                              if (alreadyUsed) {
-                                setError('Ese Tipo de Servicio ya fue agregado en otro detalle');
-                                return;
-                              }
-                              setDetalle(d.key, { idtiposervicio: v.id });
+                          <Box
+                            sx={{
+                              display: 'grid',
+                              gap: 1.25,
+                              gridTemplateColumns: {
+                                xs: '1fr',
+                                md: '2fr 1fr 1fr 1fr 1fr 1fr auto',
+                              },
+                              alignItems: 'center',
                             }}
-                            groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
-                            getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
-                            renderGroup={renderTipoGroup}
-                            disabled={!headerReadyForDetalles}
-                            renderOption={(props, option) => {
-                              const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
-                              return (
-                                <Box
-                                  component="li"
-                                  key={key}
-                                  {...rest}
-                                  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
-                                >
-                                  <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
-                                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                                    {option.categoriaNombre || 'Sin categoría'}
-                                  </Typography>
-                                </Box>
-                              );
-                            }}
-                            renderInput={(params) => (
-                              <TextField {...params} label={`Tipo de servicio #${(idxGlobal >= 0 ? idxGlobal : idxInGroup) + 1}`} />
-                            )}
-                            isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                            filterOptions={(options, state) => {
-                              const input = state.inputValue.toLowerCase();
-                              const currentId = d.idtiposervicio;
-                              return options
-                                .filter((o) => {
-                                  // permitir el actual aunque esté en selectedTipoIds
-                                  if (typeof currentId === 'number' && o.id === currentId) return true;
-                                  if (selectedTipoIds.has(o.id)) return false;
-                                  return true;
-                                })
-                                .filter((o) => {
-                                  if (!input) return true;
-                                  const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
-                                  return label.includes(input);
-                                });
-                            }}
-                          />
-
-                          <TextField
-                            label="Próximo (km)"
-                            value={d.proximoenkm}
-                            onChange={(e) => setDetalle(d.key, { proximoenkm: formatKm(e.target.value) })}
-                            inputProps={{ inputMode: 'numeric' }}
-                            disabled={!headerReadyForDetalles}
-                          />
-
-                          <FormControl fullWidth>
-                            <InputLabel id={`estado-${d.key}`}>Estado</InputLabel>
-                            <Select
-                              labelId={`estado-${d.key}`}
-                              label="Estado"
-                              value={d.idestado === null ? '' : String(d.idestado)}
-                              onChange={(e) => {
-                                const v = String(e.target.value);
-                                setDetalle(d.key, { idestado: v === '' ? null : Number(v) });
+                          >
+                            <Autocomplete
+                              options={tiposServicio}
+                              value={tipoValue}
+                              onChange={(_, v) => {
+                                if (!v) return setDetalle(d.key, { idtiposervicio: null });
+                                const alreadyUsed = detalles.some(
+                                  (x) =>
+                                    x.key !== d.key && typeof x.idtiposervicio === 'number' && x.idtiposervicio === v.id
+                                );
+                                if (alreadyUsed) {
+                                  setError('Ese Tipo de Servicio ya fue agregado en otro detalle');
+                                  return;
+                                }
+                                setDetalle(d.key, { idtiposervicio: v.id });
                               }}
+                              groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
+                              getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
+                              renderGroup={renderTipoGroup}
                               disabled={!headerReadyForDetalles}
-                            >
-                              <MenuItem value="">Sin estado</MenuItem>
-                              {estados.map((es) => (
-                                <MenuItem key={es.id} value={String(es.id)}>
-                                  {es.descripcion}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                              renderOption={(props, option) => {
+                                const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
+                                return (
+                                  <Box
+                                    component="li"
+                                    key={key}
+                                    {...rest}
+                                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+                                  >
+                                    <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
+                                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                                      {option.categoriaNombre || 'Sin categoría'}
+                                    </Typography>
+                                  </Box>
+                                );
+                              }}
+                              renderInput={(params) => (
+                                <TextField {...params} label={`Tipo de servicio #${(idxGlobal >= 0 ? idxGlobal : idxInGroup) + 1}`} />
+                              )}
+                              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                              filterOptions={(options, state) => {
+                                const input = state.inputValue.toLowerCase();
+                                const currentId = d.idtiposervicio;
+                                return options
+                                  .filter((o) => {
+                                    // permitir el actual aunque esté en selectedTipoIds
+                                    if (typeof currentId === 'number' && o.id === currentId) return true;
+                                    if (selectedTipoIds.has(o.id)) return false;
+                                    return true;
+                                  })
+                                  .filter((o) => {
+                                    if (!input) return true;
+                                    const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
+                                    return label.includes(input);
+                                  });
+                              }}
+                              sx={{ gridColumn: { md: 'span 2' } }}
+                            />
 
-                          <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, gap: 0.5 }}>
-                            <Tooltip title="Duplicar fila">
-                              <IconButton
-                                size="small"
-                                onClick={() => duplicateDetalle(d.key)}
-                                sx={{ color: 'var(--text-primary)' }}
-                              >
-                                <ContentCopyIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            {showProximoenkm && (
+                              <TextField
+                                label="Próximo (km)"
+                                value={d.proximoenkm}
+                                onChange={(e) => setDetalle(d.key, { proximoenkm: formatKm(e.target.value) })}
+                                inputProps={{ inputMode: 'numeric' }}
+                                disabled={!headerReadyForDetalles}
+                              />
+                            )}
+
+                            {showResultadoValor && (
+                              <TextField
+                                label="Resultado Valor"
+                                value={d.resultadovalor}
+                                onChange={(e) => setDetalle(d.key, { resultadovalor: e.target.value })}
+                                disabled={!headerReadyForDetalles}
+                                inputProps={{ maxLength: 50 }}
+                              />
+                            )}
+
+                            {showResultadoPorcentaje && (
+                              <TextField
+                                label="Resultado Porcentaje"
+                                value={d.resultadoporcentaje}
+                                onChange={(e) => setDetalle(d.key, { resultadoporcentaje: e.target.value })}
+                                disabled={!headerReadyForDetalles}
+                                inputProps={{ maxLength: 50 }}
+                              />
+                            )}
+                          </Box>
+
+                          {showDetalleNotas && (
+                            <Box
+                              sx={{
+                                display: 'grid',
+                                gap: 1.25,
+                                mt: 1.25,
+                                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                              }}
+                            >
+                              <TextField
+                                label="Comentario (detalle)"
+                                value={d.comentario}
+                                onChange={(e) => setDetalle(d.key, { comentario: e.target.value })}
+                                multiline
+                                minRows={2}
+                                disabled={!headerReadyForDetalles}
+                              />
+                            </Box>
+                          )}
+
+                          {/* Icono Eliminar Fila - extremo derecho */}
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                            }}
+                          >
                             <Tooltip title="Eliminar fila">
                               <IconButton
                                 size="small"
@@ -1324,38 +1590,44 @@ export default function ServicioForm(props: {
                               </IconButton>
                             </Tooltip>
                           </Box>
-                        </Box>
+                        </Paper>
 
-                        <Box
-                          sx={{
-                            display: 'grid',
-                            gap: 1.25,
-                            mt: 1.25,
-                            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                          }}
-                        >
-                          {showDetalleNotas && (
-                            <>
-                              <TextField
-                                label="Comentario (detalle)"
-                                value={d.comentario}
-                                onChange={(e) => setDetalle(d.key, { comentario: e.target.value })}
-                                multiline
-                                minRows={2}
-                                disabled={!headerReadyForDetalles}
-                              />
-                              <TextField
-                                label="Recomendación"
-                                value={d.recomendacion}
-                                onChange={(e) => setDetalle(d.key, { recomendacion: e.target.value })}
-                                multiline
-                                minRows={2}
-                                disabled={!headerReadyForDetalles}
-                              />
-                            </>
-                          )}
-                        </Box>
-                      </Paper>
+                        <FormControl component="fieldset" disabled={!headerReadyForDetalles} sx={{ minWidth: 120 }}>
+                          <RadioGroup
+                            value={
+                              d.resultadoestadoOk ? '1' : d.resultadoestadoRegular ? '2' : d.resultadoestadoMalo ? '3' : '1'
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setDetalle(d.key, {
+                                resultadoestadoOk: value === '1',
+                                resultadoestadoRegular: value === '2',
+                                resultadoestadoMalo: value === '3',
+                              });
+                            }}
+                            sx={{ gap: 0 }}
+                          >
+                            <FormControlLabel
+                              value="1"
+                              control={<Radio sx={{ color: '#4CAF50', '&.Mui-checked': { color: '#4CAF50' }, py: 0.25 }} />}
+                              label="Ok"
+                              sx={{ color: '#4CAF50', mb: 0, mt: 0 }}
+                            />
+                            <FormControlLabel
+                              value="2"
+                              control={<Radio sx={{ color: '#FF9800', '&.Mui-checked': { color: '#FF9800' }, py: 0.25 }} />}
+                              label="Regular"
+                              sx={{ color: '#FF9800', mb: 0, mt: 0 }}
+                            />
+                            <FormControlLabel
+                              value="3"
+                              control={<Radio sx={{ color: '#F44336', '&.Mui-checked': { color: '#F44336' }, py: 0.25 }} />}
+                              label="Malo"
+                              sx={{ color: '#F44336', mb: 0, mt: 0 }}
+                            />
+                          </RadioGroup>
+                        </FormControl>
+                      </Box>
                     );
                   })}
                 </Box>

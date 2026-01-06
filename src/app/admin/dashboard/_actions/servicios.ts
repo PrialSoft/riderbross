@@ -14,7 +14,6 @@ export async function createServicio(input: {
     proximoenkm: number | null;
     comentario: string | null;
     idestado: number | null;
-    recomendacion: string | null;
   }>;
 }) {
   const supabase = await createClient();
@@ -68,15 +67,13 @@ export async function createServicio(input: {
       proximoenkm: d.proximoenkm ?? null,
       comentario: d.comentario?.trim() || null,
       idestado: d.idestado ?? null,
-      recomendacion: d.recomendacion?.trim() || null,
     }))
     .filter(
       (d) =>
         d.idtiposervicio !== null ||
         d.proximoenkm !== null ||
         d.idestado !== null ||
-        (d.comentario && d.comentario.length > 0) ||
-        (d.recomendacion && d.recomendacion.length > 0)
+        (d.comentario && d.comentario.length > 0)
     );
 
   if (detalles.length > 0) {
@@ -101,7 +98,6 @@ export async function updateServicio(
       proximoenkm: number | null;
       comentario: string | null;
       idestado: number | null;
-      recomendacion: string | null;
     }>;
   }
 ) {
@@ -156,15 +152,13 @@ export async function updateServicio(
       proximoenkm: d.proximoenkm ?? null,
       comentario: d.comentario?.trim() || null,
       idestado: d.idestado ?? null,
-      recomendacion: d.recomendacion?.trim() || null,
     }))
     .filter(
       (d) =>
         d.idtiposervicio !== null ||
         d.proximoenkm !== null ||
         d.idestado !== null ||
-        (d.comentario && d.comentario.length > 0) ||
-        (d.recomendacion && d.recomendacion.length > 0)
+        (d.comentario && d.comentario.length > 0)
     );
 
   if (detalles.length > 0) {

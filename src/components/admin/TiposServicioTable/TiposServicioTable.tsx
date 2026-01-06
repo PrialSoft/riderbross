@@ -13,6 +13,10 @@ type TipoServicioRow = {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
+  resultadotipovalor: boolean;
+  resultadotipoporcentaje: boolean;
+  resultadotipoestado: boolean;
+  proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
 };
 
@@ -38,6 +42,10 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
             referencia,
             idcategoriaservicio,
             predeterminado,
+            resultadotipovalor,
+            resultadotipoporcentaje,
+            resultadotipoestado,
+            proximoenkm,
             categoriasservicio ( nombre )
           `
           )
@@ -52,6 +60,10 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
           referencia: row.referencia ?? null,
           idcategoriaservicio: row.idcategoriaservicio ?? null,
           predeterminado: row.predeterminado ?? false,
+          resultadotipovalor: row.resultadotipovalor ?? false,
+          resultadotipoporcentaje: row.resultadotipoporcentaje ?? false,
+          resultadotipoestado: row.resultadotipoestado ?? false,
+          proximoenkm: row.proximoenkm ?? false,
           categoriasservicio: Array.isArray(row.categoriasservicio)
             ? row.categoriasservicio[0] ?? null
             : row.categoriasservicio ?? null,
@@ -85,6 +97,41 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
         accessorKey: 'predeterminado',
         header: 'Predeterminado',
         cell: ({ row }) => (row.original.predeterminado ? 'Sí' : 'No'),
+      },
+      {
+        accessorKey: 'resultadotipovalor',
+        header: () => (
+          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
+            <Box>Resultado</Box>
+            <Box>Valor</Box>
+          </Box>
+        ),
+        cell: ({ row }) => (row.original.resultadotipovalor ? 'Sí' : 'No'),
+      },
+      {
+        accessorKey: 'resultadotipoporcentaje',
+        header: () => (
+          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
+            <Box>Resultado</Box>
+            <Box>Porcentaje</Box>
+          </Box>
+        ),
+        cell: ({ row }) => (row.original.resultadotipoporcentaje ? 'Sí' : 'No'),
+      },
+      {
+        accessorKey: 'resultadotipoestado',
+        header: () => (
+          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
+            <Box>Resultado</Box>
+            <Box>Estado</Box>
+          </Box>
+        ),
+        cell: ({ row }) => (row.original.resultadotipoestado ? 'Sí' : 'No'),
+      },
+      {
+        accessorKey: 'proximoenkm',
+        header: 'Próximo en KM',
+        cell: ({ row }) => (row.original.proximoenkm ? 'Sí' : 'No'),
       },
       {
         id: 'actions',

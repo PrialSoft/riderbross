@@ -15,6 +15,10 @@ type TipoServicioInitial = {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado?: boolean;
+  resultadotipovalor?: boolean;
+  resultadotipoporcentaje?: boolean;
+  resultadotipoestado?: boolean;
+  proximoenkm?: boolean;
 };
 
 export default function TiposServicioManager() {
@@ -45,7 +49,7 @@ export default function TiposServicioManager() {
 
     const { data, error } = await supabase
       .from('tiposservicio')
-      .select('id, nombre, referencia, idcategoriaservicio, predeterminado')
+      .select('id, nombre, referencia, idcategoriaservicio, predeterminado, resultadotipovalor, resultadotipoporcentaje, resultadotipoestado, proximoenkm')
       .eq('id', id)
       .maybeSingle();
 

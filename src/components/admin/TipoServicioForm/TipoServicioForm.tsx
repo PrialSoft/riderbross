@@ -26,13 +26,27 @@ type CategoriaRow = { id: number; nombre: string };
 export default function TipoServicioForm(props: {
   mode: 'create' | 'edit';
   onSuccess?: () => void;
-  initial?: { id: number; nombre: string; referencia: string | null; idcategoriaservicio: number | null; predeterminado?: boolean };
+  initial?: {
+    id: number;
+    nombre: string;
+    referencia: string | null;
+    idcategoriaservicio: number | null;
+    predeterminado?: boolean;
+    resultadotipovalor?: boolean;
+    resultadotipoporcentaje?: boolean;
+    resultadotipoestado?: boolean;
+    proximoenkm?: boolean;
+  };
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState(props.initial?.nombre ?? '');
   const [referencia, setReferencia] = useState(props.initial?.referencia ?? '');
   const [idCategoria, setIdCategoria] = useState<number | ''>(props.initial?.idcategoriaservicio ?? '');
   const [predeterminado, setPredeterminado] = useState(props.initial?.predeterminado ?? false);
+  const [resultadotipovalor, setResultadotipovalor] = useState(props.initial?.resultadotipovalor ?? false);
+  const [resultadotipoporcentaje, setResultadotipoporcentaje] = useState(props.initial?.resultadotipoporcentaje ?? false);
+  const [resultadotipoestado, setResultadotipoestado] = useState(props.initial?.resultadotipoestado ?? false);
+  const [proximoenkm, setProximoenkm] = useState(props.initial?.proximoenkm ?? false);
 
   const [categorias, setCategorias] = useState<CategoriaRow[]>([]);
   const [loadingCats, setLoadingCats] = useState(true);
@@ -74,6 +88,10 @@ export default function TipoServicioForm(props: {
         referencia: referencia.trim() ? referencia.trim() : null,
         idcategoriaservicio: idCategoria === '' ? null : Number(idCategoria),
         predeterminado,
+        resultadotipovalor,
+        resultadotipoporcentaje,
+        resultadotipoestado,
+        proximoenkm,
       };
 
       if (props.mode === 'create') {
@@ -168,6 +186,57 @@ export default function TipoServicioForm(props: {
             />
           }
           label="Predeterminado (se carga automáticamente con 'Servicio General')"
+        />
+
+        <Typography
+          variant="subtitle2"
+          sx={{ mt: 2, mb: 1, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-family-body)' }}
+        >
+          Tipo de Resultado
+        </Typography>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={resultadotipovalor}
+              onChange={(e) => setResultadotipovalor(e.target.checked)}
+              disabled={saving}
+            />
+          }
+          label="Resultado Tipo Valor"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={resultadotipoporcentaje}
+              onChange={(e) => setResultadotipoporcentaje(e.target.checked)}
+              disabled={saving}
+            />
+          }
+          label="Resultado Tipo Porcentaje"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={resultadotipoestado}
+              onChange={(e) => setResultadotipoestado(e.target.checked)}
+              disabled={saving}
+            />
+          }
+          label="Resultado Tipo Estado"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={proximoenkm}
+              onChange={(e) => setProximoenkm(e.target.checked)}
+              disabled={saving}
+            />
+          }
+          label="Próximo en KM"
         />
 
         <CustomButton
