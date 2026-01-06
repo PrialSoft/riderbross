@@ -1144,7 +1144,7 @@ export default function ServicioForm(props: {
                   setError('Completá Vehículo, Cliente y KM Actual antes de cargar detalles');
                   return;
                 }
-                // Servicio General: cargar tipos de servicio con predeterminado = true
+                // Servicio Integral: cargar tipos de servicio con predeterminado = true
                 const tiposPredeterminados = tiposServicio.filter((t) => t.predeterminado === true);
                 if (tiposPredeterminados.length === 0) {
                   setError('No hay tipos de servicio predeterminados configurados');
@@ -1177,7 +1177,7 @@ export default function ServicioForm(props: {
               }}
               disabled={!headerReadyForDetalles}
             >
-              Servicio General
+              Servicio Integral
             </CustomButton>
             <CustomButton
               onClick={() => {

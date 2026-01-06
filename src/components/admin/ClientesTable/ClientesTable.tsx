@@ -18,7 +18,6 @@ interface Cliente {
   apellidos: string;
   email: string;
   telefono: number | null;
-  dni: number;
   localidad: string | null;
   comentarioPrivado: string | null;
   provincias: {
@@ -51,7 +50,6 @@ export function ClientesTable(props?: {
           apellidos,
           email,
           telefono,
-          dni,
           localidad,
           "comentarioPrivado",
           provincias (
@@ -69,7 +67,6 @@ export function ClientesTable(props?: {
         apellidos: string;
         email: string;
         telefono: number | null;
-        dni: number;
         localidad: string | null;
         comentarioPrivado: string | null;
         provincias: { descripcion: string } | { descripcion: string }[] | null;
@@ -87,7 +84,6 @@ export function ClientesTable(props?: {
           apellidos: c.apellidos,
           email: c.email,
           telefono: c.telefono,
-          dni: c.dni,
           localidad: c.localidad,
           comentarioPrivado: c.comentarioPrivado,
           provincias: provinciasNormalized,
@@ -111,13 +107,6 @@ export function ClientesTable(props?: {
     {
       accessorKey: 'nombres',
       header: 'Nombres',
-    },
-    {
-      accessorKey: 'dni',
-      header: 'DNI',
-      cell: ({ row }) => {
-        return row.original.dni.toLocaleString('es-AR');
-      },
     },
     {
       accessorKey: 'email',
@@ -193,6 +182,6 @@ export function ClientesTable(props?: {
     );
   }
 
-  return <DataTable columns={columns} data={clientes} searchPlaceholder="Buscar por nombre, apellido, DNI, email..." />;
+  return <DataTable columns={columns} data={clientes} searchPlaceholder="Buscar por nombre, apellido, email..." />;
 }
 

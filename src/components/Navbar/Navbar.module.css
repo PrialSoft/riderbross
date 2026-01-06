@@ -74,6 +74,13 @@
   transition: filter var(--transition-base), transform var(--transition-base);
 }
 
+@media (max-width: 899px) {
+  .logoImage {
+    width: 96px !important;
+    height: 30.4px !important;
+  }
+}
+
 .logoLink:hover .logoImage,
 .logoLink:focus-visible .logoImage {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));

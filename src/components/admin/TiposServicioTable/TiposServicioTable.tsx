@@ -173,7 +173,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
     );
   }
 
-  return <DataTable columns={columns} data={data} searchPlaceholder="Buscar por nombre o categoría..." />;
+  return <DataTable columns={columns} data={data} searchPlaceholder="Buscar por nombre o categoría..." pageSize={12} />;
 }
 
 

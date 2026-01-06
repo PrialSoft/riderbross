@@ -185,7 +185,7 @@ export default function TipoServicioForm(props: {
               disabled={saving}
             />
           }
-          label="Predeterminado (se carga automáticamente con 'Servicio General')"
+          label="Predeterminado (se carga automáticamente con 'Servicio Integral')"
         />
 
         <Typography

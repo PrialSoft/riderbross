@@ -6,27 +6,20 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import CustomButton from '@/utils/ui/button/CustomButton';
 import { supabase } from '@/lib/supabase/client';
-import { ClientesTable } from '@/components/admin/ClientesTable/ClientesTable';
-import ClienteForm from '@/components/admin/ClienteForm/ClienteForm';
+import { CategoriasTable } from '@/components/admin/CategoriasTable/CategoriasTable';
+import CategoriaForm from '@/components/admin/CategoriaForm/CategoriaForm';
+import { deleteCategoria } from '@/app/admin/dashboard/categorias/actions';
 
-type ClienteInitial = {
+type CategoriaInitial = {
   id: number;
-  nombres: string;
-  apellidos: string;
-  email: string;
-  telefono: number | null;
-  idprovincia: number | null;
-  localidad: string | null;
-  direccion: string | null;
-  fechanacimiento: string | null;
-  comentarioPrivado?: string | null;
+  nombre: string;
 };
 
-export default function ClientesManager() {
+export default function CategoriasManager() {
   const [reloadToken, setReloadToken] = useState(0);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<'create' | 'edit'>('create');
-  const [initial, setInitial] = useState<ClienteInitial | undefined>(undefined);
+  const [initial, setInitial] = useState<CategoriaInitial | undefined>(undefined);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -49,21 +42,37 @@ export default function ClientesManager() {
     setOpen(true);
 
     const { data, error } = await supabase
-      .from('clientes')
-      .select('id, nombres, apellidos, email, telefono, idprovincia, localidad, direccion, fechanacimiento, "comentarioPrivado"')
+      .from('categoriasservicio')
+      .select('id, nombre')
       .eq('id', id)
       .maybeSingle();
 
     if (error || !data) {
-      // si falla, cerramos modal para no dejarlo colgado
       close();
       return;
     }
 
-    setInitial(data as ClienteInitial);
+    setInitial(data as CategoriaInitial);
   }, [close]);
 
-  const title = useMemo(() => (mode === 'create' ? 'Nuevo Cliente' : 'Editar Cliente'), [mode]);
+  const handleDelete = useCallback(async (id: number) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+      return;
+    }
+
+    try {
+      await deleteCategoria(id);
+      setReloadToken((t) => t + 1);
+    } catch (error) {
+      const err = error as { message?: string };
+      alert(err?.message || 'No se pudo eliminar la categoría');
+    }
+  }, []);
+
+  const title = useMemo(
+    () => (mode === 'create' ? 'Nueva Categoría' : 'Editar Categoría'),
+    [mode]
+  );
 
   return (
     <Box>
@@ -82,17 +91,17 @@ export default function ClientesManager() {
           component="h1"
           sx={{ fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-family-body)' }}
         >
-          Clientes
+          Categorías de Servicio
         </Typography>
         <CustomButton
           startIcon={<AddIcon />}
           onClick={openCreate}
         >
-          Nuevo Cliente
+          Nueva Categoría
         </CustomButton>
       </Box>
 
-      <ClientesTable onEdit={openEdit} reloadToken={reloadToken} />
+      <CategoriasTable onEdit={openEdit} onDelete={handleDelete} reloadToken={reloadToken} />
 
       <Dialog
         open={open}
@@ -117,20 +126,19 @@ export default function ClientesManager() {
           }}
         >
           {title}
-          <IconButton onClick={close} sx={{ color: 'var(--text-secondary)' }}>
+          <IconButton onClick={close} sx={{ color: 'var(--text-primary)' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ borderColor: 'rgba(139, 26, 26, 0.2)' }}>
           {mode === 'create' ? (
-            <ClienteForm mode="create" onSuccess={onSaved} />
+            <CategoriaForm mode="create" onSuccess={onSaved} />
           ) : (
-            initial && <ClienteForm mode="edit" initial={initial} onSuccess={onSaved} />
+            initial && <CategoriaForm mode="edit" initial={initial} onSuccess={onSaved} />
           )}
         </DialogContent>
       </Dialog>
     </Box>
   );
 }
-
 

@@ -24,7 +24,7 @@ import styles from './Navbar.module.css';
 
 const navItems = [
   { label: 'INICIO', href: '/' },
-  { label: 'CONSULTAR PATENTE', href: '/consulta' },
+  { label: 'MIS INFORMES', href: '/consulta' },
   { label: 'CONSEJOS', href: '/consejos' },
   { label: 'BLOG', href: '/blog' },
 ];

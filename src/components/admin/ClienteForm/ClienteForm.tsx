@@ -30,7 +30,6 @@ export default function ClienteForm(props: {
     nombres: string;
     apellidos: string;
     email: string;
-    dni: number;
     telefono: number | null;
     idprovincia: number | null;
     localidad: string | null;
@@ -41,10 +40,15 @@ export default function ClienteForm(props: {
 }) {
   const router = useRouter();
 
-  const [nombres, setNombres] = useState((props.initial?.nombres ?? '').toUpperCase());
-  const [apellidos, setApellidos] = useState((props.initial?.apellidos ?? '').toUpperCase());
+  // Función helper para capitalizar primera letra
+  const capitalizeFirst = (text: string): string => {
+    if (!text || text.length === 0) return text;
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
+
+  const [nombres, setNombres] = useState(props.initial?.nombres ?? '');
+  const [apellidos, setApellidos] = useState(props.initial?.apellidos ?? '');
   const [email, setEmail] = useState(props.initial?.email ?? '');
-  const [dni, setDni] = useState(props.initial?.dni?.toString() ?? '');
   const [telefono, setTelefono] = useState(props.initial?.telefono?.toString() ?? '');
   const [idProvincia, setIdProvincia] = useState<number | ''>(props.initial?.idprovincia ?? '');
   const [localidad, setLocalidad] = useState(props.initial?.localidad ?? '');
@@ -84,11 +88,10 @@ export default function ClienteForm(props: {
       nombres.trim().length > 0 &&
       apellidos.trim().length > 0 &&
       email.trim().length > 0 &&
-      dni.trim().length > 0 &&
       telefono.trim().length > 0 &&
       !saving
     );
-  }, [nombres, apellidos, email, dni, telefono, saving]);
+  }, [nombres, apellidos, email, telefono, saving]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,17 +101,13 @@ export default function ClienteForm(props: {
       setSaving(true);
       setError(null);
 
-      const dniNum = Number(dni);
-      if (!Number.isFinite(dniNum) || dniNum <= 0) throw new Error('DNI inválido');
-
       const telNum = Number(telefono);
       if (!Number.isFinite(telNum) || telNum <= 0) throw new Error('Teléfono inválido');
 
       const payload = {
-        nombres: nombres.toUpperCase(),
-        apellidos: apellidos.toUpperCase(),
+        nombres: nombres.trim(),
+        apellidos: apellidos.trim(),
         email,
-        dni: dniNum,
         telefono: telNum,
         idprovincia: idProvincia === '' ? null : Number(idProvincia),
         localidad: localidad.trim() ? localidad.trim() : null,
@@ -168,21 +167,40 @@ export default function ClienteForm(props: {
           <TextField
             label="Nombres"
             value={nombres}
-            onChange={(e) => setNombres(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Permitir escribir normalmente, pero capitalizar al perder el foco
+              setNombres(value);
+            }}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              if (value) {
+                setNombres(capitalizeFirst(value));
+              }
+            }}
             required
+            helperText="Primera letra mayúscula, resto minúsculas"
           />
           <TextField
             label="Apellidos"
             value={apellidos}
-            onChange={(e) => setApellidos(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Permitir escribir normalmente, pero capitalizar al perder el foco
+              setApellidos(value);
+            }}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              if (value) {
+                setApellidos(capitalizeFirst(value));
+              }
+            }}
             required
+            helperText="Primera letra mayúscula, resto minúsculas"
           />
         </Box>
 
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
-          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <TextField label="DNI" value={dni} onChange={(e) => setDni(e.target.value)} required />
-        </Box>
+        <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
           <TextField

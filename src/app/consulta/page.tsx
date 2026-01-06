@@ -384,7 +384,7 @@ function ConsultaPageContent() {
             </Typography>
           )}
           <Typography variant="body1" className={styles.pageDescription}>
-            Busca y consulta el historial de servicios realizados
+            Busca y consulta tu historial de servicios realizados
           </Typography>
         </Box>
 

@@ -149,7 +149,7 @@ export default function Home() {
             <Card className={styles.searchCard}>
               <CardContent>
                 <Typography variant="h3" component="h3" className={styles.searchTitle}>
-                  Busca y consulta el historial de servicios realizados
+                  Busca y consulta tu historial de servicios realizados
                 </Typography>
                 <Stack spacing={2}>
                   <TextField
