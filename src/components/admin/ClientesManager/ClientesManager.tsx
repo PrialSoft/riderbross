@@ -14,6 +14,7 @@ type ClienteInitial = {
   nombres: string;
   apellidos: string;
   email: string;
+  dni?: number;
   telefono: number | null;
   idprovincia: number | null;
   localidad: string | null;
@@ -50,7 +51,7 @@ export default function ClientesManager() {
 
     const { data, error } = await supabase
       .from('clientes')
-      .select('id, nombres, apellidos, email, telefono, idprovincia, localidad, direccion, fechanacimiento, "comentarioPrivado"')
+      .select('id, nombres, apellidos, email, dni, telefono, idprovincia, localidad, direccion, fechanacimiento, "comentarioPrivado"')
       .eq('id', id)
       .maybeSingle();
 

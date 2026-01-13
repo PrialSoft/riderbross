@@ -16,7 +16,7 @@ export async function createCliente(input: {
   nombres: string;
   apellidos: string;
   email: string;
-  dni?: number | null;
+  dni?: number;
   telefono: number | null;
   idprovincia: number | null;
   localidad: string | null;
@@ -35,8 +35,9 @@ export async function createCliente(input: {
   if (!nombres) throw new Error('Nombres es obligatorio');
   if (!apellidos) throw new Error('Apellidos es obligatorio');
   if (!email) throw new Error('Email es obligatorio');
-  // DNI es opcional, pero si se proporciona debe ser válido
-  if (input.dni !== null && input.dni !== undefined && (!Number.isFinite(input.dni) || input.dni <= 0)) {
+  // DNI debe ser un número válido (0 si no se proporciona)
+  const dniValue = input.dni ?? 0;
+  if (!Number.isFinite(dniValue) || dniValue < 0) {
     throw new Error('DNI inválido');
   }
   if (input.telefono === null) throw new Error('Teléfono es obligatorio');
@@ -46,7 +47,7 @@ export async function createCliente(input: {
     nombres,
     apellidos,
     email,
-    dni: input.dni ?? null,
+    dni: dniValue,
     telefono: input.telefono,
     idprovincia: input.idprovincia ?? null,
     localidad: input.localidad?.trim() || null,
@@ -64,7 +65,7 @@ export async function updateCliente(
     nombres: string;
     apellidos: string;
     email: string;
-    dni?: number | null;
+    dni?: number;
     telefono: number | null;
     idprovincia: number | null;
     localidad: string | null;
@@ -86,8 +87,9 @@ export async function updateCliente(
   if (!nombres) throw new Error('Nombres es obligatorio');
   if (!apellidos) throw new Error('Apellidos es obligatorio');
   if (!email) throw new Error('Email es obligatorio');
-  // DNI es opcional, pero si se proporciona debe ser válido
-  if (input.dni !== null && input.dni !== undefined && (!Number.isFinite(input.dni) || input.dni <= 0)) {
+  // DNI debe ser un número válido (0 si no se proporciona)
+  const dniValue = input.dni ?? 0;
+  if (!Number.isFinite(dniValue) || dniValue < 0) {
     throw new Error('DNI inválido');
   }
   if (input.telefono === null) throw new Error('Teléfono es obligatorio');
@@ -99,7 +101,7 @@ export async function updateCliente(
       nombres,
       apellidos,
       email,
-      dni: input.dni ?? null,
+      dni: dniValue,
       telefono: input.telefono,
       idprovincia: input.idprovincia ?? null,
       localidad: input.localidad?.trim() || null,

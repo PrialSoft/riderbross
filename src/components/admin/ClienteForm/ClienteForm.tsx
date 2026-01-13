@@ -30,6 +30,7 @@ export default function ClienteForm(props: {
     nombres: string;
     apellidos: string;
     email: string;
+    dni?: number;
     telefono: number | null;
     idprovincia: number | null;
     localidad: string | null;
@@ -49,6 +50,9 @@ export default function ClienteForm(props: {
   const [nombres, setNombres] = useState(props.initial?.nombres ?? '');
   const [apellidos, setApellidos] = useState(props.initial?.apellidos ?? '');
   const [email, setEmail] = useState(props.initial?.email ?? '');
+  const [dni, setDni] = useState(
+    props.initial?.dni && props.initial.dni !== 0 ? props.initial.dni.toString() : ''
+  );
   const [telefono, setTelefono] = useState(props.initial?.telefono?.toString() ?? '');
   const [idProvincia, setIdProvincia] = useState<number | ''>(props.initial?.idprovincia ?? '');
   const [localidad, setLocalidad] = useState(props.initial?.localidad ?? '');
@@ -104,10 +108,17 @@ export default function ClienteForm(props: {
       const telNum = Number(telefono);
       if (!Number.isFinite(telNum) || telNum <= 0) throw new Error('Teléfono inválido');
 
+      // DNI: si está vacío o es 0, enviar 0. Si tiene valor, validar que sea válido
+      const dniNum = dni.trim() === '' ? 0 : Number(dni);
+      if (dniNum !== 0 && (!Number.isFinite(dniNum) || dniNum <= 0)) {
+        throw new Error('DNI inválido');
+      }
+
       const payload = {
         nombres: nombres.trim(),
         apellidos: apellidos.trim(),
         email,
+        dni: dniNum,
         telefono: telNum,
         idprovincia: idProvincia === '' ? null : Number(idProvincia),
         localidad: localidad.trim() ? localidad.trim() : null,
@@ -204,20 +215,36 @@ export default function ClienteForm(props: {
 
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
           <TextField
+            label="DNI"
+            value={dni}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '');
+              // Limitar a 8 caracteres
+              if (value.length <= 8) {
+                setDni(value);
+              }
+            }}
+            inputProps={{ 
+              inputMode: 'numeric',
+              maxLength: 8
+            }}
+          />
+          <TextField
             label="Teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
             required
             inputProps={{ inputMode: 'numeric' }}
           />
-          <TextField
-            label="Fecha de Nacimiento"
-            type="date"
-            value={fechaNacimiento}
-            onChange={(e) => setFechaNacimiento(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
         </Box>
+
+        <TextField
+          label="Fecha de Nacimiento"
+          type="date"
+          value={fechaNacimiento}
+          onChange={(e) => setFechaNacimiento(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+        />
 
         <FormControl fullWidth disabled={loadingProv}>
           <InputLabel id="provincia-label">Provincia</InputLabel>
