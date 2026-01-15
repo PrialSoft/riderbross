@@ -3,6 +3,8 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import MuiProvider from "@/components/providers/MuiProvider";
 import Navbar from "@/components/Navbar/NavbarWrapper";
+import Footer from "@/components/Footer/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton/WhatsAppButton";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -36,6 +38,8 @@ export default function RootLayout({
           <main style={{ minHeight: 'calc(100vh - 64px)', position: 'relative', zIndex: 1 }}>
             {children}
           </main>
+          <Footer />
+          <WhatsAppButton />
         </MuiProvider>
       </body>
     </html>

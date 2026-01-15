@@ -27,6 +27,7 @@ const navItems = [
   { label: 'MIS INFORMES', href: '/consulta' },
   { label: 'CONSEJOS', href: '/consejos' },
   { label: 'BLOG', href: '/blog' },
+  { label: 'CONTACTO', href: '#contacto', isScroll: true },
 ];
 
 export default function Navbar() {
@@ -67,6 +68,25 @@ export default function Navbar() {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    // Siempre intentar hacer scroll al footer en la página actual
+    const footerElement = document.getElementById('contacto');
+    if (footerElement) {
+      footerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // Solo si no hay footer en la página actual, redirigir a inicio
+      window.location.href = '/#contacto';
+      return;
+    }
+    
+    // Cerrar drawer si está abierto
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  };
+
   const drawer = (
     <Box onClick={handleDrawerToggle} className={styles.drawer}>
       <Box className={styles.drawerHeader}>
@@ -91,8 +111,9 @@ export default function Navbar() {
         {navItems.map((item) => (
           <ListItem key={item.href} disablePadding>
             <ListItemButton
-              component={Link}
+              component={item.isScroll ? 'a' : Link}
               href={item.href}
+              onClick={item.isScroll ? handleContactClick : undefined}
               selected={pathname === item.href}
               className={styles.drawerListItemButton}
               classes={{ selected: styles.drawerListItemButtonSelected }}
@@ -186,15 +207,28 @@ export default function Navbar() {
             {/* Desktop Navigation */}
             <Box className={styles.desktopNav}>
               {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`${styles.navLink} ${
-                    pathname === item.href ? styles.navLinkActive : ''
-                  }`}
-                >
-                  {item.label}
-                </Link>
+                item.isScroll ? (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={handleContactClick}
+                    className={`${styles.navLink} ${
+                      pathname === item.href ? styles.navLinkActive : ''
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.navLink} ${
+                      pathname === item.href ? styles.navLinkActive : ''
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
               ))}
               {isAdmin && (
                 <Link

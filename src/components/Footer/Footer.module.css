@@ -1,0 +1,175 @@
+.footer {
+  background-color: var(--bg-primary);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-xl) 0;
+  margin-top: var(--spacing-2xl);
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
+}
+
+.container {
+  padding: 0 var(--spacing-md);
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  z-index: 11;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 12;
+}
+
+/* Selector específico para sobrescribir estilos de MUI - igual que ctaTitle */
+.contactItem {
+  margin-bottom: 0;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  line-height: 1.8;
+  width: 100%;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.contactLabel {
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.contactItem,
+.contactItem.MuiTypography-root {
+  color: var(--text-primary);
+}
+
+.contactItem *,
+.contactItem a {
+  color: var(--text-primary);
+}
+
+.contactLink {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: opacity var(--transition-base);
+  font-weight: 600;
+}
+
+.contactLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.socialContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  margin-top: var(--spacing-xl);
+  position: relative;
+  z-index: 12;
+}
+
+.socialIconLink {
+  text-decoration: none;
+  display: inline-block;
+  transition: transform var(--transition-base);
+}
+
+.socialIconLink:hover {
+  transform: translateY(-4px) scale(1.1);
+}
+
+.socialIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--border-radius-full);
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.socialIcon svg {
+  color: #FFFFFF;
+  font-size: 2rem;
+}
+
+.instagramIcon {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.instagramIcon:hover {
+  box-shadow: 0 6px 20px rgba(225, 48, 108, 0.6);
+  transform: scale(1.05);
+}
+
+.facebookIcon {
+  background-color: #1877F2;
+}
+
+.facebookIcon:hover {
+  box-shadow: 0 6px 20px rgba(24, 119, 242, 0.6);
+  background-color: #166FE5;
+}
+
+.youtubeIcon {
+  background-color: #FF0000;
+}
+
+.youtubeIcon:hover {
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6);
+  background-color: #E60000;
+}
+
+/* Tablet */
+@media (min-width: 600px) {
+  .footer {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .contactItem {
+    font-size: var(--font-size-2xl);
+    text-align: justify;
+    text-align-last: center;
+  }
+
+  .contactInfo {
+    gap: var(--spacing-xl);
+  }
+
+  .socialContainer {
+    gap: var(--spacing-xl);
+  }
+
+  .socialIcon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .socialIcon svg {
+    font-size: 2.5rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+  .contactItem {
+    font-size: var(--font-size-3xl);
+    max-width: 800px;
+    text-align: justify;
+    text-align-last: center;
+  }
+}
+

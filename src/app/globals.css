@@ -7,10 +7,9 @@
 :root {
   /* Colores de Marca RiderBross - Basados en el Logo */
   /* Rojo profundo de las alas (distressed red) */
-  --primary: #470707;
-  --primary-light: #5e1b1b;
-  /* Azul-gris oscuro del fondo del logo */
-  --secondary: #04000C;
+  --primary: rgb(71, 7, 7);
+  --primary-light: rgb(94, 27, 27);
+  --secondary: rgb(4, 0, 12);
   --secondary-light: #1b0a3b;
   
   /* Colores Funcionales */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,12 +19,25 @@ import SearchIcon from '@mui/icons-material/Search';
 import BuildIcon from '@mui/icons-material/Build';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import SpeedIcon from '@mui/icons-material/Speed';
+
 import styles from './page.module.css';
 
 export default function Home() {
   const [patente, setPatente] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    // Si hay un hash en la URL (#contacto), hacer scroll al footer
+    if (typeof window !== 'undefined' && window.location.hash === '#contacto') {
+      setTimeout(() => {
+        const footerElement = document.getElementById('contacto');
+        if (footerElement) {
+          footerElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
 
 
   const handleSearch = (e: React.FormEvent) => {
@@ -50,19 +63,24 @@ export default function Home() {
 
   const servicios = [
     {
+      icon: <TwoWheelerIcon className={styles.serviceIconSize} />,
+      title: 'Mantenimiento Preventivo',
+      description: 'Maximizamos la vida útil de tu motor mediante las tablas de mantenimiento y revisiones periódicas de fluidos, filtros y ajustes generales. Rodar seguro comienza con la prevención.',
+    },
+    {
       icon: <BuildIcon className={styles.serviceIconSize} />,
-      title: 'Servicio Técnico',
-      description: 'Mantenimiento completo y reparación de motocicletas con técnicos especializados.',
+      title: 'Reparaciones Específicas',
+      description: 'Soluciones precisas en motor, frenos, transmisión, suspensiones y electricidad y más. Utilizamos repuestos de alta calidad para devolverle a tu moto su rendimiento original.',
     },
     {
       icon: <SpeedIcon className={styles.serviceIconSize} />,
-      title: 'Diagnóstico',
-      description: 'Revisión exhaustiva de sistemas: batería, iluminación, transmisión, frenos y más.',
+      title: 'Diagnóstico Avanzado',
+      description: 'Identificamos fallas electrónicas y mecánicas con tecnología de precisión. Vamos directo al problema, ahorrándote tiempo y dinero.',
     },
     {
-      icon: <TwoWheelerIcon className={styles.serviceIconSize} />,
-      title: 'Mantenimiento',
-      description: 'Aceite, válvulas, filtros y todos los servicios necesarios para tu moto.',
+      icon: <SearchIcon className={styles.serviceIconSize} />,
+      title: 'Inspección Pre-compra',
+      description: '¿Vas a comprar una moto usada? Realizamos un peritaje exhaustivo para que inviertas con total seguridad y sin sorpresas ocultas.',
     },
   ];
 
@@ -89,60 +107,45 @@ export default function Home() {
         </Container>
       </Box>
 
+
       {/* Sección de Contenido - Requiere Scroll */}
       <Box className={styles.contentSection}>
         <Container maxWidth="lg">
-          <Box className={styles.contentBox}>
-            <Typography variant="h2" component="h2" className={styles.contentText}>
-              Nuestro equipo de expertos apasionados por las motos sabe lo importante que es para vos la seguridad y el rendimiento de tu vehículo. Nos comprometemos a brindarte un servicio distinguido que garantiza que tu moto funcione a la perfección en todo momento.
-            </Typography>
-          </Box>
-
-          {/* Pilares de la Empresa */}
-          <Box className={styles.pilaresSection}>
-            <Box className={styles.pilaresContainer}>
-              <Box className={styles.pilarCardWrapper}>
-                <Box className={styles.pilarCard}>
-                  <Box className={styles.pilarCardContent}>
-                    <Typography variant="h6" component="h3" className={styles.pilarCardTitle}>
-                      Ingeniería de Confianza
-                    </Typography>
-                    <Typography variant="body1" className={styles.pilarCardText}>
-                      Técnicos apasionados que tratan cada moto como propia.
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              <Box className={styles.pilarCardWrapper}>
-                <Box className={styles.pilarCard}>
-                  <Box className={styles.pilarCardContent}>
-                    <Typography variant="h6" component="h3" className={styles.pilarCardTitle}>
-                      Mantenimiento Preventivo Digital
-                    </Typography>
-                    <Typography variant="body1" className={styles.pilarCardText}>
-                      Fichas técnicas detalladas (batería, válvulas, fluidos y más...) accesibles desde tu móvil.
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              <Box className={styles.pilarCardWrapper}>
-                <Box className={styles.pilarCard}>
-                  <Box className={styles.pilarCardContent}>
-                    <Typography variant="h6" component="h3" className={styles.pilarCardTitle}>
-                      Compromiso RiderBross
-                    </Typography>
-                    <Typography variant="body1" className={styles.pilarCardText}>
-                      Calidad en repuestos y entrega en tiempo récord.
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
+            <Box className={styles.contentBox}>
+              <Typography variant="h2" component="h2" className={styles.contentText}>
+                Como Riders, entendemos lo que tu moto significa para vos. Por eso, nuestro equipo garantiza seguridad y rendimiento óptimo con un servicio técnico de primer nivel.
+              </Typography>
             </Box>
-          </Box>
 
-         
+            <Container maxWidth="lg" className={styles.servicesSection}>
+            <Typography 
+              component="h2" 
+              className={styles.servicesTitle}
+            >
+              Nuestros Servicios
+            </Typography>
+
+            <Box className={styles.servicesContainer}>
+              {servicios.map((servicio, index) => (
+                <Box key={index} className={styles.serviceCardWrapper}>
+                  <Card className={styles.serviceCard}>
+                    <CardContent className={styles.serviceCardContent}>
+                      <Box className={styles.serviceIcon}>
+                        {servicio.icon}
+                      </Box>
+                      <Typography variant="h5" component="h3" className={styles.serviceTitle}>
+                        {servicio.title}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
+                        {servicio.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
+          </Container>
+
 
           {/* Buscador de Patente */}
           <Box component="form" onSubmit={handleSearch} className={styles.searchForm}>
@@ -194,36 +197,6 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* Servicios Section */}
-      <Container maxWidth="lg" className={styles.servicesSection}>
-        <Typography 
-          component="h2" 
-          className={styles.servicesTitle}
-        >
-          Nuestros Servicios
-        </Typography>
-
-        <Box className={styles.servicesContainer}>
-          {servicios.map((servicio, index) => (
-            <Box key={index} className={styles.serviceCardWrapper}>
-              <Card className={styles.serviceCard}>
-                <CardContent className={styles.serviceCardContent}>
-                  <Box className={styles.serviceIcon}>
-                    {servicio.icon}
-                  </Box>
-                  <Typography variant="h5" component="h3" className={styles.serviceTitle}>
-                    {servicio.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
-                    {servicio.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-          ))}
-        </Box>
-      </Container>
-
       {/* CTA Section */}
       <Box className={styles.ctaSection}>
         <Container maxWidth="md">
@@ -237,7 +210,7 @@ export default function Home() {
             <CustomButton
               variant="contained"
               size="large"
-              href="tel:+5491123456789"
+              href="tel:+541144242784"
               className={styles.ctaButton}
             >
               Contactar
