@@ -79,7 +79,7 @@ export default function Home() {
     },
     {
       icon: <SearchIcon className={styles.serviceIconSize} />,
-      title: 'Inspección Pre-compra',
+      title: 'Inspección Pre\u2011compra',
       description: '¿Vas a comprar una moto usada? Realizamos un peritaje exhaustivo para que inviertas con total seguridad y sin sorpresas ocultas.',
     },
   ];
