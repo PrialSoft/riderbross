@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "RiderBross - Servicio Técnico de Motocicletas",
   description: "Taller especializado en servicio técnico de motocicletas. Consulta el estado de tu moto por patente.",
   keywords: "motocicletas, servicio técnico, taller, RiderBross",
+  icons: {
+    icon: '/icons/ICONO.ico',
+    shortcut: '/icons/ICONO.ico',
+    apple: '/icons/ICONO.ico',
+  },
 };
 
 export default function RootLayout({
