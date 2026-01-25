@@ -132,7 +132,7 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       if (Array.isArray(detalle.tiposservicio)) {
         tiposservicio = (detalle.tiposservicio[0] as unknown as {
           nombre: string;
-          categoriasservicio: { nombre: string } | null;
+          categoriasservicio: { nombre: string; orden: number } | null;
         }) || null;
       } else {
         tiposservicio = (detalle.tiposservicio as unknown) as typeof tiposservicio;
