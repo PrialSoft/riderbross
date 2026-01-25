@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Box, Container, Typography } from '@mui/material';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -12,17 +13,96 @@ import styles from './Footer.module.css';
 
 export default function Footer() {
   return (
-    <Box component="footer" id="contacto" className={styles.footer}>
-      <Container maxWidth={false} className={styles.container}>
-        <Box className={styles.footerContent}>
+    <Box 
+      component="footer" 
+      id="contacto" 
+      className={styles.footer}
+      sx={{ width: '100%', overflow: 'visible' }}
+    >
+      <Container 
+        maxWidth={false} 
+        className={styles.container} 
+        sx={{ 
+          width: '100% !important', 
+          maxWidth: '100% !important',
+          paddingLeft: 'var(--spacing-md) !important',
+          paddingRight: 'var(--spacing-md) !important'
+        }}
+      >
+        <Box 
+          className={styles.footerContent}
+        >
+          {/* Columna 1: Logo y Redes Sociales */}
+          <Box className={styles.leftColumn}>
+            <Box className={styles.logoContainer}>
+              <Image
+                src="/images/LogoRiderBross.png"
+                alt="RiderBross Logo"
+                width={150}
+                height={60}
+                className={styles.logo}
+                priority
+              />
+            </Box>
+            <Box className={styles.socialContainer}>
+              <Link 
+                href="https://www.instagram.com/rider.bross/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.socialIconLink}
+                aria-label="Instagram de RiderBross"
+              >
+                <Box className={`${styles.socialIcon} ${styles.instagramIcon}`}>
+                  <InstagramIcon fontSize="large" />
+                </Box>
+              </Link>
+              
+              <Link 
+                href="https://www.facebook.com/profile.php?id=100093746441652" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.socialIconLink}
+                aria-label="Facebook de RiderBross"
+              >
+                <Box className={`${styles.socialIcon} ${styles.facebookIcon}`}>
+                  <FacebookIcon fontSize="large" />
+                </Box>
+              </Link>
+              
+              <Link 
+                href="https://www.youtube.com/@RiderBross" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.socialIconLink}
+                aria-label="YouTube de RiderBross"
+              >
+                <Box className={`${styles.socialIcon} ${styles.youtubeIcon}`}>
+                  <YouTubeIcon fontSize="large" />
+                </Box>
+              </Link>
+            </Box>
+          </Box>
+
+          {/* Columna 2: Contacto */}
           <Box 
             className={styles.contactInfo}
             sx={{ 
-              color: '#FFFFFF',
-              '& *': { color: '#FFFFFF' },
-              '& a': { color: '#FFFFFF' }
+              color: '#FFFFFF !important',
+              '& *': { color: '#FFFFFF !important' },
+              '& a': { color: '#FFFFFF !important' },
+              display: 'flex !important',
+              visibility: 'visible !important',
+              opacity: '1 !important'
             }}
           >
+            <Typography 
+              variant="h6" 
+              component="h3"
+              className={styles.sectionTitle}
+              sx={{ color: '#FFFFFF', mb: 2 }}
+            >
+              Contacto:
+            </Typography>
             <Typography 
               variant="body1" 
               component="p" 
@@ -78,44 +158,23 @@ export default function Footer() {
             </Typography>
           </Box>
 
-          {/* Iconos de Redes Sociales */}
-          <Box className={styles.socialContainer}>
-          <Link 
-            href="https://www.instagram.com/rider.bross/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.socialIconLink}
-            aria-label="Instagram de RiderBross"
-          >
-            <Box className={`${styles.socialIcon} ${styles.instagramIcon}`}>
-              <InstagramIcon fontSize="large" />
-            </Box>
-          </Link>
-          
-          <Link 
-            href="https://www.facebook.com/profile.php?id=100093746441652" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.socialIconLink}
-            aria-label="Facebook de RiderBross"
-          >
-            <Box className={`${styles.socialIcon} ${styles.facebookIcon}`}>
-              <FacebookIcon fontSize="large" />
-            </Box>
-          </Link>
-          
-          <Link 
-            href="https://www.youtube.com/@RiderBross" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.socialIconLink}
-            aria-label="YouTube de RiderBross"
-          >
-            <Box className={`${styles.socialIcon} ${styles.youtubeIcon}`}>
-              <YouTubeIcon fontSize="large" />
-            </Box>
-          </Link>
+          {/* Columna 3: Vacía (reservada para futuro uso) */}
+          <Box className={styles.rightColumn}>
+            {/* Columna vacía por ahora */}
           </Box>
+        </Box>
+
+        {/* Línea de Copyright */}
+        <Box className={styles.copyrightContainer}>
+          <Typography 
+            variant="body2" 
+            className={styles.copyrightText}
+            sx={{ color: '#FFFFFF' }}
+          >
+            RiderBross 2026 - Todos los derechos reservados
+            <span className={styles.copyrightSeparator}> | </span>
+            Developed By: PrialSoft
+          </Typography>
         </Box>
       </Container>
     </Box>

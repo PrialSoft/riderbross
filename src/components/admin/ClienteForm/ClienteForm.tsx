@@ -228,6 +228,7 @@ export default function ClienteForm(props: {
               inputMode: 'numeric',
               maxLength: 8
             }}
+            sx={{ display: 'none' }}
           />
           <TextField
             label="Teléfono"

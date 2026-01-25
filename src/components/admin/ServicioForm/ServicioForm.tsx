@@ -382,24 +382,34 @@ export default function ServicioForm(props: {
         if (categoriaIds.length > 0) {
           const { data: cats, error: catsErr } = await supabase
             .from('categoriasservicio')
-            .select('id, nombre')
+            .select('id, nombre, orden')
             .in('id', categoriaIds);
 
           if (!catsErr) {
-            const catsById = new Map<number, { id: number; nombre: string }>();
-            (cats ?? []).forEach((c) => catsById.set(c.id, c));
+            const catsById = new Map<number, { id: number; nombre: string; orden: number }>();
+            (cats ?? []).forEach((c) => catsById.set(c.id, { ...c, orden: c.orden ?? 0 }));
             tiposBase.forEach((t) => {
-              t.categoriaNombre = t.idcategoriaservicio ? catsById.get(t.idcategoriaservicio)?.nombre ?? null : null;
+              const cat = t.idcategoriaservicio ? catsById.get(t.idcategoriaservicio) : null;
+              t.categoriaNombre = cat?.nombre ?? null;
+              // Agregar el orden de la categoría para poder ordenar después
+              (t as any).categoriaOrden = cat?.orden ?? 9999;
             });
           }
         }
 
-        // Ordenar para que el agrupado se vea consistente
+        // Ordenar para que el agrupado se vea consistente según el orden de la categoría
         tiposBase.sort((a, b) => {
+          const ordenA = (a as any).categoriaOrden ?? 9999;
+          const ordenB = (b as any).categoriaOrden ?? 9999;
+          if (ordenA !== ordenB) {
+            return ordenA - ordenB;
+          }
+          // Si tienen el mismo orden, ordenar por nombre de categoría
           const ca = a.categoriaNombre ?? 'Sin categoría';
           const cb = b.categoriaNombre ?? 'Sin categoría';
           const cCmp = ca.localeCompare(cb, 'es');
           if (cCmp !== 0) return cCmp;
+          // Finalmente, ordenar por nombre del tipo de servicio
           return a.nombre.localeCompare(b.nombre, 'es');
         });
 
@@ -443,6 +453,7 @@ export default function ServicioForm(props: {
 
   const groupedDetalles = useMemo(() => {
     const groups = new Map<string, Array<DetalleServicioDraft & { _idx: number }>>();
+    const categoriaOrdenMap = new Map<string, number>(); // Mapa para almacenar el orden de cada categoría
 
     detalles.forEach((d, idx) => {
       const tipo = typeof d.idtiposervicio === 'number' ? tiposById.get(d.idtiposervicio) : undefined;
@@ -450,20 +461,29 @@ export default function ServicioForm(props: {
       const arr = groups.get(group) ?? [];
       arr.push({ ...d, _idx: idx });
       groups.set(group, arr);
+      
+      // Guardar el orden de la categoría si existe
+      if (tipo && tipo.categoriaNombre) {
+        const categoriaOrden = (tipo as any).categoriaOrden ?? 9999;
+        if (!categoriaOrdenMap.has(group)) {
+          categoriaOrdenMap.set(group, categoriaOrden);
+        }
+      }
     });
 
-    // Ordenar grupos: primero categorías normales, luego "Sin categoría" y "Sin tipo"
-    const groupOrder = (name: string) => {
-      if (name === 'Sin tipo') return 2;
-      if (name === 'Sin categoría') return 1;
-      return 0;
+    // Función para obtener el orden de un grupo
+    const getGroupOrder = (name: string): number => {
+      if (name === 'Sin tipo') return 9998;
+      if (name === 'Sin categoría') return 9999;
+      return categoriaOrdenMap.get(name) ?? 9999;
     };
 
     return Array.from(groups.entries())
       .sort((a, b) => {
-        const oa = groupOrder(a[0]);
-        const ob = groupOrder(b[0]);
-        if (oa !== ob) return oa - ob;
+        const ordenA = getGroupOrder(a[0]);
+        const ordenB = getGroupOrder(b[0]);
+        if (ordenA !== ordenB) return ordenA - ordenB;
+        // Si tienen el mismo orden, ordenar alfabéticamente
         return a[0].localeCompare(b[0], 'es');
       })
       .map(([group, items]) => ({

@@ -20,14 +20,16 @@ export default function CategoriaForm(props: {
   initial?: {
     id: number;
     nombre: string;
+    orden?: number;
   };
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState(props.initial?.nombre ?? '');
+  const [orden, setOrden] = useState(props.initial?.orden ?? 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = useMemo(() => nombre.trim().length > 0 && !saving, [nombre, saving]);
+  const canSubmit = useMemo(() => nombre.trim().length > 0 && !saving && orden >= 0, [nombre, orden, saving]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +41,7 @@ export default function CategoriaForm(props: {
 
       const payload = {
         nombre: nombre.trim(),
+        orden: Number(orden) || 0,
       };
 
       if (props.mode === 'create') {
@@ -96,6 +99,18 @@ export default function CategoriaForm(props: {
           disabled={saving}
           fullWidth
           helperText="El nombre se guardará en mayúsculas"
+        />
+
+        <TextField
+          label="Orden"
+          type="number"
+          value={orden}
+          onChange={(e) => setOrden(Math.max(0, parseInt(e.target.value) || 0))}
+          required
+          disabled={saving}
+          fullWidth
+          helperText="Número para ordenar las categorías (menor número = mayor prioridad)"
+          inputProps={{ min: 0, step: 1 }}
         />
 
         <CustomButton

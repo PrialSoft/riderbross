@@ -59,7 +59,8 @@ export default function TipoServicioForm(props: {
         setLoadingCats(true);
         const { data, error: qErr } = await supabase
           .from('categoriasservicio')
-          .select('id, nombre')
+          .select('id, nombre, orden')
+          .order('orden', { ascending: true })
           .order('nombre', { ascending: true });
         if (qErr) throw qErr;
         setCategorias((data as CategoriaRow[]) ?? []);

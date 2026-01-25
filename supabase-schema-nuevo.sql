@@ -83,12 +83,14 @@ CREATE INDEX IF NOT EXISTS idx_vehiculo_idcliente ON Vehiculo(IdCliente);
 CREATE TABLE IF NOT EXISTS CategoriasServicio (
     Id SERIAL PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL UNIQUE,
+    orden INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Índice para búsquedas rápidas
+-- Índices para búsquedas rápidas
 CREATE INDEX IF NOT EXISTS idx_categorias_servicio_nombre ON CategoriasServicio(Nombre);
+CREATE INDEX IF NOT EXISTS idx_categorias_servicio_orden ON CategoriasServicio(orden);
 
 -- ============================================
 -- TABLA: TiposServicio
@@ -266,12 +268,12 @@ INSERT INTO Estados (Descripcion) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insertar categorías de servicio comunes
-INSERT INTO CategoriasServicio (Nombre) VALUES
-    ('Mantenimiento'),
-    ('Reparación'),
-    ('Revisión'),
-    ('Diagnóstico'),
-    ('Limpieza')
+INSERT INTO CategoriasServicio (Nombre, orden) VALUES
+    ('Mantenimiento', 1),
+    ('Reparación', 2),
+    ('Revisión', 3),
+    ('Diagnóstico', 4),
+    ('Limpieza', 5)
 ON CONFLICT (Nombre) DO NOTHING;
 
 -- ============================================

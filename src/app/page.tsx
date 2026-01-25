@@ -70,7 +70,7 @@ export default function Home() {
     {
       icon: <BuildIcon className={styles.serviceIconSize} />,
       title: 'Reparaciones Específicas',
-      description: 'Soluciones precisas en motor, frenos, transmisión, suspensiones y electricidad y más. Utilizamos repuestos de alta calidad para devolverle a tu moto su rendimiento original.',
+      description: 'Soluciones precisas en motor, frenos, transmisión, suspensiones, electricidad y más. Utilizamos repuestos de alta calidad para devolverle a tu moto su rendimiento original.',
     },
     {
       icon: <SpeedIcon className={styles.serviceIconSize} />,

@@ -6,46 +6,110 @@
   position: relative;
   z-index: 10;
   isolation: isolate;
+  width: 100%;
+  overflow: visible;
 }
 
 .container {
   padding: 0 var(--spacing-md);
   width: 100%;
-  max-width: 100%;
+  max-width: 100% !important;
   position: relative;
   z-index: 11;
+  display: block !important;
 }
 
 .footerContent {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--spacing-xl);
-  align-items: stretch;
+  align-items: flex-start;
+  justify-content: center;
   position: relative;
   z-index: 12;
+  width: 100%;
+  padding: 0 var(--spacing-md);
+}
+
+.leftColumn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  min-width: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 13;
+}
+
+.rightColumn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 13;
+}
+
+.logoContainer {
+  display: flex !important;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: auto;
+  min-width: 0;
+}
+
+.logo {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  transition: opacity var(--transition-base);
+  width: auto;
+  height: auto;
+  max-width: 150px;
+  object-fit: contain;
+}
+
+.logo:hover {
+  opacity: 1;
+}
+
+.sectionTitle {
+  font-weight: 700 !important;
+  font-size: var(--font-size-xl) !important;
+  margin-bottom: var(--spacing-md) !important;
+  color: #FFFFFF !important;
+  display: block !important;
 }
 
 .contactInfo {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   align-items: flex-start;
   text-align: left;
   position: relative;
-  z-index: 12;
+  z-index: 13;
   flex: 1;
+  min-width: 0;
+  width: 100%;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
+
 
 /* Selector específico para sobrescribir estilos de MUI - igual que ctaTitle */
 .contactItem {
   margin-bottom: 0;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   font-size: var(--font-size-xl);
   line-height: 1.8;
   width: 100%;
   text-align: left;
-  display: flex;
+  display: flex !important;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -61,7 +125,7 @@
 
 .contactIcon {
   font-size: 1.25rem !important;
-  color: var(--text-primary) !important;
+  color: #FFFFFF !important;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -70,20 +134,21 @@
 .contactLabel {
   font-weight: 700;
   white-space: nowrap;
+  color: #FFFFFF !important;
 }
 
 .contactItem,
 .contactItem.MuiTypography-root {
-  color: var(--text-primary);
+  color: #FFFFFF !important;
 }
 
 .contactItem *,
 .contactItem a {
-  color: var(--text-primary);
+  color: #FFFFFF !important;
 }
 
 .contactLink {
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   text-decoration: none;
   transition: opacity var(--transition-base);
   font-weight: 600;
@@ -95,19 +160,24 @@
 }
 
 .socialContainer {
-  display: flex;
-  justify-content: center;
+  display: flex !important;
+  justify-content: flex-start;
   align-items: center;
-  gap: var(--spacing-lg);
-  width: 100%;
+  gap: var(--spacing-md);
   position: relative;
   z-index: 12;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto;
+  align-self: flex-start;
 }
 
 .socialIconLink {
   text-decoration: none;
   display: inline-block;
   transition: transform var(--transition-base);
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .socialIconLink:hover {
@@ -126,35 +196,63 @@
 }
 
 .socialIcon svg {
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   font-size: 1.375rem;
 }
 
 .instagramIcon {
-  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  background: transparent;
+  border: 2px solid #FFFFFF;
 }
 
 .instagramIcon:hover {
-  box-shadow: 0 6px 20px rgba(225, 48, 108, 0.6);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
   transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .facebookIcon {
-  background-color: #1877F2;
+  background: transparent;
+  border: 2px solid #FFFFFF;
 }
 
 .facebookIcon:hover {
-  box-shadow: 0 6px 20px rgba(24, 119, 242, 0.6);
-  background-color: #166FE5;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .youtubeIcon {
-  background-color: #FF0000;
+  background: transparent;
+  border: 2px solid #FFFFFF;
 }
 
 .youtubeIcon:hover {
-  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6);
-  background-color: #E60000;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.copyrightContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.copyrightText {
+  color: #FFFFFF !important;
+  font-size: var(--font-size-sm) !important;
+  opacity: 0.8;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.copyrightSeparator {
+  margin: 0 var(--spacing-sm);
+  opacity: 0.6;
 }
 
 /* Tablet */
@@ -168,15 +266,38 @@
   }
 
   .footerContent {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-2xl);
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-3xl);
+    padding: 0 var(--spacing-2xl);
+  }
+
+  .leftColumn {
+    min-width: 0;
+  }
+
+  .logoContainer {
+    width: 100%;
+  }
+
+  .logo {
+    max-width: 180px;
+    width: auto;
+  }
+
+  .contactInfo {
+    gap: var(--spacing-md);
+    min-width: 0;
+    width: 100%;
+  }
+
+  .rightColumn {
+    min-width: 0;
   }
 
   .contactItem {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-lg);
     text-align: left;
-    display: flex;
+    display: flex !important;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -190,15 +311,76 @@
     font-size: 1.375rem !important;
   }
 
-  .contactInfo {
-    gap: var(--spacing-xl);
-    flex: 1;
-  }
-
   .socialContainer {
-    gap: var(--spacing-xl);
+    gap: var(--spacing-md);
     width: auto;
     flex-shrink: 0;
+  }
+
+  .socialIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .socialIcon svg {
+    font-size: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-lg) !important;
+  }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+  .footerContent {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-4xl);
+    padding: 0 var(--spacing-3xl);
+  }
+
+  .leftColumn {
+    min-width: 0;
+  }
+
+  .logoContainer {
+    width: 100%;
+  }
+
+  .logo {
+    max-width: 200px;
+    width: auto;
+  }
+
+  .contactInfo {
+    gap: var(--spacing-md);
+    min-width: 0;
+    width: 100%;
+  }
+
+  .rightColumn {
+    min-width: 0;
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-xl) !important;
+  }
+
+  .contactItem {
+    font-size: var(--font-size-lg);
+    text-align: left;
+    display: flex !important;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .contactLabelWrapper {
+    gap: 0.75rem;
+  }
+
+  .contactIcon {
+    font-size: 1.5rem !important;
   }
 
   .socialIcon {
@@ -207,49 +389,15 @@
   }
 
   .socialIcon svg {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+
+  .copyrightContainer {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+  }
+
+  .copyrightText {
+    font-size: var(--font-size-base) !important;
   }
 }
-
-/* Desktop */
-@media (min-width: 900px) {
-  .footerContent {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: 1fr auto;
-    align-items: start;
-    gap: var(--spacing-2xl);
-  }
-
-  .contactInfo {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: start;
-  }
-
-  .socialContainer {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: center;
-    width: auto;
-    align-self: end;
-  }
-
-  .contactItem {
-    font-size: var(--font-size-3xl);
-    text-align: left;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .contactLabelWrapper {
-    gap: 0.875rem;
-  }
-
-  .contactIcon {
-    font-size: 1.5rem !important;
-  }
-}
-

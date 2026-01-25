@@ -2,15 +2,9 @@ import { createClient } from '@/lib/supabase/server';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Paper,
 } from '@mui/material';
-import {
-  TwoWheeler as MotosIcon,
-  Description as FichasIcon,
-  People as ClientesIcon,
-} from '@mui/icons-material';
+import DashboardCards from '@/components/admin/DashboardCards/DashboardCards';
 import dayjs from '@/lib/dayjs';
 import { formatPatente } from '@/utils/patente';
 import type { ServicioWithRelations } from '@/types/database';
@@ -143,178 +137,11 @@ export default async function AdminDashboardPage() {
         Portal de Administración
       </Typography>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 3,
-          mb: 4,
-        }}
-      >
-        <Box
-          sx={{
-            flex: {
-              xs: '1 1 100%',
-              sm: '1 1 calc(50% - 12px)',
-              md: '1 1 calc(33.333% - 16px)',
-            },
-          }}
-        >
-          <Card
-            sx={{
-              background:
-                'linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.9) 50%, rgba(44, 62, 80, 0.15) 100%)',
-              backdropFilter: 'blur(15px)',
-              border: 'none',
-              boxShadow:
-                '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 26, 26, 0.1)',
-              transition: 'all 0.5s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow:
-                  '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
-              },
-            }}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <MotosIcon sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }} />
-                <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    {vehiculosCount || 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'var(--text-secondary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    Vehículos
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        <Box
-          sx={{
-            flex: {
-              xs: '1 1 100%',
-              sm: '1 1 calc(50% - 12px)',
-              md: '1 1 calc(33.333% - 16px)',
-            },
-          }}
-        >
-          <Card
-            sx={{
-              background:
-                'linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.9) 50%, rgba(44, 62, 80, 0.15) 100%)',
-              backdropFilter: 'blur(15px)',
-              border: 'none',
-              boxShadow:
-                '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 26, 26, 0.1)',
-              transition: 'all 0.5s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow:
-                  '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
-              },
-            }}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <FichasIcon sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }} />
-                <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    {serviciosCount || 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'var(--text-secondary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    Servicios
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        <Box
-          sx={{
-            flex: {
-              xs: '1 1 100%',
-              sm: '1 1 calc(50% - 12px)',
-              md: '1 1 calc(33.333% - 16px)',
-            },
-          }}
-        >
-          <Card
-            sx={{
-              background:
-                'linear-gradient(135deg, rgba(139, 26, 26, 0.15) 0%, rgba(4, 0, 23, 0.9) 50%, rgba(44, 62, 80, 0.15) 100%)',
-              backdropFilter: 'blur(15px)',
-              border: 'none',
-              boxShadow:
-                '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 26, 26, 0.1)',
-              transition: 'all 0.5s ease',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow:
-                  '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 26, 26, 0.2)',
-              },
-            }}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <ClientesIcon
-                  sx={{ fontSize: 48, color: 'var(--text-primary)', mr: 2 }}
-                />
-                <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    {clientesCount || 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'var(--text-secondary)',
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
-                    Clientes
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
+      <DashboardCards
+        vehiculosCount={vehiculosCount || 0}
+        serviciosCount={serviciosCount || 0}
+        clientesCount={clientesCount || 0}
+      />
 
       <Paper
         elevation={0}

@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase/client';
 type CategoriaRow = {
   id: number;
   nombre: string;
+  orden: number;
 };
 
 export function CategoriasTable(props?: {
@@ -30,7 +31,8 @@ export function CategoriasTable(props?: {
 
         const { data: rows, error: qErr } = await supabase
           .from('categoriasservicio')
-          .select('id, nombre')
+          .select('id, nombre, orden')
+          .order('orden', { ascending: true })
           .order('nombre', { ascending: true });
 
         if (qErr) throw qErr;
@@ -48,6 +50,7 @@ export function CategoriasTable(props?: {
 
   const columns = useMemo<ColumnDef<CategoriaRow>[]>(
     () => [
+      { accessorKey: 'orden', header: 'Orden', size: 80 },
       { accessorKey: 'nombre', header: 'Nombre' },
       {
         id: 'actions',

@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 
-export async function createCategoria(input: { nombre: string }) {
+export async function createCategoria(input: { nombre: string; orden?: number }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) throw new Error('No autorizado');
@@ -23,12 +23,13 @@ export async function createCategoria(input: { nombre: string }) {
 
   const { error } = await supabase.from('categoriasservicio').insert({
     nombre,
+    orden: input.orden ?? 0,
   });
 
   if (error) throw new Error(error.message);
 }
 
-export async function updateCategoria(id: number, input: { nombre: string }) {
+export async function updateCategoria(id: number, input: { nombre: string; orden?: number }) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) throw new Error('No autorizado');
@@ -50,7 +51,10 @@ export async function updateCategoria(id: number, input: { nombre: string }) {
 
   const { error } = await supabase
     .from('categoriasservicio')
-    .update({ nombre })
+    .update({ 
+      nombre,
+      orden: input.orden ?? 0,
+    })
     .eq('id', id);
 
   if (error) throw new Error(error.message);

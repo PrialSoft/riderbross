@@ -13,6 +13,7 @@ import { deleteCategoria } from '@/app/admin/dashboard/categorias/actions';
 type CategoriaInitial = {
   id: number;
   nombre: string;
+  orden?: number;
 };
 
 export default function CategoriasManager() {
@@ -43,7 +44,7 @@ export default function CategoriasManager() {
 
     const { data, error } = await supabase
       .from('categoriasservicio')
-      .select('id, nombre')
+      .select('id, nombre, orden')
       .eq('id', id)
       .maybeSingle();
 

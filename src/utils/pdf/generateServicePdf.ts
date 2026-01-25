@@ -32,6 +32,7 @@ interface ServicioCompleto {
       nombre: string;
       categoriasservicio: {
         nombre: string;
+        orden: number;
       } | null;
     } | null;
   }>;
@@ -104,7 +105,8 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       tiposservicio (
         nombre,
         categoriasservicio (
-          nombre
+          nombre,
+          orden
         )
       )
     `
@@ -124,7 +126,7 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       typeof detalle.idtiposservicio === 'number' ? detalle.idtiposservicio : null;
     let tiposservicio: {
       nombre: string;
-      categoriasservicio: { nombre: string } | null;
+      categoriasservicio: { nombre: string; orden: number } | null;
     } | null = null;
     if (detalle.tiposservicio) {
       if (Array.isArray(detalle.tiposservicio)) {
@@ -140,6 +142,10 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       if (tiposservicio?.categoriasservicio) {
         if (Array.isArray(tiposservicio.categoriasservicio)) {
           tiposservicio.categoriasservicio = tiposservicio.categoriasservicio[0] || null;
+        }
+        // Asegurar que orden tenga un valor por defecto
+        if (tiposservicio.categoriasservicio && typeof tiposservicio.categoriasservicio.orden !== 'number') {
+          tiposservicio.categoriasservicio.orden = 0;
         }
       }
     }
@@ -313,13 +319,29 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
 
   // Agrupar detalles por categoría
   const detallesPorCategoria = new Map<string, typeof servicioCompleto.detalles>();
+  const categoriasConOrden = new Map<string, number>(); // Para almacenar el orden de cada categoría
+  
   servicioCompleto.detalles.forEach((detalle) => {
     const categoriaNombre =
       detalle.tiposservicio?.categoriasservicio?.nombre || 'Sin Categoría';
+    const categoriaOrden = detalle.tiposservicio?.categoriasservicio?.orden ?? 9999; // Sin categoría al final
+    
     if (!detallesPorCategoria.has(categoriaNombre)) {
       detallesPorCategoria.set(categoriaNombre, []);
+      categoriasConOrden.set(categoriaNombre, categoriaOrden);
     }
     detallesPorCategoria.get(categoriaNombre)!.push(detalle);
+  });
+
+  // Ordenar las categorías por el campo orden
+  const categoriasOrdenadas = Array.from(detallesPorCategoria.entries()).sort((a, b) => {
+    const ordenA = categoriasConOrden.get(a[0]) ?? 9999;
+    const ordenB = categoriasConOrden.get(b[0]) ?? 9999;
+    if (ordenA !== ordenB) {
+      return ordenA - ordenB;
+    }
+    // Si tienen el mismo orden, ordenar por nombre
+    return a[0].localeCompare(b[0], 'es');
   });
 
   // Borde separador antes de SERVICIOS APLICADOS
@@ -397,9 +419,9 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
 
   // Filas de servicios
   doc.setFont('helvetica', 'normal');
-  detallesPorCategoria.forEach((detalles, categoriaNombre) => {
+  categoriasOrdenadas.forEach(([categoriaNombre, detalles]) => {
     // Título de categoría con gradiente de fondo
-    if (detallesPorCategoria.size > 1) {
+    if (categoriasOrdenadas.length > 1) {
       // Gradiente de --bg-secondary (izquierda) a --bg-primary (derecha)
       const categoriaX = margin - 2;
       const categoriaY = yPos - 4;

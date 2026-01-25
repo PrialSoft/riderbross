@@ -45,6 +45,7 @@ export interface Estado {
 export interface CategoriaServicio {
   Id: number;
   Nombre: string;
+  orden: number;
 }
 
 export interface TipoServicio {
