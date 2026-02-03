@@ -381,7 +381,7 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   }
 
   // Actualizar yPos al final de la cabecera (la mayor altura entre cliente y vehículo)
-  yPos = Math.max(headerY, vehiculoY) + 12; // Aumentar espacio entre cliente y vehículo
+  yPos = Math.max(headerY, vehiculoY) + 2; // Aumentar espacio entre cliente y vehículo
 
   // Borde separador antes de la nota general
   doc.setDrawColor(...colorGrayDark);
@@ -644,25 +644,19 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       const maxLinesInRow = Math.max(numLines, comentarioLines.length);
       const rowHeight = maxLinesInRow > 1 ? 5 + ((maxLinesInRow - 1) * lineHeight) : 5;
       
-      // Calcular dónde termina realmente el contenido de esta fila
-      // El texto se dibuja empezando en yPos
-      // Si hay 1 línea: el texto está en yPos y termina aproximadamente en yPos + 4
-      // Si hay N líneas: la última línea está en yPos + ((N-1) * lineHeight) y termina en yPos + ((N-1) * lineHeight) + 4
-      // La altura total del contenido es: 4 (altura base del texto) + ((maxLinesInRow - 1) * lineHeight)
-      const alturaContenido = 4 + (maxLinesInRow > 1 ? (maxLinesInRow - 1) * lineHeight : 0);
-      const finalYPos = yPos + alturaContenido;
+      // Calcular la altura real del contenido (basada en las líneas de texto)
+      // El texto se dibuja empezando en yPos, y cada línea adicional está a lineHeight (3.5) de distancia
+      // La altura real del contenido es: primera línea (3.5) + líneas adicionales (lineHeight cada una)
+      // Para 1 línea: 3.5, para 2 líneas: 3.5 + 3.5 = 7, para N líneas: N * 3.5
+      const alturaRealContenido = maxLinesInRow * 0.5;
       
       // Línea sutil y delgada entre cada fila para ayudar a la lectura
-      // Dibujar la línea al pie del texto, justo después del contenido de la fila
-      // Dibujar para TODOS los detalles, incluyendo el primero (excepto el último de cada categoría)
-      const esUltimoDetalle = detalles.indexOf(detalle) === detalles.length - 1;
-      if (!esUltimoDetalle) {
-        // Dibujar la línea justo después del contenido visible, con un pequeño espacio
-        const lineaY = finalYPos + 1; // 1 punto después del final del texto
-        doc.setDrawColor(220, 220, 220); // Gris muy claro y sutil
-        doc.setLineWidth(0.1); // Línea muy delgada
-        doc.line(margin, lineaY, pageWidth - margin, lineaY);
-      }
+      // Dibujar la línea justo después del contenido real del texto
+      // Dibujar para TODOS los detalles, incluyendo el primero y el último
+      const lineaY = yPos + alturaRealContenido + 0.5; // Justo después del contenido real + pequeño espacio
+      doc.setDrawColor(220, 220, 220); // Gris muy claro y sutil
+      doc.setLineWidth(0.1); // Línea muy delgada
+      doc.line(margin, lineaY, pageWidth - margin, lineaY);
       
       // Incrementar yPos para la siguiente fila
       yPos += rowHeight;
