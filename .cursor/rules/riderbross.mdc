@@ -22,6 +22,7 @@ Eres un experto en desarrollo Full Stack especializado en Next.js, TypeScript y 
 - Toda la aplicación debe ser **Full Responsive**.
 - Priorizar la visualización en dispositivos móviles (iPhone/Android) ya que los clientes consultarán sus fichas desde allí.
 - Usar el sistema de Grid y Stack de MUI para layouts adaptables.
+- Priorizar la implementacion de las variables globales definidas en el globals.css
 - Los CSS Modules deben incluir media queries para ajustes finos.
 
 ## 3. Lógica de Negocio: Fichas Técnicas (Basado en Informe Real)

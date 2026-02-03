@@ -38,8 +38,8 @@ export default function Footer() {
               <Image
                 src="/images/LogoRiderBross.png"
                 alt="RiderBross Logo"
-                width={150}
-                height={60}
+                width={120}
+                height={100}
                 className={styles.logo}
                 priority
               />

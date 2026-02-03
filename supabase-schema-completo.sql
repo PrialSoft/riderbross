@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS Clientes (
     localidad VARCHAR(100),
     direccion VARCHAR(100),
     fechaNacimiento DATE,
-    DNI NUMERIC(15) NOT NULL UNIQUE,
+    DNI NUMERIC(15) NOT NULL,
     commentarioprivado TEXT NULL, -- Campo agregado en migración
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -622,4 +622,5 @@ CREATE POLICY "Super admins pueden actualizar usuarios admin"
 --    - Clientes.commentarioprivado: Comentarios privados del cliente
 --    - Vehiculo.commentarioprivado: Comentarios privados del vehículo
 -- ============================================
+
 

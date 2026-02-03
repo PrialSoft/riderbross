@@ -207,6 +207,7 @@ export default function Home() {
             <Typography variant="body1" color="text.secondary" className={styles.ctaText}>
               Contacta con nosotros para agendar tu servicio o consultar más información
             </Typography>
+            <br />
             <CustomButton
               variant="contained"
               size="large"
