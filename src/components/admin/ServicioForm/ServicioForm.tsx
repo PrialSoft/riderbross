@@ -287,6 +287,7 @@ export default function ServicioForm(props: {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDetalleNotas, setShowDetalleNotas] = useState(false);
+  const [detallesComentariosVisibles, setDetallesComentariosVisibles] = useState<Set<string>>(new Set());
 
   // Foto del servicio (vehículo)
   const [fotoBase64, setFotoBase64] = useState<string | null>(null); // base64 sin prefix
@@ -1061,76 +1062,14 @@ export default function ServicioForm(props: {
               flexWrap: 'wrap',
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-family-body)' }}
-            >
-              Detalles del Servicio ({detalles.length})
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-family-body)' }}
+              >
+                Detalles del Servicio ({detalles.length})
+              </Typography>
 
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Campo Próximo Km. Referencia con botón Aplicar */}
-              <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                <TextField
-                  label="Próx. Km Ref."
-                  value={proximoKmReferencia}
-                  onChange={(e) => {
-                    const value = formatKm(e.target.value);
-                    setProximoKmReferencia(value);
-                  }}
-                  inputProps={{ inputMode: 'numeric' }}
-                  disabled={!headerReadyForDetalles}
-                  size="small"
-                  sx={{ width: 130 }}
-                  error={
-                    proximoKmReferencia !== '' &&
-                    kmHeader !== null &&
-                    parseKmToNumberOrNull(proximoKmReferencia) !== null &&
-                    (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
-                  }
-                  helperText={
-                    proximoKmReferencia !== '' &&
-                    kmHeader !== null &&
-                    parseKmToNumberOrNull(proximoKmReferencia) !== null &&
-                    (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
-                      ? 'Debe ser mayor al KM Actual'
-                      : ''
-                  }
-                  FormHelperTextProps={{ sx: { margin: 0, fontSize: '0.65rem', position: 'absolute', top: '100%', whiteSpace: 'nowrap' } }}
-                />
-                <CustomButton
-                  size="small"
-                  onClick={() => {
-                    if (!proximoKmReferencia.trim()) {
-                      setError('Ingresá un valor en Próximo Km. Referencia');
-                      return;
-                    }
-                    const valorRef = parseKmToNumberOrNull(proximoKmReferencia);
-                    if (valorRef === null) {
-                      setError('El valor de Próximo Km. Referencia no es válido');
-                      return;
-                    }
-                    if (kmHeader !== null && valorRef <= kmHeader) {
-                      setError('El Próximo Km. Referencia debe ser mayor al KM Actual');
-                      return;
-                    }
-                    // Aplicar a todos los detalles que tengan proximoenkm habilitado
-                    setDetalles((prev) =>
-                      prev.map((d) => {
-                        const tipo = d.idtiposervicio ? tiposServicio.find((t) => t.id === d.idtiposervicio) : null;
-                        if (tipo?.proximoenkm) {
-                          return { ...d, proximoenkm: proximoKmReferencia };
-                        }
-                        return d;
-                      })
-                    );
-                  }}
-                  disabled={!headerReadyForDetalles || !proximoKmReferencia.trim()}
-                  sx={{ minWidth: 'auto', px: 1.5, py: 0.5, height: '40px' }}
-                >
-                  Aplicar
-                </CustomButton>
-              </Box>
               <Tooltip title={showDetalleNotas ? 'Ocultar comentarios' : 'Mostrar comentarios'}>
                 <span>
                   <IconButton
@@ -1225,6 +1164,71 @@ export default function ServicioForm(props: {
             >
               Servicio Personalizado
             </CustomButton>
+          </Box>
+
+          {/* Campo Próximo Km. Referencia con botón Aplicar */}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 3 }}>
+            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+              <TextField
+                label="Próx. Km Ref."
+                value={proximoKmReferencia}
+                onChange={(e) => {
+                  const value = formatKm(e.target.value);
+                  setProximoKmReferencia(value);
+                }}
+                inputProps={{ inputMode: 'numeric' }}
+                disabled={!headerReadyForDetalles}
+                size="small"
+                sx={{ width: 130 }}
+                error={
+                  proximoKmReferencia !== '' &&
+                  kmHeader !== null &&
+                  parseKmToNumberOrNull(proximoKmReferencia) !== null &&
+                  (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
+                }
+                helperText={
+                  proximoKmReferencia !== '' &&
+                  kmHeader !== null &&
+                  parseKmToNumberOrNull(proximoKmReferencia) !== null &&
+                  (parseKmToNumberOrNull(proximoKmReferencia) ?? 0) <= kmHeader
+                    ? 'Debe ser mayor al KM Actual'
+                    : ''
+                }
+                FormHelperTextProps={{ sx: { margin: 0, fontSize: '0.65rem', position: 'absolute', top: '100%', whiteSpace: 'nowrap' } }}
+              />
+              <CustomButton
+                size="small"
+                onClick={() => {
+                  if (!proximoKmReferencia.trim()) {
+                    setError('Ingresá un valor en Próximo Km. Referencia');
+                    return;
+                  }
+                  const valorRef = parseKmToNumberOrNull(proximoKmReferencia);
+                  if (valorRef === null) {
+                    setError('El valor de Próximo Km. Referencia no es válido');
+                    return;
+                  }
+                  if (kmHeader !== null && valorRef <= kmHeader) {
+                    setError('El Próximo Km. Referencia debe ser mayor al KM Actual');
+                    return;
+                  }
+                  // Aplicar a todos los detalles que tengan proximoenkm habilitado
+                  setDetalles((prev) =>
+                    prev.map((d) => {
+                      const tipo = d.idtiposervicio ? tiposServicio.find((t) => t.id === d.idtiposervicio) : null;
+                      if (tipo?.proximoenkm) {
+                        return { ...d, proximoenkm: proximoKmReferencia };
+                      }
+                      return d;
+                    })
+                  );
+                }}
+                disabled={!headerReadyForDetalles || !proximoKmReferencia.trim()}
+                sx={{ minWidth: 'auto', px: 1.5, py: 0.5, height: '40px' }}
+              >
+                Aplicar
+              </CustomButton>
+            </Box>
           </Box>
 
           {/* Dialog para seleccionar tipos de servicio específicos */}
@@ -1572,7 +1576,7 @@ export default function ServicioForm(props: {
                             )}
                           </Box>
 
-                          {showDetalleNotas && (
+                          {(showDetalleNotas || detallesComentariosVisibles.has(d.key)) && (
                             <Box
                               sx={{
                                 display: 'grid',
@@ -1592,18 +1596,55 @@ export default function ServicioForm(props: {
                             </Box>
                           )}
 
-                          {/* Icono Eliminar Fila - extremo derecho */}
+                          {/* Iconos de acción - extremo derecho */}
                           <Box
                             sx={{
                               position: 'absolute',
                               top: 8,
                               right: 8,
+                              display: 'flex',
+                              gap: 0.5,
                             }}
                           >
+                            <Tooltip title={detallesComentariosVisibles.has(d.key) ? 'Ocultar comentario' : 'Mostrar comentario'}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setDetallesComentariosVisibles((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(d.key)) {
+                                      next.delete(d.key);
+                                    } else {
+                                      next.add(d.key);
+                                    }
+                                    return next;
+                                  });
+                                }}
+                                sx={{
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid rgba(139, 26, 26, 0.25)',
+                                  borderRadius: '8px',
+                                }}
+                              >
+                                {detallesComentariosVisibles.has(d.key) ? (
+                                  <VisibilityOffIcon fontSize="small" />
+                                ) : (
+                                  <VisibilityIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Eliminar fila">
                               <IconButton
                                 size="small"
-                                onClick={() => removeDetalle(d.key)}
+                                onClick={() => {
+                                  // Remover también del set de comentarios visibles si existe
+                                  setDetallesComentariosVisibles((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(d.key);
+                                    return next;
+                                  });
+                                  removeDetalle(d.key);
+                                }}
                                 sx={{ color: 'var(--text-primary)' }}
                               >
                                 <DeleteIcon fontSize="small" />
