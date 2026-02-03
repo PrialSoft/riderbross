@@ -14,8 +14,7 @@ type TipoServicioRow = {
   idcategoriaservicio: number | null;
   predeterminado: boolean;
   resultadotipovalor: boolean;
-  resultadotipoporcentaje: boolean;
-  resultadotipoestado: boolean;
+  tipovalorpordefecto: string | null;
   proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
 };
@@ -43,8 +42,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
             idcategoriaservicio,
             predeterminado,
             resultadotipovalor,
-            resultadotipoporcentaje,
-            resultadotipoestado,
+            tipovalorpordefecto,
             proximoenkm,
             categoriasservicio ( nombre )
           `
@@ -61,8 +59,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
           idcategoriaservicio: row.idcategoriaservicio ?? null,
           predeterminado: row.predeterminado ?? false,
           resultadotipovalor: row.resultadotipovalor ?? false,
-          resultadotipoporcentaje: row.resultadotipoporcentaje ?? false,
-          resultadotipoestado: row.resultadotipoestado ?? false,
+          tipovalorpordefecto: row.tipovalorpordefecto ?? null,
           proximoenkm: row.proximoenkm ?? false,
           categoriasservicio: Array.isArray(row.categoriasservicio)
             ? row.categoriasservicio[0] ?? null
@@ -109,24 +106,9 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
         cell: ({ row }) => (row.original.resultadotipovalor ? 'Sí' : 'No'),
       },
       {
-        accessorKey: 'resultadotipoporcentaje',
-        header: () => (
-          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
-            <Box>Resultado</Box>
-            <Box>Porcentaje</Box>
-          </Box>
-        ),
-        cell: ({ row }) => (row.original.resultadotipoporcentaje ? 'Sí' : 'No'),
-      },
-      {
-        accessorKey: 'resultadotipoestado',
-        header: () => (
-          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
-            <Box>Resultado</Box>
-            <Box>Estado</Box>
-          </Box>
-        ),
-        cell: ({ row }) => (row.original.resultadotipoestado ? 'Sí' : 'No'),
+        accessorKey: 'tipovalorpordefecto',
+        header: 'Valor por Defecto',
+        cell: ({ row }) => row.original.tipovalorpordefecto || '—',
       },
       {
         accessorKey: 'proximoenkm',

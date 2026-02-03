@@ -33,8 +33,7 @@ export default function TipoServicioForm(props: {
     idcategoriaservicio: number | null;
     predeterminado?: boolean;
     resultadotipovalor?: boolean;
-    resultadotipoporcentaje?: boolean;
-    resultadotipoestado?: boolean;
+    tipovalorpordefecto?: string | null;
     proximoenkm?: boolean;
   };
 }) {
@@ -44,8 +43,7 @@ export default function TipoServicioForm(props: {
   const [idCategoria, setIdCategoria] = useState<number | ''>(props.initial?.idcategoriaservicio ?? '');
   const [predeterminado, setPredeterminado] = useState(props.initial?.predeterminado ?? false);
   const [resultadotipovalor, setResultadotipovalor] = useState(props.initial?.resultadotipovalor ?? false);
-  const [resultadotipoporcentaje, setResultadotipoporcentaje] = useState(props.initial?.resultadotipoporcentaje ?? false);
-  const [resultadotipoestado, setResultadotipoestado] = useState(props.initial?.resultadotipoestado ?? false);
+  const [tipovalorpordefecto, setTipovalorpordefecto] = useState(props.initial?.tipovalorpordefecto ?? '');
   const [proximoenkm, setProximoenkm] = useState(props.initial?.proximoenkm ?? false);
 
   const [categorias, setCategorias] = useState<CategoriaRow[]>([]);
@@ -90,8 +88,7 @@ export default function TipoServicioForm(props: {
         idcategoriaservicio: idCategoria === '' ? null : Number(idCategoria),
         predeterminado,
         resultadotipovalor,
-        resultadotipoporcentaje,
-        resultadotipoestado,
+        tipovalorpordefecto: tipovalorpordefecto.trim() ? tipovalorpordefecto.trim() : null,
         proximoenkm,
       };
 
@@ -207,27 +204,16 @@ export default function TipoServicioForm(props: {
           label="Resultado Tipo Valor"
         />
 
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={resultadotipoporcentaje}
-              onChange={(e) => setResultadotipoporcentaje(e.target.checked)}
-              disabled={saving}
-            />
-          }
-          label="Resultado Tipo Porcentaje"
-        />
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={resultadotipoestado}
-              onChange={(e) => setResultadotipoestado(e.target.checked)}
-              disabled={saving}
-            />
-          }
-          label="Resultado Tipo Estado"
-        />
+        {resultadotipovalor && (
+          <TextField
+            label="Valor por Defecto"
+            value={tipovalorpordefecto}
+            onChange={(e) => setTipovalorpordefecto(e.target.value)}
+            disabled={saving}
+            fullWidth
+            helperText="Este valor aparecerá por defecto en el campo de resultado valor del detalle de servicio"
+          />
+        )}
 
         <FormControlLabel
           control={

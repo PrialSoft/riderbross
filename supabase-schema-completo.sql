@@ -109,8 +109,8 @@ CREATE TABLE IF NOT EXISTS TiposServicio (
     Referencia VARCHAR(500),
     predeterminado BOOLEAN NOT NULL DEFAULT false, -- Campo agregado en migración: si es true, se carga automáticamente al presionar "Servicio General"
     resultadotipovalor BOOLEAN DEFAULT FALSE, -- Campo agregado en migración: indica si requiere valor de resultado
-    resultadotipoporcentaje BOOLEAN DEFAULT FALSE, -- Campo agregado en migración: indica si requiere porcentaje de resultado
-    resultadotipoestado BOOLEAN DEFAULT FALSE, -- Campo agregado en migración: indica si requiere estado de resultado
+    resultadotipoestado BOOLEAN DEFAULT TRUE, -- Siempre se asigna un estado (Ok, Regular, Malo), no se muestra en el form
+    tipovalorpordefecto VARCHAR(100) DEFAULT NULL, -- Valor por defecto que aparece en el campo de resultado valor del detalle de servicio
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (IdCategoriaServicio) REFERENCES CategoriasServicio(Id) ON DELETE CASCADE
@@ -123,8 +123,8 @@ CREATE INDEX IF NOT EXISTS idx_tiposservicio_predeterminado ON TiposServicio(pre
 
 -- Comentarios para documentación
 COMMENT ON COLUMN TiposServicio.resultadotipovalor IS 'Indica si este tipo de servicio requiere un valor de resultado';
-COMMENT ON COLUMN TiposServicio.resultadotipoporcentaje IS 'Indica si este tipo de servicio requiere un porcentaje de resultado';
-COMMENT ON COLUMN TiposServicio.resultadotipoestado IS 'Indica si este tipo de servicio requiere un estado de resultado';
+COMMENT ON COLUMN TiposServicio.resultadotipoestado IS 'Siempre se asigna un estado (Ok, Regular, Malo), no se muestra en el form';
+COMMENT ON COLUMN TiposServicio.tipovalorpordefecto IS 'Valor por defecto que aparece en el campo de resultado valor del detalle de servicio';
 
 -- ============================================
 -- TABLA: Estados
@@ -616,7 +616,9 @@ CREATE POLICY "Super admins pueden actualizar usuarios admin"
 -- 5. Campos agregados en migraciones:
 --    - CategoriasServicio.orden: Para ordenar las categorías
 --    - TiposServicio.predeterminado: Si es true, se carga automáticamente al presionar "Servicio General"
---    - TiposServicio.resultadotipovalor, resultadotipoporcentaje, resultadotipoestado: Indican qué tipo de resultado requiere
+--    - TiposServicio.resultadotipovalor: Indica si requiere valor de resultado
+--    - TiposServicio.resultadotipoestado: Siempre se asigna un estado (Ok, Regular, Malo)
+--    - TiposServicio.tipovalorpordefecto: Valor por defecto para el campo de resultado valor
 --    - DetallesServicio.resultadovalor, resultadoporcentaje: Almacenan los valores de resultado
 --    - Servicios.IdCliente: Relación directa con cliente
 --    - Clientes.commentarioprivado: Comentarios privados del cliente

@@ -37,6 +37,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import InfoIcon from '@mui/icons-material/Info';
 import dayjs from '@/lib/dayjs';
 import { supabase } from '@/lib/supabase/client';
 import { createServicio, updateServicio } from '@/app/admin/dashboard/_actions/servicios';
@@ -60,10 +61,10 @@ type TipoServicioRow = {
   id: number;
   nombre: string;
   idcategoriaservicio: number | null;
+  referencia: string | null;
   predeterminado: boolean;
   resultadotipovalor: boolean;
-  resultadotipoporcentaje: boolean;
-  resultadotipoestado: boolean;
+  tipovalorpordefecto: string | null;
   proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
   categoriaNombre?: string | null;
@@ -77,7 +78,6 @@ type DetalleServicioDraft = {
   comentario: string;
   idestado: number | null;
   resultadovalor: string;
-  resultadoporcentaje: string;
   resultadoestadoOk: boolean;
   resultadoestadoRegular: boolean;
   resultadoestadoMalo: boolean;
@@ -274,7 +274,6 @@ export default function ServicioForm(props: {
         comentario: d.comentario ?? '',
         idestado: idestado,
         resultadovalor: '',
-        resultadoporcentaje: '',
         resultadoestadoOk: idestado === 1,
         resultadoestadoRegular: idestado === 2,
         resultadoestadoMalo: idestado === 3,
@@ -327,7 +326,7 @@ export default function ServicioForm(props: {
           supabase.from('vehiculo').select('id, patente, modelo, idcliente, idmarca, "comentarioPrivado"').order('patente', { ascending: true }),
           supabase
             .from('tiposservicio')
-            .select('id, nombre, idcategoriaservicio, predeterminado, resultadotipovalor, resultadotipoporcentaje, resultadotipoestado, proximoenkm')
+            .select('id, nombre, idcategoriaservicio, referencia, predeterminado, resultadotipovalor, tipovalorpordefecto, proximoenkm')
             .order('nombre', { ascending: true }),
           supabase.from('estados').select('id, descripcion').order('descripcion', { ascending: true }),
           supabase
@@ -362,11 +361,10 @@ export default function ServicioForm(props: {
           setIdCliente(v?.idcliente ?? null);
         }
 
-        const tiposBase = ((tiposData as Array<TipoServicioRow & { resultadotipovalor?: boolean; resultadotipoporcentaje?: boolean; resultadotipoestado?: boolean; proximoenkm?: boolean }>) ?? []).map((t) => ({
+        const tiposBase = ((tiposData as Array<TipoServicioRow & { resultadotipovalor?: boolean; tipovalorpordefecto?: string | null; proximoenkm?: boolean }>) ?? []).map((t) => ({
           ...t,
           resultadotipovalor: t.resultadotipovalor ?? false,
-          resultadotipoporcentaje: t.resultadotipoporcentaje ?? false,
-          resultadotipoestado: t.resultadotipoestado ?? false,
+          tipovalorpordefecto: t.tipovalorpordefecto ?? null,
           proximoenkm: t.proximoenkm ?? false,
           categoriaNombre: null as string | null,
         }));
@@ -563,7 +561,6 @@ export default function ServicioForm(props: {
           comentario: '',
           idestado: null,
           resultadovalor: '',
-          resultadoporcentaje: '',
           resultadoestadoOk: false,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
@@ -597,7 +594,6 @@ export default function ServicioForm(props: {
           comentario: '',
           idestado: null,
           resultadovalor: '',
-          resultadoporcentaje: '',
           resultadoestadoOk: false,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
@@ -643,7 +639,6 @@ export default function ServicioForm(props: {
           comentario: d.comentario.trim() ? d.comentario.trim() : null,
           idestado: finalIdestado,
           resultadovalor: d.resultadovalor.trim() ? d.resultadovalor.trim() : null,
-          resultadoporcentaje: d.resultadoporcentaje.trim() ? d.resultadoporcentaje.trim() : null,
         };
       });
 
@@ -1124,7 +1119,6 @@ export default function ServicioForm(props: {
                       comentario: '',
                       idestado: null,
                       resultadovalor: '',
-                      resultadoporcentaje: '',
                       resultadoestadoOk: false,
                       resultadoestadoRegular: false,
                       resultadoestadoMalo: false,
@@ -1449,8 +1443,7 @@ export default function ServicioForm(props: {
                     // Determinar qué campos mostrar según el tipo de servicio
                     const showProximoenkm = tipoValue?.proximoenkm ?? false;
                     const showResultadoValor = tipoValue?.resultadotipovalor ?? false;
-                    const showResultadoPorcentaje = tipoValue?.resultadotipoporcentaje ?? false;
-                    const showResultadoEstado = tipoValue?.resultadotipoestado ?? false;
+                    // showResultadoEstado siempre es true - siempre se asigna un estado (Ok, Regular, Malo)
 
                     return (
                       <Box
@@ -1487,63 +1480,91 @@ export default function ServicioForm(props: {
                               alignItems: 'center',
                             }}
                           >
-                            <Autocomplete
-                              options={tiposServicio}
-                              value={tipoValue}
-                              onChange={(_, v) => {
-                                if (!v) return setDetalle(d.key, { idtiposervicio: null });
-                                const alreadyUsed = detalles.some(
-                                  (x) =>
-                                    x.key !== d.key && typeof x.idtiposervicio === 'number' && x.idtiposervicio === v.id
-                                );
-                                if (alreadyUsed) {
-                                  setError('Ese Tipo de Servicio ya fue agregado en otro detalle');
-                                  return;
-                                }
-                                setDetalle(d.key, { idtiposervicio: v.id });
-                              }}
-                              groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
-                              getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
-                              renderGroup={renderTipoGroup}
-                              disabled={!headerReadyForDetalles}
-                              renderOption={(props, option) => {
-                                const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
-                                return (
-                                  <Box
-                                    component="li"
-                                    key={key}
-                                    {...rest}
-                                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
-                                  >
-                                    <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
-                                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                                      {option.categoriaNombre || 'Sin categoría'}
-                                    </Typography>
-                                  </Box>
-                                );
-                              }}
-                              renderInput={(params) => (
-                                <TextField {...params} label={`Tipo de servicio #${(idxGlobal >= 0 ? idxGlobal : idxInGroup) + 1}`} />
-                              )}
-                              isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                              filterOptions={(options, state) => {
-                                const input = state.inputValue.toLowerCase();
-                                const currentId = d.idtiposervicio;
-                                return options
-                                  .filter((o) => {
-                                    // permitir el actual aunque esté en selectedTipoIds
-                                    if (typeof currentId === 'number' && o.id === currentId) return true;
-                                    if (selectedTipoIds.has(o.id)) return false;
-                                    return true;
-                                  })
-                                  .filter((o) => {
-                                    if (!input) return true;
-                                    const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
-                                    return label.includes(input);
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, gridColumn: { md: 'span 2' }, width: '100%' }}>
+                              <Autocomplete
+                                options={tiposServicio}
+                                value={tipoValue}
+                                onChange={(_, v) => {
+                                  if (!v) return setDetalle(d.key, { idtiposervicio: null });
+                                  const alreadyUsed = detalles.some(
+                                    (x) =>
+                                      x.key !== d.key && typeof x.idtiposervicio === 'number' && x.idtiposervicio === v.id
+                                  );
+                                  if (alreadyUsed) {
+                                    setError('Ese Tipo de Servicio ya fue agregado en otro detalle');
+                                    return;
+                                  }
+                                  // Si el tipo tiene un valor por defecto y el campo está vacío, establecerlo
+                                  const valorPorDefecto = v.tipovalorpordefecto && v.tipovalorpordefecto.trim() ? v.tipovalorpordefecto.trim() : '';
+                                  setDetalle(d.key, { 
+                                    idtiposervicio: v.id,
+                                    resultadovalor: d.resultadovalor || valorPorDefecto
                                   });
-                              }}
-                              sx={{ gridColumn: { md: 'span 2' } }}
-                            />
+                                }}
+                                groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
+                                getOptionLabel={(o) => `${o.nombre}${o.categoriaNombre ? ` — ${o.categoriaNombre}` : ''}`}
+                                renderGroup={renderTipoGroup}
+                                disabled={!headerReadyForDetalles}
+                                renderOption={(props, option) => {
+                                  const { key, ...rest } = props as unknown as { key: Key } & HTMLAttributes<HTMLLIElement>;
+                                  return (
+                                    <Box
+                                      component="li"
+                                      key={key}
+                                      {...rest}
+                                      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
+                                    >
+                                      <Typography sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>{option.nombre}</Typography>
+                                      <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                                        {option.categoriaNombre || 'Sin categoría'}
+                                      </Typography>
+                                    </Box>
+                                  );
+                                }}
+                                renderInput={(params) => (
+                                  <TextField {...params} label={`Tipo de servicio #${(idxGlobal >= 0 ? idxGlobal : idxInGroup) + 1}`} />
+                                )}
+                                isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                                filterOptions={(options, state) => {
+                                  const input = state.inputValue.toLowerCase();
+                                  const currentId = d.idtiposervicio;
+                                  return options
+                                    .filter((o) => {
+                                      // permitir el actual aunque esté en selectedTipoIds
+                                      if (typeof currentId === 'number' && o.id === currentId) return true;
+                                      if (selectedTipoIds.has(o.id)) return false;
+                                      return true;
+                                    })
+                                    .filter((o) => {
+                                      if (!input) return true;
+                                      const label = `${o.nombre} ${o.categoriaNombre ?? ''}`.toLowerCase();
+                                      return label.includes(input);
+                                    });
+                                }}
+                                sx={{ flex: 1 }}
+                              />
+                              {tipoValue?.referencia && tipoValue.referencia.trim() && (
+                                <Tooltip
+                                  title={tipoValue.referencia}
+                                  arrow
+                                  placement="top"
+                                  sx={{ mt: 1 }}
+                                >
+                                  <IconButton
+                                    size="small"
+                                    sx={{
+                                      color: 'var(--primary)',
+                                      mt: 0.5,
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(139, 26, 26, 0.1)',
+                                      },
+                                    }}
+                                  >
+                                    <InfoIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Box>
 
                             {showProximoenkm && (
                               <TextField
@@ -1562,16 +1583,7 @@ export default function ServicioForm(props: {
                                 onChange={(e) => setDetalle(d.key, { resultadovalor: e.target.value })}
                                 disabled={!headerReadyForDetalles}
                                 inputProps={{ maxLength: 50 }}
-                              />
-                            )}
-
-                            {showResultadoPorcentaje && (
-                              <TextField
-                                label="Resultado Porcentaje"
-                                value={d.resultadoporcentaje}
-                                onChange={(e) => setDetalle(d.key, { resultadoporcentaje: e.target.value })}
-                                disabled={!headerReadyForDetalles}
-                                inputProps={{ maxLength: 50 }}
+                                placeholder={tipoValue?.tipovalorpordefecto || undefined}
                               />
                             )}
                           </Box>

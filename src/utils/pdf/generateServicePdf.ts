@@ -28,12 +28,18 @@ interface ServicioCompleto {
     idtiposervicio: number | null;
     proximoenkm: number | null;
     comentario: string | null;
+    resultadovalor: string | null;
+    idestado: number | null;
     tiposservicio: {
       nombre: string;
+      referencia: string | null;
       categoriasservicio: {
         nombre: string;
         orden: number;
       } | null;
+    } | null;
+    estados: {
+      descripcion: string;
     } | null;
   }>;
 }
@@ -102,12 +108,18 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       idtiposervicio,
       proximoenkm,
       comentario,
+      resultadovalor,
+      idestado,
       tiposservicio (
         nombre,
+        referencia,
         categoriasservicio (
           nombre,
           orden
         )
+      ),
+      estados (
+        descripcion
       )
     `
     )
@@ -118,7 +130,10 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       idtiposservicio?: number | null;
       proximoenkm?: number | null;
       comentario?: string | null;
+      resultadovalor?: string | null;
+      idestado?: number | null;
       tiposservicio?: unknown;
+      estados?: unknown;
     };
     
     // Asegurar que idtiposservicio sea number | null
@@ -126,12 +141,14 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       typeof detalle.idtiposservicio === 'number' ? detalle.idtiposservicio : null;
     let tiposservicio: {
       nombre: string;
+      referencia: string | null;
       categoriasservicio: { nombre: string; orden: number } | null;
     } | null = null;
     if (detalle.tiposservicio) {
       if (Array.isArray(detalle.tiposservicio)) {
         tiposservicio = (detalle.tiposservicio[0] as unknown as {
           nombre: string;
+          referencia: string | null;
           categoriasservicio: { nombre: string; orden: number } | null;
         }) || null;
       } else {
@@ -150,11 +167,23 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       }
     }
 
+    let estados: { descripcion: string } | null = null;
+    if (detalle.estados) {
+      if (Array.isArray(detalle.estados)) {
+        estados = (detalle.estados[0] as unknown as { descripcion: string }) || null;
+      } else {
+        estados = (detalle.estados as unknown) as typeof estados;
+      }
+    }
+
     return {
       idtiposervicio: idtiposservicioValue,
       proximoenkm: detalle.proximoenkm ?? null,
       comentario: detalle.comentario ?? null,
+      resultadovalor: detalle.resultadovalor ?? null,
+      idestado: detalle.idestado ?? null,
       tiposservicio: tiposservicio ?? null,
+      estados: estados ?? null,
     };
   });
 
@@ -177,6 +206,13 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   const margin = 14;
   let yPos = margin;
 
+  // Nota sobre fuentes en jsPDF:
+  // jsPDF no tiene Montserrat por defecto. Para usar Montserrat real, necesitarías:
+  // 1. Archivos .ttf de Montserrat convertidos a base64
+  // 2. Usar doc.addFileToVFS() y doc.addFont()
+  // Por ahora, usaremos 'helvetica' que es la fuente más similar disponible
+  // Reemplazamos 'montserrat' por 'helvetica' en todas las llamadas a setFont
+
   // Colores
   const colorRed: [number, number, number] = [139, 26, 26];
   const colorBlack: [number, number, number] = [0, 0, 0];
@@ -193,7 +229,42 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   doc.setFillColor(...colorBgPrimary);
   doc.rect(0, 0, pageWidth, headerHeight + 5, 'F');
   
-  // Cargar y agregar logo
+  // Función para optimizar imagen manteniendo transparencia (PNG) o comprimiendo (JPEG)
+  const optimizeImage = (img: HTMLImageElement, maxDimension: number, quality: number = 0.8, preserveTransparency: boolean = false): string | null => {
+    try {
+      if (typeof document === 'undefined') return null;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      // Calcular dimensiones manteniendo proporción
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
+      if (width > maxDimension || height > maxDimension) {
+        const ratio = Math.min(maxDimension / width, maxDimension / height);
+        width = width * ratio;
+        height = height * ratio;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Si necesitamos preservar transparencia, usar PNG
+      if (preserveTransparency) {
+        ctx.drawImage(img, 0, 0, width, height);
+        return canvas.toDataURL('image/png');
+      } else {
+        // Para logo, usar JPEG con mejor calidad
+        ctx.drawImage(img, 0, 0, width, height);
+        return canvas.toDataURL('image/jpeg', quality);
+      }
+    } catch (error) {
+      console.warn('Error al optimizar imagen:', error);
+      return null;
+    }
+  };
+
+  // Cargar y agregar logo (optimizado)
   try {
     const logoImg = new Image();
     logoImg.crossOrigin = 'anonymous';
@@ -210,17 +281,24 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
     if (logoImg.complete && logoImg.naturalWidth > 0) {
       const logoWidth = 30;
       const logoHeight = (logoImg.naturalHeight / logoImg.naturalWidth) * logoWidth;
-      doc.addImage(logoImg, 'PNG', margin, yPos, logoWidth, logoHeight);
+      // Optimizar imagen antes de agregar (alta calidad para logo)
+      const optimizedLogo = optimizeImage(logoImg, 200, 0.95, false);
+      if (optimizedLogo) {
+        doc.addImage(optimizedLogo, 'JPEG', margin, yPos, logoWidth, logoHeight);
+      } else {
+        // Fallback: usar imagen original
+        doc.addImage(logoImg, 'PNG', margin, yPos, logoWidth, logoHeight);
+      }
     }
   } catch (error) {
     console.warn('Error al cargar el logo:', error);
   }
 
-  // Título centrado (en blanco sobre fondo oscuro)
+  // Título centrado (en blanco sobre fondo oscuro) - un poco más abajo
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('INFORME DE SERVICIO TÉCNICO', pageWidth / 2, yPos + 12, { align: 'center' });
+  doc.text('INFORME DE SERVICIO TÉCNICO', pageWidth / 2, yPos + 16, { align: 'center' });
   
   // Fecha a la derecha (en blanco sobre fondo oscuro)
   doc.setFontSize(10);
@@ -266,7 +344,7 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       vehiculoStartX + 25,
       vehiculoY
     );
-    vehiculoY += 5;
+    vehiculoY += 8; // Más espacio entre la línea de patente y los datos del vehículo
 
     // Marca, Modelo y KM Actual en una sola línea (ajustado para no salir de márgenes)
     let xPos = margin;
@@ -303,7 +381,13 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   }
 
   // Actualizar yPos al final de la cabecera (la mayor altura entre cliente y vehículo)
-  yPos = Math.max(headerY, vehiculoY) + 5;
+  yPos = Math.max(headerY, vehiculoY) + 12; // Aumentar espacio entre cliente y vehículo
+
+  // Borde separador antes de la nota general
+  doc.setDrawColor(...colorGrayDark);
+  doc.setLineWidth(0.8);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
+  yPos += 6; // Aumentar espacio después de la línea gris para separar el texto
 
   // Nota general
   doc.setFontSize(9);
@@ -344,55 +428,20 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
     return a[0].localeCompare(b[0], 'es');
   });
 
-  // Borde separador antes de SERVICIOS APLICADOS
-  doc.setDrawColor(...colorGrayDark);
-  doc.setLineWidth(0.8);
-  doc.line(margin, yPos, pageWidth - margin, yPos);
-  yPos += 5;
-
-  // Borde separador antes de SERVICIOS APLICADOS
-  doc.setDrawColor(...colorGrayDark);
-  doc.setLineWidth(0.8);
-  doc.line(margin, yPos, pageWidth - margin, yPos);
-  yPos += 5;
-
-  // Tabla de servicios aplicados
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('SERVICIOS APLICADOS', margin, yPos);
-  yPos += 6;
-
-  // Encabezados de tabla
+  // Encabezados de tabla se mostrarán dentro de cada categoría
+  // Redimensionar columnas: Servicios (1/3), Comentario (todo el ancho posible), Próximo+Estado (1/3 compartido)
+  const availableWidth = pageWidth - 2 * margin;
+  const servicioWidth = availableWidth / 3;  // 1/3 para servicios
+  const proximoEstadoWidth = availableWidth / 3;  // 1/3 para Próximo + Estado
+  const comentarioWidth = availableWidth - servicioWidth - proximoEstadoWidth;  // Resto para comentario
+  
   const colWidths = {
-    servicio: 75,
-    adm: 12,
-    esc: 12,
-    luz: 12,
-    proximo: 28,
-    comentario: 45,
+    servicio: servicioWidth,
+    comentario: comentarioWidth,      // Ocupa todo el ancho posible
+    proximo: proximoEstadoWidth / 2,   // Mitad del último tercio
+    estado: proximoEstadoWidth / 2,    // Mitad del último tercio
   };
   const startX = margin;
-  let xPos = startX;
-
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.text('SERVICIOS APLICADOS', xPos, yPos);
-  xPos += colWidths.servicio;
-  doc.text('ADM', xPos, yPos);
-  xPos += colWidths.adm;
-  doc.text('ESC', xPos, yPos);
-  xPos += colWidths.esc;
-  doc.text('LUZ', xPos, yPos);
-  xPos += colWidths.luz;
-  doc.text('PRÓXIMO', xPos, yPos);
-  xPos += colWidths.proximo;
-  doc.text('COMENTARIO', xPos, yPos);
-  yPos += 5;
-
-  // Línea separadora
-  doc.setDrawColor(...colorBlack);
-  doc.line(margin, yPos, pageWidth - margin, yPos);
-  yPos += 3;
 
   // Función para dibujar gradiente horizontal
   const drawGradient = (
@@ -420,6 +469,18 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   // Filas de servicios
   doc.setFont('helvetica', 'normal');
   categoriasOrdenadas.forEach(([categoriaNombre, detalles]) => {
+    // Determinar qué columnas mostrar para esta categoría
+    const tieneProximo = detalles.some(d => d.proximoenkm !== null);
+    
+    // Verificar si hay espacio suficiente para la cabecera + al menos una fila de datos
+    // Altura necesaria: cabecera (6) + espacio después (6) + altura mínima de fila (8) = 20
+    const espacioNecesario = 20;
+    if (yPos + espacioNecesario > pageHeight - 30) {
+      // No hay espacio suficiente, crear nueva página antes de dibujar la cabecera
+      doc.addPage();
+      yPos = margin;
+    }
+    
     // Título de categoría con gradiente de fondo
     if (categoriasOrdenadas.length > 1) {
       // Gradiente de --bg-secondary (izquierda) a --bg-primary (derecha)
@@ -440,119 +501,283 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
-      doc.text(categoriaNombre.toUpperCase(), margin, yPos);
+      
+      // Nombre de categoría y encabezados de columna en la misma línea
+      // Distribución: NOMBRE DEL SERVICIO (1/3), COMENTARIO (1/3), PRÓXIMO + ESTADO (1/3 compartido)
+      let headerX = margin;
+      doc.text(categoriaNombre.toUpperCase(), headerX, yPos);
+      headerX += colWidths.servicio; // NOMBRE DEL SERVICIO ocupa 1/3
+      
+      doc.text('COMENTARIO', headerX, yPos);
+      headerX += colWidths.comentario; // COMENTARIO ocupa 1/3
+      
+      // PRÓXIMO y ESTADO comparten el último 1/3
+      // Calcular posición de PRÓXIMO para alinearlo con los datos (centrado en su columna)
+      if (tieneProximo) {
+        const proximoHeaderX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
+        doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
+      }
+      
+      // ESTADO al margen derecho, alineado a la derecha
+      const estadoHeaderRightX = pageWidth - margin;
+      doc.text('ESTADO', estadoHeaderRightX, yPos, { align: 'right' });
+      
       doc.setTextColor(...colorBlack); // Restaurar color negro
       
-      // Border bottom oscuro
-      const categoriaBorderY = yPos + 2;
-      doc.setDrawColor(...colorGrayDark);
-      doc.setLineWidth(0.8);
-      doc.line(margin - 2, categoriaBorderY, pageWidth - margin + 2, categoriaBorderY);
+      yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
+      doc.setFont('helvetica', 'normal');
+    } else {
+      // Si solo hay una categoría, mostrar encabezados aquí
+      // Distribución: NOMBRE DEL SERVICIO (1/3), COMENTARIO (1/3), PRÓXIMO + ESTADO (1/3 compartido)
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      let headerX = margin;
       
-      yPos += 4;
+      // NOMBRE DEL SERVICIO (1/3) - aunque no se muestre el título, se reserva el espacio
+      headerX += colWidths.servicio;
+      
+      doc.text('COMENTARIO', headerX, yPos);
+      headerX += colWidths.comentario; // COMENTARIO ocupa 1/3
+      
+      // PRÓXIMO y ESTADO comparten el último 1/3
+      // Calcular posición de PRÓXIMO para alinearlo con los datos (centrado en su columna)
+      if (tieneProximo) {
+        const proximoHeaderX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
+        doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
+      }
+      
+      // ESTADO al margen derecho, alineado a la derecha
+      const estadoHeaderRightX = pageWidth - margin;
+      doc.text('ESTADO', estadoHeaderRightX, yPos, { align: 'right' });
+      
+      yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
       doc.setFont('helvetica', 'normal');
     }
 
-    detalles.forEach((detalle) => {
+    detalles.forEach((detalle, detalleIndex) => {
       if (yPos > pageHeight - 30) {
         doc.addPage();
         yPos = margin;
       }
 
       const nombreServicio = detalle.tiposservicio?.nombre || '—';
+      const referencia = detalle.tiposservicio?.referencia || null;
       const proximo = detalle.proximoenkm
         ? detalle.proximoenkm.toLocaleString('es-AR')
-        : '—';
-      const comentario = detalle.comentario || 'OK';
+        : null;
+      const comentario = detalle.comentario || null;
+      const estado = detalle.estados?.descripcion || '—';
 
-      xPos = startX;
+      let xPos = startX;
       doc.setFontSize(7.5);
-      // Servicio aplicado
-      const lines = doc.splitTextToSize(nombreServicio, colWidths.servicio - 2);
-      doc.text(lines[0] || nombreServicio.substring(0, 40), xPos, yPos);
-      if (lines.length > 1) {
-        doc.text(lines[1], xPos, yPos + 3.5);
-      }
-      xPos += colWidths.servicio;
-      doc.text('', xPos, yPos); // ADM (vacío por ahora)
-      xPos += colWidths.adm;
-      doc.text('', xPos, yPos); // ESC (vacío por ahora)
-      xPos += colWidths.esc;
-      doc.text('', xPos, yPos); // LUZ (vacío por ahora, puede tener valores como "0,65")
-      xPos += colWidths.luz;
-      // Próximo en rojo
-      doc.setTextColor(...colorRed);
-      doc.setFontSize(7.5);
-      const proximoText = proximo.length > 12 ? proximo.substring(0, 12) : proximo;
-      doc.text(proximoText, xPos, yPos, {
-        maxWidth: colWidths.proximo - 2,
-      });
       doc.setTextColor(...colorBlack);
-      xPos += colWidths.proximo;
-      doc.text(comentario.substring(0, 30), xPos, yPos, {
-        maxWidth: colWidths.comentario - 2,
+      
+      // SERVICIOS APLICADOS: Nombre + (Referencia) si existe
+      let servicioTexto = nombreServicio;
+      if (referencia && referencia.trim()) {
+        servicioTexto += ` (${referencia.trim()})`;
+      }
+      const lines = doc.splitTextToSize(servicioTexto, colWidths.servicio - 2);
+      const numLines = lines.length;
+      const lineHeight = 3.5; // Altura entre líneas
+      
+      // Dibujar todas las líneas del servicio (alineado a la izquierda)
+      lines.forEach((line: string, index: number) => {
+        doc.text(line, xPos, yPos + (index * lineHeight), { align: 'left' });
       });
+      
+      xPos += colWidths.servicio;
+      
+      // Comentario (si existe) - puede ocupar múltiples líneas también, alineado a la izquierda
+      // Orden: Servicios (1/3), Comentario (1/3), Próximo (1/6), Estado (1/6)
+      let comentarioLines: string[] = [''];
+      if (comentario && comentario.trim()) {
+        comentarioLines = doc.splitTextToSize(comentario.trim(), colWidths.comentario - 2);
+        comentarioLines.forEach((line: string, index: number) => {
+          doc.text(line, xPos, yPos + (index * lineHeight), {
+            align: 'left',
+            maxWidth: colWidths.comentario - 2,
+          });
+        });
+      }
+      xPos += colWidths.comentario;
+      
+      // Próximo en KM (solo si la categoría tiene este campo) - en rojo, centrado
+      // Calcular posición para alinearlo con el header
+      if (tieneProximo) {
+        const proximoCenterX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
+        if (proximo) {
+          doc.setTextColor(...colorRed);
+          const proximoText = proximo.length > 12 ? proximo.substring(0, 12) : proximo;
+          doc.text(proximoText, proximoCenterX, yPos, {
+            align: 'center',
+            maxWidth: colWidths.proximo - 2,
+          });
+          doc.setTextColor(...colorBlack);
+        }
+        xPos += colWidths.proximo;
+      } else {
+        // Si no hay PRÓXIMO, reservar el espacio igual
+        xPos += colWidths.proximo;
+      }
+      
+      // Estado - al margen derecho, alineado a la derecha
+      // Colores según el estado: OK = verde, Regular = amarillo, Malo = rojo
+      const estadoRightX = pageWidth - margin;
+      const estadoLower = estado.toLowerCase();
+      if (estadoLower.includes('ok')) {
+        doc.setTextColor(76, 175, 80); // Verde
+      } else if (estadoLower.includes('regular')) {
+        doc.setTextColor(255, 193, 7); // Amarillo
+      } else if (estadoLower.includes('malo')) {
+        doc.setTextColor(244, 67, 54); // Rojo
+      } else {
+        doc.setTextColor(...colorBlack); // Negro por defecto
+      }
+      doc.text(estado.substring(0, 20), estadoRightX, yPos, {
+        align: 'right',
+        maxWidth: colWidths.estado - 2,
+      });
+      doc.setTextColor(...colorBlack); // Restaurar color negro
 
-      yPos += 5;
+      // Calcular la altura de la fila según la altura máxima (servicio o comentario)
+      const maxLinesInRow = Math.max(numLines, comentarioLines.length);
+      const rowHeight = maxLinesInRow > 1 ? 5 + ((maxLinesInRow - 1) * lineHeight) : 5;
+      
+      // Calcular dónde termina realmente el contenido de esta fila
+      // El texto se dibuja empezando en yPos
+      // Si hay 1 línea: el texto está en yPos y termina aproximadamente en yPos + 4
+      // Si hay N líneas: la última línea está en yPos + ((N-1) * lineHeight) y termina en yPos + ((N-1) * lineHeight) + 4
+      // La altura total del contenido es: 4 (altura base del texto) + ((maxLinesInRow - 1) * lineHeight)
+      const alturaContenido = 4 + (maxLinesInRow > 1 ? (maxLinesInRow - 1) * lineHeight : 0);
+      const finalYPos = yPos + alturaContenido;
+      
+      // Línea sutil y delgada entre cada fila para ayudar a la lectura
+      // Dibujar la línea al pie del texto, justo después del contenido de la fila
+      // Dibujar para TODOS los detalles, incluyendo el primero (excepto el último de cada categoría)
+      const esUltimoDetalle = detalles.indexOf(detalle) === detalles.length - 1;
+      if (!esUltimoDetalle) {
+        // Dibujar la línea justo después del contenido visible, con un pequeño espacio
+        const lineaY = finalYPos + 1; // 1 punto después del final del texto
+        doc.setDrawColor(220, 220, 220); // Gris muy claro y sutil
+        doc.setLineWidth(0.1); // Línea muy delgada
+        doc.line(margin, lineaY, pageWidth - margin, lineaY);
+      }
+      
+      // Incrementar yPos para la siguiente fila
+      yPos += rowHeight;
     });
   });
 
-
-
-  // Observaciones
+  // Observaciones - después de todos los servicios (con mismo estilo que categorías)
   if (servicioCompleto.servicio.comentario) {
     if (yPos > pageHeight - 40) {
       doc.addPage();
       yPos = margin;
     }
     yPos += 8;
-    doc.setFontSize(10);
+    
+    // Título de OBSERVACIONES con gradiente de fondo (igual que categorías)
+    const observacionesX = margin - 2;
+    const observacionesY = yPos - 4;
+    const observacionesWidth = pageWidth - 2 * margin + 4;
+    const observacionesHeight = 6;
+    
+    drawGradient(
+      observacionesX,
+      observacionesY,
+      observacionesWidth,
+      observacionesHeight,
+      colorBgSecondary, // Izquierda: --bg-secondary (#470707)
+      colorBgPrimary    // Derecha: --bg-primary (#04000C)
+    );
+    
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
     doc.text('OBSERVACIONES', margin, yPos);
-    yPos += 5;
+    doc.setTextColor(...colorBlack); // Restaurar color negro
+    
+    // Más espacio entre el header y el contenido (sin border bottom)
+    yPos += 8; // Aumentado de 4 a 8 para más espacio
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text(servicioCompleto.servicio.comentario, margin, yPos, {
       maxWidth: pageWidth - 2 * margin,
     });
+    yPos += 10;
   }
 
-  // Footer
-  const footerY = pageHeight - 15;
+  // Footer - se agregará al final de la última página con gradiente como las categorías
+  const footerHeight = 20;
+  const footerY = pageHeight - footerHeight;
+  const footerX = 0;
+  const footerWidth = pageWidth;
   
-  // Cargar y agregar imagen de redes sociales
+  // Aplicar gradiente de fondo al footer (igual que las categorías)
+  drawGradient(
+    footerX,
+    footerY,
+    footerWidth,
+    footerHeight,
+    colorBgSecondary, // Izquierda: --bg-secondary (#470707)
+    colorBgPrimary    // Derecha: --bg-primary (#04000C)
+  );
+  
+  // Cargar y agregar icono de Instagram blanco con RIDER.BROSS y URL en la misma línea
   try {
-    const redesImg = new Image();
-    redesImg.crossOrigin = 'anonymous';
-    redesImg.src = '/images/Redes.png';
+    // Crear un icono de Instagram simple en blanco usando SVG o buscar imagen
+    // Por ahora, usaremos un círculo blanco como placeholder para Instagram
+    // En producción, deberías tener un archivo de icono de Instagram blanco
+    const instagramIcon = new Image();
+    instagramIcon.crossOrigin = 'anonymous';
+    // Intentar cargar desde una URL de icono de Instagram blanco o usar un SVG
+    // Por ahora, crearemos un icono simple
+    instagramIcon.src = 'data:image/svg+xml;base64,' + btoa(`
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" stroke-width="2" fill="none"/>
+        <circle cx="12" cy="12" r="4" stroke="white" stroke-width="2" fill="none"/>
+        <circle cx="17" cy="7" r="1" fill="white"/>
+      </svg>
+    `);
     
     await new Promise<void>((resolve) => {
-      redesImg.onload = () => resolve();
-      redesImg.onerror = () => {
-        console.warn('No se pudo cargar la imagen de redes, continuando sin ella');
+      instagramIcon.onload = () => resolve();
+      instagramIcon.onerror = () => {
+        console.warn('No se pudo cargar el icono de Instagram, usando texto');
         resolve();
       };
     });
 
-    if (redesImg.complete && redesImg.naturalWidth > 0) {
-      const redesWidth = 80;
-      const redesHeight = (redesImg.naturalHeight / redesImg.naturalWidth) * redesWidth;
-      const redesX = pageWidth / 2 - redesWidth / 2;
-      const redesY = footerY - redesHeight - 2;
-      doc.addImage(redesImg, 'PNG', redesX, redesY, redesWidth, redesHeight);
+      const iconWidth = 7; // Aún más chico
+      const iconHeight = 7; // Aún más chico
+    const iconX = margin;
+    const iconY = footerY + (footerHeight - iconHeight) / 2;
+    
+    if (instagramIcon.complete && instagramIcon.naturalWidth > 0) {
+      // Optimizar imagen manteniendo transparencia
+      const optimizedIcon = optimizeImage(instagramIcon, 50, 1.0, true);
+      if (optimizedIcon) {
+        doc.addImage(optimizedIcon, 'PNG', iconX, iconY, iconWidth, iconHeight);
+      } else {
+        doc.addImage(instagramIcon, 'PNG', iconX, iconY, iconWidth, iconHeight);
+      }
     }
+    
+    // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea (texto blanco sobre fondo con gradiente)
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255); // Texto blanco
+    doc.text('RIDER.BROSS', iconX + iconWidth + 5, iconY + iconHeight / 2 + 2);
+    
+    // URL del sitio web a la derecha en la misma línea (texto blanco, solo www.riderbross.com en mayúscula)
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(255, 255, 255); // Texto blanco
+    doc.text('WWW.RIDERBROSS.COM', pageWidth - margin, iconY + iconHeight / 2 + 2, { align: 'right' });
   } catch (error) {
-    console.warn('Error al cargar la imagen de redes:', error);
+    console.warn('Error al cargar el icono de Instagram:', error);
   }
-  
-  doc.setFontSize(8);
-  doc.setTextColor(...colorGray);
-  doc.text(
-    '¡Muchas gracias por elegirnos, te esperamos la próxima!',
-    pageWidth / 2,
-    footerY + 4,
-    { align: 'center' }
-  );
 
   // Guardar PDF
   const patente = servicioCompleto.vehiculo?.patente

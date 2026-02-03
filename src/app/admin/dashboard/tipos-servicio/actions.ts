@@ -8,8 +8,7 @@ export async function createTipoServicio(input: {
   idcategoriaservicio: number | null;
   predeterminado: boolean;
   resultadotipovalor: boolean;
-  resultadotipoporcentaje: boolean;
-  resultadotipoestado: boolean;
+  tipovalorpordefecto: string | null;
   proximoenkm: boolean;
 }) {
   const supabase = await createClient();
@@ -25,8 +24,8 @@ export async function createTipoServicio(input: {
     idcategoriaservicio: input.idcategoriaservicio ?? null,
     predeterminado: input.predeterminado ?? false,
     resultadotipovalor: input.resultadotipovalor ?? false,
-    resultadotipoporcentaje: input.resultadotipoporcentaje ?? false,
-    resultadotipoestado: input.resultadotipoestado ?? false,
+    tipovalorpordefecto: input.tipovalorpordefecto?.trim() || null,
+    resultadotipoestado: true, // Siempre se asigna un estado
     proximoenkm: input.proximoenkm ?? false,
   });
 
@@ -39,8 +38,7 @@ export async function updateTipoServicio(id: number, input: {
   idcategoriaservicio: number | null;
   predeterminado: boolean;
   resultadotipovalor: boolean;
-  resultadotipoporcentaje: boolean;
-  resultadotipoestado: boolean;
+  tipovalorpordefecto: string | null;
   proximoenkm: boolean;
 }) {
   const supabase = await createClient();
@@ -58,8 +56,8 @@ export async function updateTipoServicio(id: number, input: {
       idcategoriaservicio: input.idcategoriaservicio ?? null,
       predeterminado: input.predeterminado ?? false,
       resultadotipovalor: input.resultadotipovalor ?? false,
-      resultadotipoporcentaje: input.resultadotipoporcentaje ?? false,
-      resultadotipoestado: input.resultadotipoestado ?? false,
+      tipovalorpordefecto: input.tipovalorpordefecto?.trim() || null,
+      resultadotipoestado: true, // Siempre se asigna un estado
       proximoenkm: input.proximoenkm ?? false,
     })
     .eq('id', id);
