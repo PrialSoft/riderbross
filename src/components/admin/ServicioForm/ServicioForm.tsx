@@ -1,7 +1,7 @@
 'use client';
 
 import type { HTMLAttributes, Key } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Alert,
@@ -33,8 +33,6 @@ import type { AutocompleteRenderGroupParams } from '@mui/material/Autocomplete';
 import SaveIcon from '@mui/icons-material/Save';
 import CustomButton from '@/utils/ui/button/CustomButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import InfoIcon from '@mui/icons-material/Info';
@@ -63,8 +61,7 @@ type TipoServicioRow = {
   idcategoriaservicio: number | null;
   referencia: string | null;
   predeterminado: boolean;
-  resultadotipovalor: boolean;
-  tipovalorpordefecto: string | null;
+  comentariopordefecto: string | null;
   proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
   categoriaNombre?: string | null;
@@ -77,7 +74,6 @@ type DetalleServicioDraft = {
   proximoenkm: string; // mostrado con separador
   comentario: string;
   idestado: number | null;
-  resultadovalor: string;
   resultadoestadoOk: boolean;
   resultadoestadoRegular: boolean;
   resultadoestadoMalo: boolean;
@@ -265,7 +261,7 @@ export default function ServicioForm(props: {
   const [detalles, setDetalles] = useState<DetalleServicioDraft[]>(() => {
     const fromInitial = props.initial?.detalles ?? [];
     return fromInitial.map((d, idx) => {
-      // Mapear idestado a los checkboxes
+      // Mapear idestado a los checkboxes - siempre por defecto Ok (id 1)
       const idestado = d.idestado ?? 1; // Por defecto Ok (id 1)
       return {
         key: `init-${d.id ?? idx}`,
@@ -273,7 +269,6 @@ export default function ServicioForm(props: {
         proximoenkm: d.proximoenkm ? formatKm(String(d.proximoenkm)) : '',
         comentario: d.comentario ?? '',
         idestado: idestado,
-        resultadovalor: '',
         resultadoestadoOk: idestado === 1,
         resultadoestadoRegular: idestado === 2,
         resultadoestadoMalo: idestado === 3,
@@ -285,8 +280,6 @@ export default function ServicioForm(props: {
   const [loadingRefs, setLoadingRefs] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDetalleNotas, setShowDetalleNotas] = useState(false);
-  const [detallesComentariosVisibles, setDetallesComentariosVisibles] = useState<Set<string>>(new Set());
 
   // Foto del servicio (vehículo)
   const [fotoBase64, setFotoBase64] = useState<string | null>(null); // base64 sin prefix
@@ -326,7 +319,7 @@ export default function ServicioForm(props: {
           supabase.from('vehiculo').select('id, patente, modelo, idcliente, idmarca, "comentarioPrivado"').order('patente', { ascending: true }),
           supabase
             .from('tiposservicio')
-            .select('id, nombre, idcategoriaservicio, referencia, predeterminado, resultadotipovalor, tipovalorpordefecto, proximoenkm')
+            .select('id, nombre, idcategoriaservicio, referencia, predeterminado, comentariopordefecto, proximoenkm')
             .order('nombre', { ascending: true }),
           supabase.from('estados').select('id, descripcion').order('descripcion', { ascending: true }),
           supabase
@@ -361,10 +354,9 @@ export default function ServicioForm(props: {
           setIdCliente(v?.idcliente ?? null);
         }
 
-        const tiposBase = ((tiposData as Array<TipoServicioRow & { resultadotipovalor?: boolean; tipovalorpordefecto?: string | null; proximoenkm?: boolean }>) ?? []).map((t) => ({
+        const tiposBase = ((tiposData as Array<TipoServicioRow & { comentariopordefecto?: string | null; proximoenkm?: boolean }>) ?? []).map((t) => ({
           ...t,
-          resultadotipovalor: t.resultadotipovalor ?? false,
-          tipovalorpordefecto: t.tipovalorpordefecto ?? null,
+          comentariopordefecto: t.comentariopordefecto ?? null,
           proximoenkm: t.proximoenkm ?? false,
           categoriaNombre: null as string | null,
         }));
@@ -450,6 +442,21 @@ export default function ServicioForm(props: {
     return m;
   }, [tiposServicio]);
 
+  // Crear una clave de agrupación que solo cambia cuando cambian los campos relevantes para la agrupación
+  // (idtiposervicio y el orden de los detalles, no comentario u otros campos)
+  // Esto evita recalcular groupedDetalles cuando solo cambia el comentario
+  const detallesGroupingKey = useMemo(() => {
+    return detalles.map((d) => `${d.key}:${d.idtiposervicio ?? 'null'}`).join('|');
+  }, [
+    detalles.length,
+    // Crear una cadena estable basada solo en key e idtiposervicio
+    detalles.reduce((acc, d, idx) => {
+      if (idx > 0) acc += '|';
+      acc += `${d.key}:${d.idtiposervicio ?? 'null'}`;
+      return acc;
+    }, '')
+  ]);
+
   const groupedDetalles = useMemo(() => {
     const groups = new Map<string, Array<DetalleServicioDraft & { _idx: number }>>();
     const categoriaOrdenMap = new Map<string, number>(); // Mapa para almacenar el orden de cada categoría
@@ -489,7 +496,7 @@ export default function ServicioForm(props: {
         group,
         items: items.sort((x, y) => x._idx - y._idx),
       }));
-  }, [detalles, tiposById]);
+  }, [detalles, tiposById, detallesGroupingKey]);
 
   const hasProximoMenorAKmHeader = useMemo(() => {
     if (!headerReadyForDetalles) return false;
@@ -522,10 +529,8 @@ export default function ServicioForm(props: {
         idtiposervicio: null,
         proximoenkm: '',
         comentario: '',
-        idestado: null,
-        resultadovalor: '',
-        resultadoporcentaje: '',
-        resultadoestadoOk: false,
+        idestado: 1, // Por defecto Ok (id 1)
+        resultadoestadoOk: true,
         resultadoestadoRegular: false,
         resultadoestadoMalo: false,
         ...partial,
@@ -533,12 +538,13 @@ export default function ServicioForm(props: {
     ]);
   };
 
-  const removeDetalle = (key: string) => setDetalles((prev) => prev.filter((d) => d.key !== key));
+  const removeDetalle = useCallback((key: string) => {
+    setDetalles((prev) => prev.filter((d) => d.key !== key));
+  }, []);
 
-
-  const setDetalle = (key: string, patch: Partial<DetalleServicioDraft>) => {
+  const setDetalle = useCallback((key: string, patch: Partial<DetalleServicioDraft>) => {
     setDetalles((prev) => prev.map((d) => (d.key === key ? { ...d, ...patch } : d)));
-  };
+  }, []);
 
   const handleAddSelectedTipos = () => {
     if (selectedTiposForDialog.length === 0) return;
@@ -559,9 +565,8 @@ export default function ServicioForm(props: {
           idtiposervicio: t.id,
           proximoenkm: '',
           comentario: '',
-          idestado: null,
-          resultadovalor: '',
-          resultadoestadoOk: false,
+          idestado: 1, // Por defecto Ok (id 1)
+          resultadoestadoOk: true,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
         });
@@ -592,9 +597,8 @@ export default function ServicioForm(props: {
           idtiposervicio: t.id,
           proximoenkm: '',
           comentario: '',
-          idestado: null,
-          resultadovalor: '',
-          resultadoestadoOk: false,
+          idestado: 1, // Por defecto Ok (id 1)
+          resultadoestadoOk: true,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
         });
@@ -638,7 +642,6 @@ export default function ServicioForm(props: {
           proximoenkm: parseKmToNumberOrNull(d.proximoenkm),
           comentario: d.comentario.trim() ? d.comentario.trim() : null,
           idestado: finalIdestado,
-          resultadovalor: d.resultadovalor.trim() ? d.resultadovalor.trim() : null,
         };
       });
 
@@ -1064,23 +1067,6 @@ export default function ServicioForm(props: {
               >
                 Detalles del Servicio ({detalles.length})
               </Typography>
-
-              <Tooltip title={showDetalleNotas ? 'Ocultar comentarios' : 'Mostrar comentarios'}>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={() => setShowDetalleNotas((v) => !v)}
-                    sx={{
-                      color: 'var(--text-primary)',
-                      border: '1px solid rgba(139, 26, 26, 0.25)',
-                      borderRadius: '10px',
-                    }}
-                    aria-label={showDetalleNotas ? 'Ocultar comentarios' : 'Mostrar comentarios'}
-                  >
-                    {showDetalleNotas ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
-                  </IconButton>
-                </span>
-              </Tooltip>
             </Box>
           </Box>
 
@@ -1112,14 +1098,15 @@ export default function ServicioForm(props: {
                   });
                   tiposPredeterminados.forEach((t) => {
                     if (existing.has(t.id)) return; // no duplicar tipos ya agregados
+                    // Obtener el comentario por defecto del tipo de servicio
+                    const comentarioPorDefecto = t.comentariopordefecto && t.comentariopordefecto.trim() ? t.comentariopordefecto.trim() : '';
                     next.push({
                       key: `pred-${next.length}`,
                       idtiposervicio: t.id,
                       proximoenkm: '',
-                      comentario: '',
-                      idestado: null,
-                      resultadovalor: '',
-                      resultadoestadoOk: false,
+                      comentario: comentarioPorDefecto,
+                      idestado: 1, // Por defecto Ok (id 1)
+                      resultadoestadoOk: true,
                       resultadoestadoRegular: false,
                       resultadoestadoMalo: false,
                     });
@@ -1442,8 +1429,7 @@ export default function ServicioForm(props: {
                     
                     // Determinar qué campos mostrar según el tipo de servicio
                     const showProximoenkm = tipoValue?.proximoenkm ?? false;
-                    const showResultadoValor = tipoValue?.resultadotipovalor ?? false;
-                    // showResultadoEstado siempre es true - siempre se asigna un estado (Ok, Regular, Malo)
+                    // Siempre se muestra el estado - siempre se asigna un estado (Ok, Regular, Malo)
 
                     return (
                       <Box
@@ -1475,12 +1461,12 @@ export default function ServicioForm(props: {
                               gap: 1.25,
                               gridTemplateColumns: {
                                 xs: '1fr',
-                                md: '2fr 1fr 1fr 1fr 1fr 1fr auto',
+                                md: '1.5fr 2fr 1fr auto',
                               },
                               alignItems: 'center',
                             }}
                           >
-                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, gridColumn: { md: 'span 2' }, width: '100%' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, width: '100%' }}>
                               <Autocomplete
                                 options={tiposServicio}
                                 value={tipoValue}
@@ -1494,11 +1480,11 @@ export default function ServicioForm(props: {
                                     setError('Ese Tipo de Servicio ya fue agregado en otro detalle');
                                     return;
                                   }
-                                  // Si el tipo tiene un valor por defecto y el campo está vacío, establecerlo
-                                  const valorPorDefecto = v.tipovalorpordefecto && v.tipovalorpordefecto.trim() ? v.tipovalorpordefecto.trim() : '';
+                                  // Si el tipo tiene un comentario por defecto y el campo está vacío, establecerlo
+                                  const comentarioPorDefecto = v.comentariopordefecto && v.comentariopordefecto.trim() ? v.comentariopordefecto.trim() : '';
                                   setDetalle(d.key, { 
                                     idtiposervicio: v.id,
-                                    resultadovalor: d.resultadovalor || valorPorDefecto
+                                    comentario: d.comentario || comentarioPorDefecto
                                   });
                                 }}
                                 groupBy={(o) => o.categoriaNombre || 'Sin categoría'}
@@ -1566,6 +1552,14 @@ export default function ServicioForm(props: {
                               )}
                             </Box>
 
+                            <TextField
+                              label="Comentario"
+                              value={d.comentario}
+                              onChange={(e) => setDetalle(d.key, { comentario: e.target.value })}
+                              disabled={!headerReadyForDetalles}
+                              fullWidth
+                            />
+
                             {showProximoenkm && (
                               <TextField
                                 label="Próximo (km)"
@@ -1576,37 +1570,7 @@ export default function ServicioForm(props: {
                               />
                             )}
 
-                            {showResultadoValor && (
-                              <TextField
-                                label="Resultado Valor"
-                                value={d.resultadovalor}
-                                onChange={(e) => setDetalle(d.key, { resultadovalor: e.target.value })}
-                                disabled={!headerReadyForDetalles}
-                                inputProps={{ maxLength: 50 }}
-                                placeholder={tipoValue?.tipovalorpordefecto || undefined}
-                              />
-                            )}
                           </Box>
-
-                          {(showDetalleNotas || detallesComentariosVisibles.has(d.key)) && (
-                            <Box
-                              sx={{
-                                display: 'grid',
-                                gap: 1.25,
-                                mt: 1.25,
-                                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                              }}
-                            >
-                              <TextField
-                                label="Comentario (detalle)"
-                                value={d.comentario}
-                                onChange={(e) => setDetalle(d.key, { comentario: e.target.value })}
-                                multiline
-                                minRows={2}
-                                disabled={!headerReadyForDetalles}
-                              />
-                            </Box>
-                          )}
 
                           {/* Iconos de acción - extremo derecho */}
                           <Box
@@ -1618,43 +1582,10 @@ export default function ServicioForm(props: {
                               gap: 0.5,
                             }}
                           >
-                            <Tooltip title={detallesComentariosVisibles.has(d.key) ? 'Ocultar comentario' : 'Mostrar comentario'}>
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  setDetallesComentariosVisibles((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(d.key)) {
-                                      next.delete(d.key);
-                                    } else {
-                                      next.add(d.key);
-                                    }
-                                    return next;
-                                  });
-                                }}
-                                sx={{
-                                  color: 'var(--text-primary)',
-                                  border: '1px solid rgba(139, 26, 26, 0.25)',
-                                  borderRadius: '8px',
-                                }}
-                              >
-                                {detallesComentariosVisibles.has(d.key) ? (
-                                  <VisibilityOffIcon fontSize="small" />
-                                ) : (
-                                  <VisibilityIcon fontSize="small" />
-                                )}
-                              </IconButton>
-                            </Tooltip>
                             <Tooltip title="Eliminar fila">
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  // Remover también del set de comentarios visibles si existe
-                                  setDetallesComentariosVisibles((prev) => {
-                                    const next = new Set(prev);
-                                    next.delete(d.key);
-                                    return next;
-                                  });
                                   removeDetalle(d.key);
                                 }}
                                 sx={{ color: 'var(--text-primary)' }}
@@ -1672,7 +1603,9 @@ export default function ServicioForm(props: {
                             }
                             onChange={(e) => {
                               const value = e.target.value;
+                              const newIdestado = value === '1' ? 1 : value === '2' ? 2 : 3;
                               setDetalle(d.key, {
+                                idestado: newIdestado,
                                 resultadoestadoOk: value === '1',
                                 resultadoestadoRegular: value === '2',
                                 resultadoestadoMalo: value === '3',

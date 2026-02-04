@@ -13,8 +13,7 @@ type TipoServicioRow = {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
-  resultadotipovalor: boolean;
-  tipovalorpordefecto: string | null;
+  comentariopordefecto: string | null;
   proximoenkm: boolean;
   categoriasservicio?: { nombre: string } | null;
 };
@@ -41,8 +40,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
             referencia,
             idcategoriaservicio,
             predeterminado,
-            resultadotipovalor,
-            tipovalorpordefecto,
+            comentariopordefecto,
             proximoenkm,
             categoriasservicio ( nombre )
           `
@@ -58,8 +56,7 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
           referencia: row.referencia ?? null,
           idcategoriaservicio: row.idcategoriaservicio ?? null,
           predeterminado: row.predeterminado ?? false,
-          resultadotipovalor: row.resultadotipovalor ?? false,
-          tipovalorpordefecto: row.tipovalorpordefecto ?? null,
+          comentariopordefecto: row.comentariopordefecto ?? null,
           proximoenkm: row.proximoenkm ?? false,
           categoriasservicio: Array.isArray(row.categoriasservicio)
             ? row.categoriasservicio[0] ?? null
@@ -96,19 +93,9 @@ export function TiposServicioTable(props?: { onEdit?: (id: number) => void; relo
         cell: ({ row }) => (row.original.predeterminado ? 'Sí' : 'No'),
       },
       {
-        accessorKey: 'resultadotipovalor',
-        header: () => (
-          <Box sx={{ lineHeight: 1.2, textAlign: 'center' }}>
-            <Box>Resultado</Box>
-            <Box>Valor</Box>
-          </Box>
-        ),
-        cell: ({ row }) => (row.original.resultadotipovalor ? 'Sí' : 'No'),
-      },
-      {
-        accessorKey: 'tipovalorpordefecto',
-        header: 'Valor por Defecto',
-        cell: ({ row }) => row.original.tipovalorpordefecto || '—',
+        accessorKey: 'comentariopordefecto',
+        header: 'Comentario por Defecto',
+        cell: ({ row }) => row.original.comentariopordefecto || '—',
       },
       {
         accessorKey: 'proximoenkm',

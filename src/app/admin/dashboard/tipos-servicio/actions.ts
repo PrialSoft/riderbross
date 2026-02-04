@@ -7,8 +7,7 @@ export async function createTipoServicio(input: {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
-  resultadotipovalor: boolean;
-  tipovalorpordefecto: string | null;
+  comentariopordefecto: string | null;
   proximoenkm: boolean;
 }) {
   const supabase = await createClient();
@@ -23,8 +22,7 @@ export async function createTipoServicio(input: {
     referencia: input.referencia?.trim() || null,
     idcategoriaservicio: input.idcategoriaservicio ?? null,
     predeterminado: input.predeterminado ?? false,
-    resultadotipovalor: input.resultadotipovalor ?? false,
-    tipovalorpordefecto: input.tipovalorpordefecto?.trim() || null,
+    comentariopordefecto: input.comentariopordefecto?.trim() || null,
     resultadotipoestado: true, // Siempre se asigna un estado
     proximoenkm: input.proximoenkm ?? false,
   });
@@ -37,8 +35,7 @@ export async function updateTipoServicio(id: number, input: {
   referencia: string | null;
   idcategoriaservicio: number | null;
   predeterminado: boolean;
-  resultadotipovalor: boolean;
-  tipovalorpordefecto: string | null;
+  comentariopordefecto: string | null;
   proximoenkm: boolean;
 }) {
   const supabase = await createClient();
@@ -55,8 +52,7 @@ export async function updateTipoServicio(id: number, input: {
       referencia: input.referencia?.trim() || null,
       idcategoriaservicio: input.idcategoriaservicio ?? null,
       predeterminado: input.predeterminado ?? false,
-      resultadotipovalor: input.resultadotipovalor ?? false,
-      tipovalorpordefecto: input.tipovalorpordefecto?.trim() || null,
+      comentariopordefecto: input.comentariopordefecto?.trim() || null,
       resultadotipoestado: true, // Siempre se asigna un estado
       proximoenkm: input.proximoenkm ?? false,
     })

@@ -32,8 +32,7 @@ export default function TipoServicioForm(props: {
     referencia: string | null;
     idcategoriaservicio: number | null;
     predeterminado?: boolean;
-    resultadotipovalor?: boolean;
-    tipovalorpordefecto?: string | null;
+    comentariopordefecto?: string | null;
     proximoenkm?: boolean;
   };
 }) {
@@ -42,8 +41,7 @@ export default function TipoServicioForm(props: {
   const [referencia, setReferencia] = useState(props.initial?.referencia ?? '');
   const [idCategoria, setIdCategoria] = useState<number | ''>(props.initial?.idcategoriaservicio ?? '');
   const [predeterminado, setPredeterminado] = useState(props.initial?.predeterminado ?? false);
-  const [resultadotipovalor, setResultadotipovalor] = useState(props.initial?.resultadotipovalor ?? false);
-  const [tipovalorpordefecto, setTipovalorpordefecto] = useState(props.initial?.tipovalorpordefecto ?? '');
+  const [comentariopordefecto, setComentariopordefecto] = useState(props.initial?.comentariopordefecto ?? '');
   const [proximoenkm, setProximoenkm] = useState(props.initial?.proximoenkm ?? false);
 
   const [categorias, setCategorias] = useState<CategoriaRow[]>([]);
@@ -87,8 +85,7 @@ export default function TipoServicioForm(props: {
         referencia: referencia.trim() ? referencia.trim() : null,
         idcategoriaservicio: idCategoria === '' ? null : Number(idCategoria),
         predeterminado,
-        resultadotipovalor,
-        tipovalorpordefecto: tipovalorpordefecto.trim() ? tipovalorpordefecto.trim() : null,
+        comentariopordefecto: comentariopordefecto.trim() ? comentariopordefecto.trim() : null,
         proximoenkm,
       };
 
@@ -186,34 +183,16 @@ export default function TipoServicioForm(props: {
           label="Predeterminado (se carga automáticamente con 'Servicio Integral')"
         />
 
-        <Typography
-          variant="subtitle2"
-          sx={{ mt: 2, mb: 1, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'var(--font-family-body)' }}
-        >
-          Tipo de Resultado
-        </Typography>
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={resultadotipovalor}
-              onChange={(e) => setResultadotipovalor(e.target.checked)}
-              disabled={saving}
-            />
-          }
-          label="Resultado Tipo Valor"
+        <TextField
+          label="Comentario por Defecto"
+          value={comentariopordefecto}
+          onChange={(e) => setComentariopordefecto(e.target.value)}
+          disabled={saving}
+          fullWidth
+          multiline
+          minRows={2}
+          helperText="Este comentario aparecerá por defecto en el cuadro de comentario del detalle de servicio"
         />
-
-        {resultadotipovalor && (
-          <TextField
-            label="Valor por Defecto"
-            value={tipovalorpordefecto}
-            onChange={(e) => setTipovalorpordefecto(e.target.value)}
-            disabled={saving}
-            fullWidth
-            helperText="Este valor aparecerá por defecto en el campo de resultado valor del detalle de servicio"
-          />
-        )}
 
         <FormControlLabel
           control={

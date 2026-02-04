@@ -28,7 +28,6 @@ interface ServicioCompleto {
     idtiposervicio: number | null;
     proximoenkm: number | null;
     comentario: string | null;
-    resultadovalor: string | null;
     idestado: number | null;
     tiposservicio: {
       nombre: string;
@@ -108,7 +107,6 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       idtiposervicio,
       proximoenkm,
       comentario,
-      resultadovalor,
       idestado,
       tiposservicio (
         nombre,
@@ -130,7 +128,6 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       idtiposservicio?: number | null;
       proximoenkm?: number | null;
       comentario?: string | null;
-      resultadovalor?: string | null;
       idestado?: number | null;
       tiposservicio?: unknown;
       estados?: unknown;
@@ -180,7 +177,6 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       idtiposervicio: idtiposservicioValue,
       proximoenkm: detalle.proximoenkm ?? null,
       comentario: detalle.comentario ?? null,
-      resultadovalor: detalle.resultadovalor ?? null,
       idestado: detalle.idestado ?? null,
       tiposservicio: tiposservicio ?? null,
       estados: estados ?? null,
@@ -575,7 +571,13 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       // SERVICIOS APLICADOS: Nombre + (Referencia) si existe
       let servicioTexto = nombreServicio;
       if (referencia && referencia.trim()) {
-        servicioTexto += ` (${referencia.trim()})`;
+        // Limpiar la referencia de paréntesis existentes para evitar dobles paréntesis
+        let referenciaLimpia = referencia.trim();
+        // Remover paréntesis al inicio y final si existen
+        if (referenciaLimpia.startsWith('(') && referenciaLimpia.endsWith(')')) {
+          referenciaLimpia = referenciaLimpia.slice(1, -1).trim();
+        }
+        servicioTexto += ` (${referenciaLimpia})`;
       }
       const lines = doc.splitTextToSize(servicioTexto, colWidths.servicio - 2);
       const numLines = lines.length;
