@@ -246,11 +246,18 @@
   color: #FFFFFF !important;
   font-size: var(--font-size-sm) !important;
   opacity: 0.8;
-  white-space: nowrap;
+  white-space: normal;
   text-align: center;
+  line-height: 1.6;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .copyrightSeparator {
+  display: none;
   margin: 0 var(--spacing-sm);
   opacity: 0.6;
 }
@@ -405,5 +412,11 @@
 
   .copyrightText {
     font-size: var(--font-size-base) !important;
+    flex-direction: row;
+    white-space: nowrap;
+  }
+
+  .copyrightSeparator {
+    display: inline;
   }
 }

@@ -170,10 +170,11 @@ export default function Footer() {
             variant="body2" 
             className={styles.copyrightText}
             sx={{ color: '#FFFFFF' }}
+            component="div"
           >
-            RiderBross 2026 - Todos los derechos reservados
+            <span>RiderBross 2026 - Todos los derechos reservados</span>
             <span className={styles.copyrightSeparator}> | </span>
-            Developed By: PrialSoft
+            <span>Developed By: PrialSoft</span>
           </Typography>
         </Box>
       </Container>
