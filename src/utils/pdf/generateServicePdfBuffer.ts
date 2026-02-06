@@ -25,7 +25,7 @@ interface ServicioCompleto {
     } | null;
   } | null;
   detalles: Array<{
-    idtiposervicio: number | null;
+    idtiposservicio: number | null;
     proximoenkm: number | null;
     comentario: string | null;
     idestado: number | null;
