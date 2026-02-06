@@ -1,7 +1,7 @@
 .whatsappContainer {
   position: fixed;
-  bottom: var(--spacing-xl);
-  right: var(--spacing-xl);
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -9,8 +9,8 @@
 }
 
 .whatsappButton {
-  width: 60px !important;
-  height: 60px !important;
+  width: 56px !important;
+  height: 56px !important;
   animation: pulse 2s infinite;
 }
 
@@ -26,11 +26,24 @@
   }
 }
 
+/* Mobile - Posición inferior derecha */
+@media (max-width: 599px) {
+  .whatsappContainer {
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+
+  .whatsappButton {
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
 /* Tablet */
 @media (min-width: 600px) {
   .whatsappContainer {
-    bottom: var(--spacing-2xl);
-    right: var(--spacing-2xl);
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
   }
 
   .whatsappButton {
@@ -41,17 +54,14 @@
 
 /* Desktop */
 @media (min-width: 900px) {
+  .whatsappContainer {
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+  }
+
   .whatsappButton {
     width: 70px !important;
     height: 70px !important;
-  }
-}
-
-/* Mobile - Ajustar posición si es necesario */
-@media (max-width: 599px) {
-  .whatsappContainer {
-    bottom: calc(var(--spacing-xl) + 80px); /* Espacio para el footer */
-    right: var(--spacing-md);
   }
 }
 
