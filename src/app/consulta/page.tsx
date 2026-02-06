@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase/client';
 import { DataTable } from '@/utils/ui/table/DataTable';
 import { formatPatente, cleanPatente } from '@/utils/patente';
 import { generateServicePdf } from '@/utils/pdf/generateServicePdf';
+import { EmailDialog } from '@/components/EmailDialog/EmailDialog';
 import styles from './page.module.css';
 
 interface ServicioPublico {
@@ -72,6 +73,8 @@ function ConsultaPageContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [viewMode, setViewMode] = useState<'search' | 'results'>('search');
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [selectedServicio, setSelectedServicio] = useState<ServicioPublico | null>(null);
 
 
   // Cargar datos iniciales solo si estamos en modo búsqueda
@@ -252,24 +255,9 @@ function ConsultaPageContent() {
     }
   };
 
-  const sendEmail = (row: ServicioPublico) => {
-    const to = row.clienteEmail?.trim();
-    if (!to) return;
-
-    const vehiculo = row.Vehiculo;
-    const patente = vehiculo?.patente ? formatPatente(vehiculo.patente) : '—';
-    const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
-    const subject = encodeURIComponent(`RiderBross - Servicio ${patente} (${fecha})`);
-    const body = encodeURIComponent(
-      `Hola ${row.clienteNombre ?? ''}\n\n` +
-        `Te enviamos el resumen del servicio.\n` +
-        `- Servicio: #${row.id}\n` +
-        `- Patente: ${patente}\n` +
-        `- Fecha: ${fecha}\n\n` +
-        `Saludos,\nRiderBross`
-    );
-
-    window.location.href = `mailto:${encodeURIComponent(to)}?subject=${subject}&body=${body}`;
+  const handleSendEmail = (row: ServicioPublico) => {
+    setSelectedServicio(row);
+    setEmailDialogOpen(true);
   };
 
   const columns: ColumnDef<ServicioPublico>[] = [
@@ -316,23 +304,19 @@ function ConsultaPageContent() {
       id: 'actions',
       header: 'Acciones',
       cell: ({ row }) => {
-        const hasEmail = Boolean(row.original.clienteEmail && row.original.clienteEmail.includes('@'));
         return (
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title={hasEmail ? 'Enviar por email' : 'Cliente sin email'}>
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={!hasEmail}
-                  onClick={() => sendEmail(row.original)}
-                  sx={{
-                    color: hasEmail ? 'var(--text-primary)' : 'var(--text-disabled)',
-                    '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
-                  }}
-                >
-                  <EmailIcon fontSize="small" />
-                </IconButton>
-              </span>
+            <Tooltip title="Enviar por email">
+              <IconButton
+                size="small"
+                onClick={() => handleSendEmail(row.original)}
+                sx={{
+                  color: 'var(--text-primary)',
+                  '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
+                }}
+              >
+                <EmailIcon fontSize="small" />
+              </IconButton>
             </Tooltip>
             <Tooltip title="Descargar PDF">
               <IconButton
@@ -473,6 +457,19 @@ function ConsultaPageContent() {
           <DataTable columns={columns} data={servicios} searchable={false} />
         ) : null}
       </Container>
+      {selectedServicio && (
+        <EmailDialog
+          open={emailDialogOpen}
+          onClose={() => {
+            setEmailDialogOpen(false);
+            setSelectedServicio(null);
+          }}
+          servicioId={selectedServicio.id}
+          patente={selectedServicio.Vehiculo?.patente || ''}
+          clienteNombre={selectedServicio.clienteNombre || null}
+          clienteEmail={selectedServicio.clienteEmail || null}
+        />
+      )}
     </Box>
   );
 }

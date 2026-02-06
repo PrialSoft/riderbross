@@ -114,4 +114,32 @@ export async function updateCliente(
   if (error) throw new Error(error.message);
 }
 
+export async function deleteCliente(id: number) {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) throw new Error('No autorizado');
+
+  if (!Number.isFinite(id) || id <= 0) throw new Error('ID inválido');
+
+  // Verificar si el cliente tiene vehículos relacionados
+  const { data: vehiculos, error: vehiculosError } = await supabase
+    .from('vehiculo')
+    .select('id, patente')
+    .eq('idcliente', id);
+
+  if (vehiculosError) throw new Error('Error al verificar vehículos relacionados');
+
+  if (vehiculos && vehiculos.length > 0) {
+    const patentes = vehiculos.map((v) => v.patente).join(', ');
+    throw new Error(
+      `No se puede eliminar el cliente porque tiene ${vehiculos.length} vehículo(s) relacionado(s): ${patentes}. Por favor, elimine o reasigne los vehículos primero.`
+    );
+  }
+
+  // Eliminar el cliente
+  const { error } = await supabase.from('clientes').delete().eq('id', id);
+
+  if (error) throw new Error(error.message);
+}
+
 

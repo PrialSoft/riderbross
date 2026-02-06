@@ -19,6 +19,7 @@ import { formatPatente } from '@/utils/patente';
 import { supabase } from '@/lib/supabase/client';
 import dayjs from '@/lib/dayjs';
 import { generateServicePdf } from '@/utils/pdf/generateServicePdf';
+import { EmailDialog } from '@/components/EmailDialog/EmailDialog';
 
 interface Servicio {
   id: number;
@@ -44,6 +45,8 @@ export function ServiciosTable(props?: {
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [selectedServicio, setSelectedServicio] = useState<Servicio | null>(null);
 
   useEffect(() => {
     fetchServicios();
@@ -170,24 +173,9 @@ export function ServiciosTable(props?: {
     }
   };
 
-  const sendEmail = (row: Servicio) => {
-    const to = row.clienteEmail?.trim();
-    if (!to) return;
-
-    const vehiculo = row.Vehiculo;
-    const patente = vehiculo?.patente ? formatPatente(vehiculo.patente) : '—';
-    const fecha = row.fechaservicio ? dayjs(row.fechaservicio).format('DD/MM/YYYY') : '—';
-    const subject = encodeURIComponent(`RiderBross - Servicio ${patente} (${fecha})`);
-    const body = encodeURIComponent(
-      `Hola ${row.clienteNombre ?? ''}\n\n` +
-        `Te enviamos el resumen del servicio.\n` +
-        `- Servicio: #${row.id}\n` +
-        `- Patente: ${patente}\n` +
-        `- Fecha: ${fecha}\n\n` +
-        `Saludos,\nRiderBross`
-    );
-
-    window.location.href = `mailto:${encodeURIComponent(to)}?subject=${subject}&body=${body}`;
+  const handleSendEmail = (row: Servicio) => {
+    setSelectedServicio(row);
+    setEmailDialogOpen(true);
   };
 
   const columns: ColumnDef<Servicio>[] = [
@@ -269,14 +257,13 @@ export function ServiciosTable(props?: {
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>
-            <Tooltip title={hasEmail ? 'Enviar por email' : 'Cliente sin email'}>
+            <Tooltip title="Enviar por email">
               <span>
                 <IconButton
                   size="small"
-                  disabled={!hasEmail}
-                  onClick={() => sendEmail(row.original)}
+                  onClick={() => handleSendEmail(row.original)}
                   sx={{
-                    color: hasEmail ? 'var(--text-primary)' : 'var(--text-disabled)',
+                    color: 'var(--text-primary)',
                     '&:hover': { backgroundColor: 'rgba(139, 26, 26, 0.1)' },
                   }}
                 >
@@ -332,6 +319,23 @@ export function ServiciosTable(props?: {
     );
   }
 
-  return <DataTable columns={columns} data={servicios} searchPlaceholder="Buscar por patente, vehículo o cliente..." />;
+  return (
+    <>
+      <DataTable columns={columns} data={servicios} searchPlaceholder="Buscar por patente, vehículo o cliente..." />
+      {selectedServicio && (
+        <EmailDialog
+          open={emailDialogOpen}
+          onClose={() => {
+            setEmailDialogOpen(false);
+            setSelectedServicio(null);
+          }}
+          servicioId={selectedServicio.id}
+          patente={selectedServicio.Vehiculo?.patente || ''}
+          clienteNombre={selectedServicio.clienteNombre || null}
+          clienteEmail={selectedServicio.clienteEmail || null}
+        />
+      )}
+    </>
+  );
 }
 

@@ -44,7 +44,13 @@ Crea un archivo `.env.local` en la raíz del proyecto con:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+RESEND_API_KEY=tu_clave_api_de_resend
 ```
+
+**Nota sobre Resend:**
+- Obtén tu API key desde [resend.com](https://resend.com)
+- La API key es necesaria para enviar emails con los informes técnicos en PDF
+- El email se enviará desde `info@riderbross.com` (debes configurar este dominio en Resend)
 
 4. Ejecuta el servidor de desarrollo:
 ```bash

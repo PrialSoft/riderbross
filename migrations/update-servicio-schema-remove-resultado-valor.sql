@@ -22,3 +22,5 @@ DROP COLUMN IF EXISTS resultadovalor;
 ALTER TABLE detallesservicio
 DROP COLUMN IF EXISTS resultadoporcentaje;
 
+
+

@@ -23,3 +23,5 @@ WHERE resultadotipoestado IS NULL OR resultadotipoestado = false;
 -- Comentario para documentación
 COMMENT ON COLUMN tiposservicio.tipovalorpordefecto IS 'Valor por defecto que aparece en el campo de resultado valor del detalle de servicio';
 
+
+

@@ -70,4 +70,32 @@ export async function updateVehiculo(
   if (error) throw new Error(error.message);
 }
 
+export async function deleteVehiculo(id: number) {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) throw new Error('No autorizado');
+
+  if (!Number.isFinite(id) || id <= 0) throw new Error('ID inválido');
+
+  // Verificar si el vehículo tiene servicios relacionados
+  const { data: servicios, error: serviciosError } = await supabase
+    .from('servicios')
+    .select('id')
+    .eq('idvehiculo', id)
+    .limit(1);
+
+  if (serviciosError) throw new Error('Error al verificar servicios relacionados');
+
+  if (servicios && servicios.length > 0) {
+    throw new Error(
+      'No se puede eliminar el vehículo porque tiene servicios relacionados. Por favor, elimine los servicios primero.'
+    );
+  }
+
+  // Eliminar el vehículo
+  const { error } = await supabase.from('vehiculo').delete().eq('id', id);
+
+  if (error) throw new Error(error.message);
+}
+
 
