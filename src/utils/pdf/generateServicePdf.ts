@@ -365,8 +365,8 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
     doc.text('KM ACTUAL:', xPos, vehiculoY);
     doc.setFont('helvetica', 'normal');
     xPos += 28;
-    const kmActual = servicioCompleto.vehiculo.kmactual
-      ? servicioCompleto.vehiculo.kmactual.toLocaleString('es-AR')
+    const kmActual = servicioCompleto.servicio.kmservicio
+      ? servicioCompleto.servicio.kmservicio?.toLocaleString('es-AR')
       : '—';
     // Asegurar que no salga del margen derecho
     const maxX = pageWidth - margin - 5;

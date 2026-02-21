@@ -17,10 +17,15 @@ export async function POST(request: NextRequest) {
   try {
     // Validar que Resend esté configurado
     if (!resend || !resendApiKey) {
+      const isProduction = process.env.NODE_ENV === 'production';
+      const errorMessage = isProduction
+        ? 'RESEND_API_KEY no está configurada. Por favor, agrega la variable de entorno RESEND_API_KEY en tu plataforma de hosting (Vercel, Netlify, etc.)'
+        : 'RESEND_API_KEY no está configurada. Por favor, agrega RESEND_API_KEY en tu archivo .env.local';
+      
       return NextResponse.json(
         { 
           success: false, 
-          error: 'RESEND_API_KEY no está configurada. Por favor, agrega RESEND_API_KEY en tu archivo .env.local' 
+          error: errorMessage
         },
         { status: 500 }
       );
