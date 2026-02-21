@@ -41,7 +41,7 @@ export const ServiceReportEmail = ({ patente, clienteNombre }: ServiceReportEmai
               <li>Próximos mantenimientos recomendados</li>
             </ul>
             <Text style={paragraph}>
-              Por favor, prestá atención a nuestras recomendaciones y recordá realizar los mantenimientos preventivos una vez cumplida la cantidad de kilómetros remarcados en el informe.
+            Este informe está pensado para acompañar el cuidado de tu moto! Tené en cuenta los kilómetros indicados y las especificaciones del manual del fabricante para planificar los próximos servicios y mantener tu moto siempre en óptimas condiciones. 🪽
             </Text>
             <Hr style={hr} />
             <Text style={footer}>
