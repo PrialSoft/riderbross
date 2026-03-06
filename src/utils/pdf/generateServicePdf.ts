@@ -684,6 +684,8 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
       // Orden: Servicios (1/3), Comentario (1/3), Próximo (1/6), Estado (1/6)
       let comentarioLines: string[] = [''];
       if (comentario && comentario.trim()) {
+        // Cambiar color a gris oscuro para el comentario
+        doc.setTextColor(90, 90, 90); // Gris oscuro
         comentarioLines = doc.splitTextToSize(comentario.trim(), colWidths.comentario - 2);
         comentarioLines.forEach((line: string, index: number) => {
           doc.text(line, xPos, yPos + (index * lineHeight), {
@@ -691,6 +693,8 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
             maxWidth: colWidths.comentario - 2,
           });
         });
+        // Restaurar color negro
+        doc.setTextColor(...colorBlack);
       }
       xPos += colWidths.comentario;
       
