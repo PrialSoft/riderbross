@@ -166,7 +166,7 @@ export default function VehiculoForm(props: {
 
       <Box component="form" onSubmit={onSubmit} sx={{ display: 'grid', gap: 2 }}>
         <TextField
-          label="Patente"
+          label="Dominio"
           value={patente}
           onChange={(e) => setPatente(formatPatente(e.target.value))}
           required

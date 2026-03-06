@@ -144,7 +144,7 @@ export function VehiculosTable(props?: {
   const columns: ColumnDef<Vehiculo>[] = [
     {
       accessorKey: 'patente',
-      header: 'Patente',
+      header: 'Dominio',
       cell: ({ row }) => {
         return formatPatente(row.original.patente);
       },
@@ -184,7 +184,7 @@ export function VehiculosTable(props?: {
       cell: ({ row }) => {
         const cliente = row.original.clientes;
         if (!cliente) return 'N/A';
-        return `${cliente.nombres} ${cliente.apellidos}`;
+        return `${cliente.apellidos}, ${cliente.nombres} `;
       },
     },
     {

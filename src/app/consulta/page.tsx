@@ -108,7 +108,7 @@ function ConsultaPageContent() {
         .single();
 
       if (vehiculoError || !vehiculoData) {
-        setError('No se encontró ningún vehículo con esa patente');
+        setError('No se encontró ningún vehículo con ese dominio');
         setVehiculo(null);
         setServicios([]);
         setHasSearched(true);
@@ -263,7 +263,7 @@ function ConsultaPageContent() {
   const columns: ColumnDef<ServicioPublico>[] = [
     {
       accessorKey: 'Vehiculo.patente',
-      header: 'Patente',
+      header: 'Dominio',
       cell: ({ row }) => {
         const vehiculo = row.original.Vehiculo;
         return vehiculo ? formatPatente(vehiculo.patente) : 'N/A';
@@ -364,7 +364,7 @@ function ConsultaPageContent() {
           </Typography>
           {viewMode === 'results' && vehiculo && (
             <Typography variant="body1" className={styles.pageSubtitle}>
-              Patente: <strong>{formatPatente(vehiculo.patente)}</strong>
+              Dominio: <strong>{formatPatente(vehiculo.patente)}</strong>
             </Typography>
           )}
           <Typography variant="body1" className={styles.pageDescription}>
@@ -378,7 +378,7 @@ function ConsultaPageContent() {
             <TextField
               fullWidth
               size="small"
-              placeholder="Ingrese la patente (Ej: A-111-BBB O AAA-111)"
+              placeholder="Ingrese el dominio (Ej: A-111-BBB O AAA-111)"
               value={searchTerm}
               onChange={(event) => {
                 const raw = event.target.value;
@@ -450,7 +450,7 @@ function ConsultaPageContent() {
             <Typography variant="body1" color="text.secondary">
               {viewMode === 'results' && vehiculo
                 ? 'No se encontraron servicios registrados para este vehículo.'
-                : 'No se encontraron servicios para la patente ingresada.'}
+                : 'No se encontraron servicios para el dominio ingresado.'}
             </Typography>
           </Paper>
         ) : servicios.length > 0 ? (

@@ -48,12 +48,12 @@ export default function Home() {
     const patenteClean = cleanPatente(patente);
     
     if (!patenteClean) {
-      setError('Por favor ingresa una patente');
+      setError('Por favor ingresa un dominio');
       return;
     }
 
     if (patenteClean.length < 6 || patenteClean.length > 8) {
-      setError('La patente debe tener entre 6 y 8 caracteres');
+      setError('El dominio debe tener entre 6 y 8 caracteres');
       return;
     }
 
@@ -157,7 +157,7 @@ export default function Home() {
                 <Stack spacing={2}>
                   <TextField
                     fullWidth
-                    label="Patente"
+                    label="Dominio"
                     placeholder="Ej: A-111-BBB O AAA-111"
                     value={patente}
                     onChange={(e) => {
@@ -168,7 +168,7 @@ export default function Home() {
                       setError('');
                     }}
                     error={!!error}
-                    helperText={error || 'Ingresa la patente de tu motocicleta'}
+                    helperText={error || 'Ingresa el dominio de tu motocicleta'}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">

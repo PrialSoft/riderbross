@@ -181,7 +181,7 @@ export function ServiciosTable(props?: {
   const columns: ColumnDef<Servicio>[] = [
     {
       accessorKey: 'Vehiculo.patente',
-      header: 'Patente',
+      header: 'Dominio',
       cell: ({ row }) => {
         const vehiculo = row.original.Vehiculo;
         return vehiculo ? formatPatente(vehiculo.patente) : 'N/A';

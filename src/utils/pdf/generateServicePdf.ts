@@ -309,75 +309,85 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   yPos = headerStartY + headerHeight + 8; // Separar más la sección de datos del cliente
 
   // Información del cliente y vehículo en la cabecera
+  // Línea superior: CLIENTE, EMAIL, TEL
+  // Línea inferior: DOMINIO, MARCA, MODELO, KM ACTUAL
   const clienteVehiculoStartY = yPos;
-  let headerY = clienteVehiculoStartY;
+  let currentY = clienteVehiculoStartY;
   
-  // Columna izquierda: Cliente
+  doc.setFontSize(10);
+  let xPos = margin;
+  
+  // Línea superior: CLIENTE, EMAIL, TEL
   if (servicioCompleto.cliente) {
-    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('CLIENTE:', margin, headerY);
+    doc.text('CLIENTE:', xPos, currentY);
     doc.setFont('helvetica', 'normal');
-    doc.text(
-      `${servicioCompleto.cliente.apellidos}, ${servicioCompleto.cliente.nombres}`,
-      margin + 25,
-      headerY
-    );
-    headerY += 5;
+    const clienteText = `${servicioCompleto.cliente.apellidos}, ${servicioCompleto.cliente.nombres}`;
+    doc.text(clienteText.substring(0, 22), xPos + 20, currentY);
+    xPos += 70; // Espacio para siguiente campo
   }
-
-  // Columna derecha: Vehículo
-  const vehiculoStartX = pageWidth / 2 + 10;
-  let vehiculoY = clienteVehiculoStartY;
   
+  // EMAIL
+  if (servicioCompleto.cliente?.email) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('EMAIL:', xPos, currentY);
+    doc.setFont('helvetica', 'normal');
+    const emailText = servicioCompleto.cliente.email.substring(0, 22);
+    doc.text(emailText, xPos + 18, currentY);
+    xPos += 65; // Espacio para siguiente campo
+  }
+  
+  // TEL
+  if (servicioCompleto.cliente?.telefono) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('TEL:', xPos, currentY);
+    doc.setFont('helvetica', 'normal');
+    const telText = servicioCompleto.cliente.telefono.toString();
+    doc.text(telText, xPos + 12, currentY);
+  }
+  
+  currentY += 6; // Espacio entre líneas
+  xPos = margin;
+  
+  // Línea inferior: DOMINIO, MARCA, MODELO, KM ACTUAL
   if (servicioCompleto.vehiculo) {
-    doc.setFontSize(10);
+    // DOMINIO
     doc.setFont('helvetica', 'bold');
-    doc.text('PATENTE:', vehiculoStartX, vehiculoY);
+    doc.text('DOMINIO:', xPos, currentY);
     doc.setFont('helvetica', 'normal');
-    doc.text(
-      formatPatente(servicioCompleto.vehiculo.patente),
-      vehiculoStartX + 25,
-      vehiculoY
-    );
-    vehiculoY += 8; // Más espacio entre la línea de patente y los datos del vehículo
-
-    // Marca, Modelo y KM Actual en una sola línea (ajustado para no salir de márgenes)
-    let xPos = margin;
+    const dominioText = formatPatente(servicioCompleto.vehiculo.patente);
+    doc.text(dominioText, xPos + 22, currentY);
+    xPos += 45;
     
+    // MARCA
     doc.setFont('helvetica', 'bold');
-    doc.text('MARCA VEHÍCULO:', xPos, vehiculoY);
+    doc.text('MARCA:', xPos, currentY);
     doc.setFont('helvetica', 'normal');
-    xPos += 40;
-    const marcaText = (servicioCompleto.vehiculo.marcas?.descripcion || '—').substring(0, 15);
-    doc.text(marcaText, xPos, vehiculoY);
-    xPos += 40;
-
+    const marcaText = (servicioCompleto.vehiculo.marcas?.descripcion || '—').substring(0, 12);
+    doc.text(marcaText, xPos + 18, currentY);
+    xPos += 45;
+    
+    // MODELO
     doc.setFont('helvetica', 'bold');
-    doc.text('MODELO:', xPos, vehiculoY);
+    doc.text('MODELO:', xPos, currentY);
     doc.setFont('helvetica', 'normal');
-    xPos += 22;
-    const modeloText = (servicioCompleto.vehiculo.modelo || '—').substring(0, 15);
-    doc.text(modeloText, xPos, vehiculoY);
-    xPos += 40;
-
+    const modeloText = (servicioCompleto.vehiculo.modelo || '—').substring(0, 12);
+    doc.text(modeloText, xPos + 20, currentY);
+    xPos += 45;
+    
+    // KM ACTUAL
     doc.setFont('helvetica', 'bold');
-    doc.text('KM ACTUAL:', xPos, vehiculoY);
+    doc.text('KM ACTUAL:', xPos, currentY);
     doc.setFont('helvetica', 'normal');
-    xPos += 28;
     const kmActual = servicioCompleto.servicio.kmservicio
       ? servicioCompleto.servicio.kmservicio?.toLocaleString('es-AR')
       : '—';
-    // Asegurar que no salga del margen derecho
-    const maxX = pageWidth - margin - 5;
-    if (xPos < maxX) {
-      doc.text(kmActual.substring(0, 12), xPos, vehiculoY);
-    }
-    vehiculoY += 5;
+    const kmText = kmActual.substring(0, 10);
+    doc.text(kmText, xPos + 28, currentY);
   }
-
-  // Actualizar yPos al final de la cabecera (la mayor altura entre cliente y vehículo)
-  yPos = Math.max(headerY, vehiculoY) + 2; // Aumentar espacio entre cliente y vehículo
+  
+  // Actualizar yPos al final de la cabecera
+  yPos = currentY + 2;
 
   // Borde separador antes de la nota general
   doc.setDrawColor(...colorGrayDark);
@@ -388,13 +398,93 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
   // Nota general
   doc.setFontSize(9);
   doc.setTextColor(...colorGray);
-  doc.text(
-    'Por favor, prestá atención a nuestras recomendaciones y recorda realizar los mantenimientos preventivos una vez cumplida la cantidad de kilómetros remarcados en rojo.',
-    margin,
-    yPos,
-    { maxWidth: pageWidth - 2 * margin }
-  );
-  yPos += 10;
+  const notaTexto = 'Por favor, prestá atención a nuestras recomendaciones y recorda realizar los mantenimientos preventivos una vez cumplida la cantidad de kilómetros remarcados en rojo.';
+  const palabraRojo = 'rojo';
+  const indiceRojo = notaTexto.toLowerCase().indexOf(palabraRojo);
+  
+  if (indiceRojo !== -1) {
+    // Dividir el texto en partes: antes de "rojo", "rojo", y después
+    const textoAntes = notaTexto.substring(0, indiceRojo);
+    const textoRojo = notaTexto.substring(indiceRojo, indiceRojo + palabraRojo.length);
+    const textoDespues = notaTexto.substring(indiceRojo + palabraRojo.length);
+    
+    // Construir el texto completo con marcador especial para "rojo"
+    // Usaremos un enfoque más simple: dibujar parte por parte
+    let currentY = yPos;
+    const lineHeight = 4;
+    const maxWidth = pageWidth - 2 * margin;
+    
+    // Dibujar texto antes de "rojo" en gris
+    if (textoAntes.trim()) {
+      const linesAntes = doc.splitTextToSize(textoAntes, maxWidth);
+      for (let i = 0; i < linesAntes.length; i++) {
+        doc.text(linesAntes[i], margin, currentY);
+        if (i < linesAntes.length - 1) {
+          currentY += lineHeight;
+        }
+      }
+    }
+    
+    // Calcular posición X donde termina el texto anterior (última línea)
+    const ultimaLineaAntes = textoAntes.trim() 
+      ? doc.splitTextToSize(textoAntes, maxWidth).slice(-1)[0] 
+      : '';
+    const xPosRojo = margin + (ultimaLineaAntes ? doc.getTextWidth(ultimaLineaAntes) : 0);
+    
+    // Verificar si "rojo" cabe en la misma línea
+    const textWidthRojo = doc.getTextWidth(textoRojo);
+    const espacioDisponible = pageWidth - margin - xPosRojo;
+    
+    if (textWidthRojo <= espacioDisponible && ultimaLineaAntes) {
+      // Dibujar "rojo" en rojo en la misma línea
+      doc.setTextColor(...colorRed);
+      doc.text(textoRojo, xPosRojo, currentY);
+      doc.setTextColor(...colorGray);
+      
+      // Dibujar texto después en la misma línea o nueva línea
+      if (textoDespues.trim()) {
+        const xPosDespues = xPosRojo + textWidthRojo;
+        const textWidthDespues = doc.getTextWidth(textoDespues);
+        if (xPosDespues + textWidthDespues <= pageWidth - margin) {
+          doc.text(textoDespues, xPosDespues, currentY);
+        } else {
+          currentY += lineHeight;
+          const linesDespues = doc.splitTextToSize(textoDespues, maxWidth);
+          doc.text(linesDespues[0], margin, currentY);
+        }
+      }
+    } else {
+      // "rojo" no cabe en la misma línea, ir a nueva línea
+      currentY += lineHeight;
+      doc.setTextColor(...colorRed);
+      doc.text(textoRojo, margin, currentY);
+      doc.setTextColor(...colorGray);
+      
+      // Dibujar texto después
+      if (textoDespues.trim()) {
+        const xPosDespues = margin + textWidthRojo;
+        const textWidthDespues = doc.getTextWidth(textoDespues);
+        if (xPosDespues + textWidthDespues <= pageWidth - margin) {
+          doc.text(textoDespues, xPosDespues, currentY);
+        } else {
+          currentY += lineHeight;
+          const linesDespues = doc.splitTextToSize(textoDespues, maxWidth);
+          for (const line of linesDespues) {
+            doc.text(line, margin, currentY);
+            currentY += lineHeight;
+          }
+          currentY -= lineHeight; // Ajustar última línea
+        }
+      }
+    }
+    
+    yPos = currentY + 6;
+  } else {
+    // Si no se encuentra "rojo", dibujar el texto completo en gris (fallback)
+    doc.text(notaTexto, margin, yPos, { maxWidth: pageWidth - 2 * margin });
+    yPos += 10;
+  }
+  
   doc.setTextColor(...colorBlack);
 
   // Agrupar detalles por categoría
@@ -623,24 +713,25 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
         xPos += colWidths.proximo;
       }
       
-      // Estado - al margen derecho, alineado a la derecha
-      // Colores según el estado: OK = verde, Regular = amarillo, Malo = rojo
-      const estadoRightX = pageWidth - margin;
+      // Estado - esfera de color al margen derecho, centrada verticalmente
+      // Colores según el estado: OK = verde, Regular = naranja, Malo = rojo
+      const estadoRightX = pageWidth - margin - 2; // Un poco más a la izquierda para centrar la esfera
       const estadoLower = estado.toLowerCase();
+      const sphereRadius = 0.9; // Radio de la esfera (90% del tamaño anterior)
+      const sphereY = yPos - 1.5; // Centrar verticalmente con el texto
+      
+      let estadoColor: [number, number, number] = [0, 0, 0]; // Negro por defecto
       if (estadoLower.includes('ok')) {
-        doc.setTextColor(76, 175, 80); // Verde
+        estadoColor = [76, 175, 80]; // Verde
       } else if (estadoLower.includes('regular')) {
-        doc.setTextColor(255, 193, 7); // Amarillo
+        estadoColor = [255, 152, 0]; // Naranja
       } else if (estadoLower.includes('malo')) {
-        doc.setTextColor(244, 67, 54); // Rojo
-      } else {
-        doc.setTextColor(...colorBlack); // Negro por defecto
+        estadoColor = [200, 50, 45]; // Rojo más oscuro
       }
-      doc.text(estado.substring(0, 20), estadoRightX, yPos, {
-        align: 'right',
-        maxWidth: colWidths.estado - 2,
-      });
-      doc.setTextColor(...colorBlack); // Restaurar color negro
+      
+      // Dibujar esfera de color
+      doc.setFillColor(...estadoColor);
+      doc.circle(estadoRightX, sphereY, sphereRadius, 'F');
 
       // Calcular la altura de la fila según la altura máxima (servicio o comentario)
       const maxLinesInRow = Math.max(numLines, comentarioLines.length);
@@ -696,7 +787,7 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
     
     // Más espacio entre el header y el contenido (sin border bottom)
     yPos += 8; // Aumentado de 4 a 8 para más espacio
-    doc.setFontSize(9);
+    doc.setFontSize(7.5); // Mismo tamaño que los servicios y detalles
     doc.setFont('helvetica', 'normal');
     doc.text(servicioCompleto.servicio.comentario, margin, yPos, {
       maxWidth: pageWidth - 2 * margin,
@@ -780,6 +871,12 @@ export async function generateServicePdf(servicioId: number): Promise<void> {
     ? formatPatente(servicioCompleto.vehiculo.patente)
     : 'N/A';
   const safePatente = patente.replace(/[^a-zA-Z0-9_-]+/g, '_');
-  doc.save(`servicio-${servicioCompleto.servicio.id}-${safePatente}.pdf`);
+  
+  // Formatear fecha como DD/MM/AA (usando guiones para el nombre de archivo)
+  const fechaArchivo = servicioCompleto.servicio.fechaservicio
+    ? dayjs(servicioCompleto.servicio.fechaservicio).format('DD-MM-YY')
+    : 'N/A';
+  
+  doc.save(`${safePatente}_${fechaArchivo}.pdf`);
 }
 
