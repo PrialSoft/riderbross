@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Generar PDF como buffer
-    const pdfBuffer = await generateServicePdfBuffer(servicioId);
+    const { buffer: pdfBuffer, filename: pdfFilename } =
+      await generateServicePdfBuffer(servicioId);
 
     // Renderizar template de email
     const emailHtml = await render(
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       html: emailHtml,
       attachments: [
         {
-          filename: `Informe_RiderBross_${safePatente}.pdf`,
+          filename: pdfFilename,
           content: pdfBuffer.toString('base64'),
         },
       ],

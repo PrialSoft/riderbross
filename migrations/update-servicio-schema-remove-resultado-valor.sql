@@ -33,3 +33,4 @@ DROP COLUMN IF EXISTS resultadoporcentaje;
 
 
 
+
