@@ -1,6 +1,6 @@
 # RiderBross - Sistema de Gestión de Servicio Técnico
 
-Aplicación web para RiderBross, un taller especializado en servicio técnico de motocicletas.
+Aplicación web para RiderBross, un taller especializado en servicio técnico de vehiculos.
 
 ## 🚀 Características
 
@@ -88,7 +88,7 @@ riderbross/
 
 ## 🗄️ Esquema de Base de Datos
 
-### Tabla: `motocicletas`
+### Tabla: `vehiculos`
 - `id` (uuid, primary key)
 - `patente` (text, unique)
 - `marca` (text)
@@ -130,13 +130,16 @@ El proyecto sigue un enfoque **Mobile-First**:
 - **Tablet** (600px - 900px): Layouts adaptativos
 - **Desktop** (> 900px): Layouts completos con navegación horizontal
 
+## 🚧 Funcionalidades Actuales
+- Generación de PDFs
+- Formulario de carga de datos optimizado para taller
+- Panel de administración protegido
+
+  
 ## 🚧 Próximas Funcionalidades
 
-- [ ] Panel de administración protegido
-- [ ] Formulario de carga de datos optimizado para taller
-- [ ] Generación de PDFs (formato idéntico al informe de RiderBross)
 - [ ] Exportación a Excel
-- [ ] Autenticación con Supabase Auth
+- [ ] Autenticación con Supabase Auth (Gmail, Hotmail, Yahoo, etc...)
 
 ## 📝 Scripts Disponibles
 
