@@ -1,8 +1,8 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import jsPDF from 'jspdf';
 import { supabase } from '@/lib/supabase/client';
 import {
+  createServiceJsPdf,
   drawServicePdfContent,
   fetchServicioCompletoForPdf,
   getServicePdfFilename,
@@ -23,7 +23,7 @@ export async function generateServicePdfBuffer(
 ): Promise<{ buffer: Buffer; filename: string }> {
   const servicioCompleto = await fetchServicioCompletoForPdf(supabase, servicioId);
   const logoDataUrl = await loadLogoDataUrlServer();
-  const doc = new jsPDF();
+  const doc = createServiceJsPdf();
   drawServicePdfContent(doc, servicioCompleto, logoDataUrl);
   const pdfOutput = doc.output('arraybuffer');
   return {

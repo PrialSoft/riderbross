@@ -210,6 +210,31 @@ export async function fetchServicioCompletoForPdf(
   return servicioCompleto;
 }
 
+/** jsPDF con compresión de streams (reduce tamaño del archivo). */
+export function createServiceJsPdf(): jsPDF {
+  return new jsPDF({
+    orientation: 'p',
+    unit: 'mm',
+    format: 'a4',
+    compress: true,
+  });
+}
+
+/** Una sola línea; si no entra, recorta con elipsis (fuente ya en helvetica normal). */
+function truncateTextToMaxWidth(doc: jsPDF, text: string, maxWidth: number): string {
+  if (maxWidth <= 0) return '';
+  doc.setFont('helvetica', 'normal');
+  if (doc.getTextWidth(text) <= maxWidth) return text;
+  const ellipsis = '…';
+  let len = text.length;
+  while (len > 0) {
+    const candidate = text.slice(0, len) + ellipsis;
+    if (doc.getTextWidth(candidate) <= maxWidth) return candidate;
+    len -= 1;
+  }
+  return doc.getTextWidth(ellipsis) <= maxWidth ? ellipsis : '';
+}
+
 function addLogoToPdf(doc: jsPDF, logoDataUrl: string | null, margin: number, yPos: number): void {
   if (!logoDataUrl) return;
   try {
@@ -290,45 +315,74 @@ export function drawServicePdfContent(
   yPos = headerStartY + headerHeight + 8; // Separar más la sección de datos del cliente
 
   // Información del cliente y vehículo en la cabecera
-  // Línea superior: CLIENTE, EMAIL, TEL
-  // Línea inferior: DOMINIO, MARCA, MODELO, KM ACTUAL
+  // Una sola línea: reserva fija para TEL (~12 cifras); el resto se reparte a medias entre CLIENTE y EMAIL.
   const clienteVehiculoStartY = yPos;
   let currentY = clienteVehiculoStartY;
-  
+
   doc.setFontSize(10);
-  let xPos = margin;
-  
-  // Línea superior: CLIENTE, EMAIL, TEL
+
   if (servicioCompleto.cliente) {
+    const c = servicioCompleto.cliente;
+    const inner = pageWidth - 2 * margin;
+    const y = currentY;
+    const hasEmail = Boolean(c.email?.trim());
+    const telStr = c.telefono != null ? String(c.telefono) : '';
+
     doc.setFont('helvetica', 'bold');
-    doc.text('CLIENTE:', xPos, currentY);
+    const telLabelW = doc.getTextWidth('TEL: ');
     doc.setFont('helvetica', 'normal');
-    const clienteText = `${servicioCompleto.cliente.apellidos}, ${servicioCompleto.cliente.nombres}`;
-    doc.text(clienteText.substring(0, 22), xPos + 20, currentY);
-    xPos += 70; // Espacio para siguiente campo
-  }
-  
-  // EMAIL
-  if (servicioCompleto.cliente?.email) {
+    const telNumRefW = Math.max(doc.getTextWidth(telStr), doc.getTextWidth('0'.repeat(12)));
+    const telReserve =
+      c.telefono != null ? telLabelW + telNumRefW + 4 : 0;
+
+    const pairW = inner - telReserve;
+
     doc.setFont('helvetica', 'bold');
-    doc.text('EMAIL:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
-    const emailText = servicioCompleto.cliente.email.substring(0, 22);
-    doc.text(emailText, xPos + 18, currentY);
-    xPos += 65; // Espacio para siguiente campo
+    const labelCliente = 'CLIENTE:';
+    doc.text(labelCliente, margin, y);
+    const wLabelCliente = doc.getTextWidth(labelCliente);
+
+    if (hasEmail) {
+      const colW = pairW / 2;
+      const maxClienteVal = colW - wLabelCliente - 2;
+      const clienteFull = `${c.apellidos}, ${c.nombres}`;
+      doc.setFont('helvetica', 'normal');
+      doc.text(truncateTextToMaxWidth(doc, clienteFull, maxClienteVal), margin + wLabelCliente + 1, y);
+
+      const xEmail = margin + colW;
+      doc.setFont('helvetica', 'bold');
+      const labelEmail = 'EMAIL:';
+      doc.text(labelEmail, xEmail, y);
+      const wLabelEmail = doc.getTextWidth(labelEmail);
+      doc.setFont('helvetica', 'normal');
+      const maxEmailVal = colW - wLabelEmail - 2;
+      doc.text(truncateTextToMaxWidth(doc, c.email!.trim(), maxEmailVal), xEmail + wLabelEmail + 1, y);
+    } else {
+      const maxClienteVal = pairW - wLabelCliente - 2;
+      doc.setFont('helvetica', 'normal');
+      doc.text(
+        truncateTextToMaxWidth(doc, `${c.apellidos}, ${c.nombres}`, maxClienteVal),
+        margin + wLabelCliente + 1,
+        y
+      );
+    }
+
+    if (c.telefono != null) {
+      doc.setFont('helvetica', 'bold');
+      const tw = doc.getTextWidth('TEL: ');
+      doc.setFont('helvetica', 'normal');
+      const nw = doc.getTextWidth(telStr);
+      const xTel = pageWidth - margin - tw - nw;
+      doc.setFont('helvetica', 'bold');
+      doc.text('TEL:', xTel, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(telStr, xTel + tw + 0.5, y);
+    }
+
+    currentY += 6;
   }
-  
-  // TEL
-  if (servicioCompleto.cliente?.telefono) {
-    doc.setFont('helvetica', 'bold');
-    doc.text('TEL:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
-    const telText = servicioCompleto.cliente.telefono.toString();
-    doc.text(telText, xPos + 12, currentY);
-  }
-  
-  currentY += 6; // Espacio entre líneas
-  xPos = margin;
+
+  let xPos = margin;
   
   // Línea inferior: DOMINIO, MARCA, MODELO, KM ACTUAL
   if (servicioCompleto.vehiculo) {
