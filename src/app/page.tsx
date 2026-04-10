@@ -20,6 +20,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import SpeedIcon from '@mui/icons-material/Speed';
 
+import { MarcasCarousel } from '@/components/public/MarcasCarousel/MarcasCarousel';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -116,6 +117,8 @@ export default function Home() {
                 Como Riders, entendemos lo que tu moto significa para vos. Por eso, nuestro equipo garantiza seguridad y rendimiento óptimo con un servicio técnico de primer nivel.
               </Typography>
             </Box>
+
+            <MarcasCarousel />
 
             <Container maxWidth="lg" className={styles.servicesSection}>
             <Typography 
