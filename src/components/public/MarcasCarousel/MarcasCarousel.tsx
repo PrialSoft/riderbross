@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import styles from './MarcasCarousel.module.css';
 
-/** Píxeles por segundo (desplazamiento hacia la izquierda) */
-const SPEED_PX_S = 100;
+/** Velocidad base en escritorio (px/s). En móvil se reduce en código para que no se sienta “acelerado”. */
+const SPEED_PX_S_DESKTOP = 88;
 
 /** Opcional: en `.env.local` pon `NEXT_PUBLIC_MARCAS_ASSET_VERSION=2` y reinicia `npm run dev` para invalidar caché del optimizador al cambiar PNG con el mismo nombre. */
 const MARCAS_ASSET_QUERY =
@@ -65,7 +65,7 @@ function LogoItem({
         width={480}
         height={240}
         className={styles.logo}
-        sizes="(max-width: 600px) 28vw, (max-width: 900px) 28vw, 26vw"
+        sizes="(max-width: 599px) 18vw, (max-width: 900px) 28vw, 26vw"
       />
     </div>
   );
@@ -90,10 +90,20 @@ function LogoStrip({ stripKey, decorative }: { stripKey: string; decorative?: bo
   );
 }
 
+function speedPxForViewportWidth(width: number): number {
+  if (width < 480) return 28;
+  if (width < 600) return 34;
+  if (width < 768) return 42;
+  if (width < 1024) return 58;
+  if (width < 1280) return 72;
+  return SPEED_PX_S_DESKTOP;
+}
+
 export function MarcasCarousel() {
   const moverRef = useRef<HTMLDivElement>(null);
   const loopPxRef = useRef(0);
   const offsetPxRef = useRef(0);
+  const speedPxRef = useRef(SPEED_PX_S_DESKTOP);
   const pausedHoverRef = useRef(false);
   const reduceMotionRef = useRef(false);
   const rafRef = useRef<number | null>(null);
@@ -126,13 +136,21 @@ export function MarcasCarousel() {
       return;
     }
 
+    const syncSpeed = () => {
+      speedPxRef.current = speedPxForViewportWidth(window.innerWidth);
+    };
+    syncSpeed();
+
     measureLoop();
     const ro = new ResizeObserver(() => {
       measureLoop();
+      syncSpeed();
     });
     ro.observe(mover);
+    window.addEventListener('resize', syncSpeed);
 
-    const speed = () => (reduceMotionRef.current ? SPEED_PX_S * 0.2 : SPEED_PX_S);
+    const speed = () =>
+      reduceMotionRef.current ? speedPxRef.current * 0.2 : speedPxRef.current;
 
     const tick = (now: number) => {
       const last = lastTsRef.current;
@@ -165,6 +183,7 @@ export function MarcasCarousel() {
         rafRef.current = null;
       }
       ro.disconnect();
+      window.removeEventListener('resize', syncSpeed);
       mover.style.transform = '';
       lastTsRef.current = null;
     };
