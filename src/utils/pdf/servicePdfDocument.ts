@@ -306,6 +306,9 @@ export function drawServicePdfContent(
   const colorGrayDark: [number, number, number] = [150, 150, 150]; // Gris oscuro para border bottom de categorías
   const colorBgPrimary: [number, number, number] = [4, 0, 12]; // #04000C --bg-primary
   const colorBgSecondary: [number, number, number] = [71, 7, 7]; // #470707 --bg-secondary
+  const colorEstadoOk: [number, number, number] = [76, 175, 80];
+  const colorEstadoRegular: [number, number, number] = [255, 193, 7];
+  const colorEstadoMalo: [number, number, number] = [200, 50, 45];
 
   // Header con fondo y borde
   const headerHeight = 35;
@@ -541,6 +544,39 @@ export function drawServicePdfContent(
     yPos += 10;
   }
   
+  // Referencia de colores de estado antes del detalle de servicios
+  setServicePdfFont(doc, 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...colorBlack);
+  const legendY = yPos;
+  const legendCircleY = legendY - 1.4;
+  const legendItems: Array<{ label: string; color: [number, number, number] }> = [
+    { label: 'Ok', color: colorEstadoOk },
+    { label: 'Regular', color: colorEstadoRegular },
+    { label: 'Malo', color: colorEstadoMalo },
+  ];
+  const legendWidth = legendItems.reduce((total, item, index) => {
+    const itemWidth = 1.1 * 2 + 3 + doc.getTextWidth(item.label);
+    const separatorWidth = index < legendItems.length - 1 ? 7 : 0;
+    return total + itemWidth + separatorWidth;
+  }, 0);
+  let legendX = pageWidth - margin - legendWidth;
+
+  legendItems.forEach((item, index) => {
+    doc.setFillColor(...item.color);
+    doc.circle(legendX, legendCircleY, 1.1, 'F');
+    legendX += 3;
+    doc.text(item.label, legendX, legendY);
+    legendX += doc.getTextWidth(item.label) + 3;
+    if (index < legendItems.length - 1) {
+      doc.setTextColor(...colorGray);
+      doc.text('|', legendX, legendY);
+      doc.setTextColor(...colorBlack);
+      legendX += 4;
+    }
+  });
+  yPos += 7;
+
   doc.setTextColor(...colorBlack);
 
   // Agrupar detalles por categoría
@@ -774,7 +810,7 @@ export function drawServicePdfContent(
       }
       
       // Estado - esfera de color al margen derecho, centrada verticalmente
-      // Colores según el estado: OK = verde, Regular = naranja, Malo = rojo
+      // Colores según el estado: OK = verde, Regular = amarillo, Malo = rojo
       const estadoRightX = pageWidth - margin - 2; // Un poco más a la izquierda para centrar la esfera
       const estadoLower = estado.toLowerCase();
       const sphereRadius = 0.9; // Radio de la esfera (90% del tamaño anterior)
@@ -782,11 +818,11 @@ export function drawServicePdfContent(
       
       let estadoColor: [number, number, number] = [0, 0, 0]; // Negro por defecto
       if (estadoLower.includes('ok')) {
-        estadoColor = [76, 175, 80]; // Verde
+        estadoColor = colorEstadoOk; // Verde
       } else if (estadoLower.includes('regular')) {
-        estadoColor = [255, 152, 0]; // Naranja
+        estadoColor = colorEstadoRegular; // Amarillo
       } else if (estadoLower.includes('malo')) {
-        estadoColor = [200, 50, 45]; // Rojo más oscuro
+        estadoColor = colorEstadoMalo; // Rojo más oscuro
       }
       
       // Dibujar esfera de color
@@ -855,41 +891,80 @@ export function drawServicePdfContent(
     yPos += 10;
   }
 
-  // Footer - se agregará al final de la última página con gradiente como las categorías
+  // Footer - se agregará al final de la última página con el mismo fondo del encabezado
   const footerHeight = 20;
   const footerY = pageHeight - footerHeight;
-  const footerX = 0;
-  const footerWidth = pageWidth;
   
-  // Aplicar gradiente de fondo al footer (igual que las categorías)
-  drawGradient(
-    footerX,
-    footerY,
-    footerWidth,
-    footerHeight,
-    colorBgSecondary, // Izquierda: --bg-secondary (#470707)
-    colorBgPrimary    // Derecha: --bg-primary (#04000C)
-  );
+  doc.setFillColor(...colorBgPrimary);
+  doc.rect(0, footerY, pageWidth, footerHeight, 'F');
   
   try {
-    const iconWidth = 7;
-    const iconHeight = 7;
-    const iconX = margin;
-    const iconY = footerY + (footerHeight - iconHeight) / 2;
+    const footerCenterY = footerY + footerHeight / 2;
+    const footerTextY = footerCenterY + 1.25;
+    const iconSize = 4.2;
+    const iconTextGap = 3;
+    const separatorGap = 6;
+    const separatorHeight = 13;
+    const labelText = 'RIDER.BROSS';
+    const webText = 'www.riderbross.com';
+    const webLetterSpacing = 0.35;
 
-    drawInstagramIconVector(doc, iconX, iconY, iconWidth);
-
-    // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea (texto blanco sobre fondo con gradiente)
-    doc.setFontSize(10);
     setServicePdfFont(doc, 'bold');
-    doc.setTextColor(255, 255, 255); // Texto blanco
-    doc.text('RIDER.BROSS', iconX + iconWidth + 5, iconY + iconHeight / 2 + 2);
-    
-    // URL del sitio web a la derecha en la misma línea (texto blanco, solo www.riderbross.com en mayúscula)
-    doc.setFontSize(8);
+    doc.setFontSize(9);
+    const labelWidth = doc.getTextWidth(labelText);
     setServicePdfFont(doc, 'normal');
-    doc.setTextColor(255, 255, 255); // Texto blanco
-    doc.text('WWW.RIDERBROSS.COM', pageWidth - margin, iconY + iconHeight / 2 + 2, { align: 'right' });
+    doc.setFontSize(9);
+    const webWidth =
+      doc.getTextWidth(webText) + Math.max(0, webText.length - 1) * webLetterSpacing;
+
+    const footerContentWidth = iconSize + iconTextGap + labelWidth + separatorGap * 2 + webWidth;
+    const contentStartX = pageWidth / 2 - footerContentWidth / 2;
+    const iconX = contentStartX;
+    const iconY = footerCenterY - iconSize / 2;
+    const labelX = iconX + iconSize + iconTextGap;
+    const separatorX = labelX + labelWidth + separatorGap;
+    const webX = separatorX + separatorGap;
+
+    // Resplandor radial amplio y sutil, contenido dentro del footer.
+    const glowColor: [number, number, number] = [180, 210, 255];
+    for (let i = 0; i < 72; i++) {
+      const ratio = i / 71;
+      const glow = Math.pow(ratio, 2.9) * 0.075;
+      const r = Math.round(colorBgPrimary[0] + (glowColor[0] - colorBgPrimary[0]) * glow);
+      const g = Math.round(colorBgPrimary[1] + (glowColor[1] - colorBgPrimary[1]) * glow);
+      const b = Math.round(colorBgPrimary[2] + (glowColor[2] - colorBgPrimary[2]) * glow);
+      const radiusX = 96 - ratio * 54;
+      const radiusY = 9.1 - ratio * 5.6;
+      doc.setFillColor(r, g, b);
+      doc.ellipse(pageWidth / 2, footerCenterY, radiusX, radiusY, 'F');
+    }
+
+    drawInstagramIconVector(doc, iconX, iconY - 0.15, iconSize);
+
+    // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea.
+    doc.setFontSize(9);
+    setServicePdfFont(doc, 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(labelText, labelX, footerTextY);
+
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.25);
+    doc.line(
+      separatorX,
+      footerCenterY - separatorHeight / 2,
+      separatorX,
+      footerCenterY + separatorHeight / 2
+    );
+    
+    // URL del sitio web a la derecha del separador.
+    doc.setFontSize(9);
+    setServicePdfFont(doc, 'normal');
+    doc.setTextColor(255, 255, 255);
+    let webCharX = webX;
+    for (const char of webText) {
+      doc.text(char, webCharX, footerTextY);
+      webCharX += doc.getTextWidth(char) + webLetterSpacing;
+    }
   } catch (error) {
     console.warn('Error al dibujar el pie de página:', error);
   }
