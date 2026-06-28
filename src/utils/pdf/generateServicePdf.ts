@@ -4,6 +4,9 @@ import {
   drawServicePdfContent,
   fetchServicioCompletoForPdf,
   getServicePdfFilename,
+  registerServicePdfFonts,
+  SERVICE_PDF_FONT_URLS,
+  type ServicePdfFonts,
 } from '@/utils/pdf/servicePdfDocument';
 
 /** Máx. lado del logo en px al rasterizar: evita incrustar PNG enormes (PDF de descarga hinchado). */
@@ -37,10 +40,38 @@ async function loadLogoDataUrlBrowser(): Promise<string | null> {
   }
 }
 
+async function loadFontBase64Browser(url: string): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar la fuente del PDF: ${url}`);
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function loadServicePdfFontsBrowser(): Promise<ServicePdfFonts> {
+  const [regularBase64, boldBase64] = await Promise.all([
+    loadFontBase64Browser(SERVICE_PDF_FONT_URLS.regular),
+    loadFontBase64Browser(SERVICE_PDF_FONT_URLS.bold),
+  ]);
+
+  return { regularBase64, boldBase64 };
+}
+
 export async function generateServicePdf(servicioId: number): Promise<void> {
   const servicioCompleto = await fetchServicioCompletoForPdf(supabase, servicioId);
-  const logoDataUrl = await loadLogoDataUrlBrowser();
+  const [logoDataUrl, fonts] = await Promise.all([
+    loadLogoDataUrlBrowser(),
+    loadServicePdfFontsBrowser(),
+  ]);
   const doc = createServiceJsPdf();
+  registerServicePdfFonts(doc, fonts);
   drawServicePdfContent(doc, servicioCompleto, logoDataUrl);
   doc.save(getServicePdfFilename(servicioCompleto));
 }

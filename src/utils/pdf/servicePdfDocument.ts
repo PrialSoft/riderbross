@@ -3,6 +3,20 @@ import jsPDF from 'jspdf';
 import dayjs from '@/lib/dayjs';
 import { formatPatente } from '@/utils/patente';
 
+const SERVICE_PDF_FONT_FAMILY = 'Montserrat';
+const SERVICE_PDF_FONT_REGULAR_FILE = 'Montserrat_400Regular.ttf';
+const SERVICE_PDF_FONT_BOLD_FILE = 'Montserrat_700Bold.ttf';
+
+export const SERVICE_PDF_FONT_URLS = {
+  regular: `/fonts/montserrat/${SERVICE_PDF_FONT_REGULAR_FILE}`,
+  bold: `/fonts/montserrat/${SERVICE_PDF_FONT_BOLD_FILE}`,
+} as const;
+
+export interface ServicePdfFonts {
+  regularBase64: string;
+  boldBase64: string;
+}
+
 export interface ServicioCompleto {
   servicio: {
     id: number;
@@ -220,10 +234,22 @@ export function createServiceJsPdf(): jsPDF {
   });
 }
 
-/** Una sola línea; si no entra, recorta con elipsis (fuente ya en helvetica normal). */
+export function registerServicePdfFonts(doc: jsPDF, fonts: ServicePdfFonts): void {
+  doc.addFileToVFS(SERVICE_PDF_FONT_REGULAR_FILE, fonts.regularBase64);
+  doc.addFont(SERVICE_PDF_FONT_REGULAR_FILE, SERVICE_PDF_FONT_FAMILY, 'normal');
+  doc.addFileToVFS(SERVICE_PDF_FONT_BOLD_FILE, fonts.boldBase64);
+  doc.addFont(SERVICE_PDF_FONT_BOLD_FILE, SERVICE_PDF_FONT_FAMILY, 'bold');
+  setServicePdfFont(doc, 'normal');
+}
+
+function setServicePdfFont(doc: jsPDF, style: 'normal' | 'bold'): void {
+  doc.setFont(SERVICE_PDF_FONT_FAMILY, style);
+}
+
+/** Una sola línea; si no entra, recorta con elipsis (fuente ya en Montserrat normal). */
 function truncateTextToMaxWidth(doc: jsPDF, text: string, maxWidth: number): string {
   if (maxWidth <= 0) return '';
-  doc.setFont('helvetica', 'normal');
+  setServicePdfFont(doc, 'normal');
   if (doc.getTextWidth(text) <= maxWidth) return text;
   const ellipsis = '…';
   let len = text.length;
@@ -271,12 +297,7 @@ export function drawServicePdfContent(
   const margin = 14;
   let yPos = margin;
 
-  // Nota sobre fuentes en jsPDF:
-  // jsPDF no tiene Montserrat por defecto. Para usar Montserrat real, necesitarías:
-  // 1. Archivos .ttf de Montserrat convertidos a base64
-  // 2. Usar doc.addFileToVFS() y doc.addFont()
-  // Por ahora, usaremos 'helvetica' que es la fuente más similar disponible
-  // Reemplazamos 'montserrat' por 'helvetica' en todas las llamadas a setFont
+  setServicePdfFont(doc, 'normal');
 
   // Colores
   const colorRed: [number, number, number] = [139, 26, 26];
@@ -299,12 +320,12 @@ export function drawServicePdfContent(
   // Título centrado (en blanco sobre fondo oscuro) - un poco más abajo
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
+  setServicePdfFont(doc, 'bold');
   doc.text('INFORME DE SERVICIO TÉCNICO', pageWidth / 2, yPos + 16, { align: 'center' });
   
   // Fecha a la derecha (en blanco sobre fondo oscuro)
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
+  setServicePdfFont(doc, 'normal');
   const fecha = servicioCompleto.servicio.fechaservicio
     ? dayjs(servicioCompleto.servicio.fechaservicio).format('DD/MM/YYYY')
     : '—';
@@ -328,16 +349,16 @@ export function drawServicePdfContent(
     const hasEmail = Boolean(c.email?.trim());
     const telStr = c.telefono != null ? String(c.telefono) : '';
 
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     const telLabelW = doc.getTextWidth('TEL: ');
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     const telNumRefW = Math.max(doc.getTextWidth(telStr), doc.getTextWidth('0'.repeat(12)));
     const telReserve =
       c.telefono != null ? telLabelW + telNumRefW + 4 : 0;
 
     const pairW = inner - telReserve;
 
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     const labelCliente = 'CLIENTE:';
     doc.text(labelCliente, margin, y);
     const wLabelCliente = doc.getTextWidth(labelCliente);
@@ -346,20 +367,20 @@ export function drawServicePdfContent(
       const colW = pairW / 2;
       const maxClienteVal = colW - wLabelCliente - 2;
       const clienteFull = `${c.apellidos}, ${c.nombres}`;
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
       doc.text(truncateTextToMaxWidth(doc, clienteFull, maxClienteVal), margin + wLabelCliente + 1, y);
 
       const xEmail = margin + colW;
-      doc.setFont('helvetica', 'bold');
+      setServicePdfFont(doc, 'bold');
       const labelEmail = 'EMAIL:';
       doc.text(labelEmail, xEmail, y);
       const wLabelEmail = doc.getTextWidth(labelEmail);
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
       const maxEmailVal = colW - wLabelEmail - 2;
       doc.text(truncateTextToMaxWidth(doc, c.email!.trim(), maxEmailVal), xEmail + wLabelEmail + 1, y);
     } else {
       const maxClienteVal = pairW - wLabelCliente - 2;
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
       doc.text(
         truncateTextToMaxWidth(doc, `${c.apellidos}, ${c.nombres}`, maxClienteVal),
         margin + wLabelCliente + 1,
@@ -368,14 +389,14 @@ export function drawServicePdfContent(
     }
 
     if (c.telefono != null) {
-      doc.setFont('helvetica', 'bold');
+      setServicePdfFont(doc, 'bold');
       const tw = doc.getTextWidth('TEL: ');
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
       const nw = doc.getTextWidth(telStr);
       const xTel = pageWidth - margin - tw - nw;
-      doc.setFont('helvetica', 'bold');
+      setServicePdfFont(doc, 'bold');
       doc.text('TEL:', xTel, y);
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
       doc.text(telStr, xTel + tw + 0.5, y);
     }
 
@@ -387,33 +408,33 @@ export function drawServicePdfContent(
   // Línea inferior: DOMINIO, MARCA, MODELO, KM ACTUAL
   if (servicioCompleto.vehiculo) {
     // DOMINIO
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.text('DOMINIO:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     const dominioText = formatPatente(servicioCompleto.vehiculo.patente);
     doc.text(dominioText, xPos + 22, currentY);
     xPos += 45;
     
     // MARCA
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.text('MARCA:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     const marcaText = (servicioCompleto.vehiculo.marcas?.descripcion || '—').substring(0, 12);
     doc.text(marcaText, xPos + 18, currentY);
     xPos += 45;
     
     // MODELO
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.text('MODELO:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     const modeloText = (servicioCompleto.vehiculo.modelo || '—').substring(0, 12);
     doc.text(modeloText, xPos + 20, currentY);
     xPos += 45;
     
     // KM ACTUAL
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.text('KM ACTUAL:', xPos, currentY);
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     const kmActual = servicioCompleto.servicio.kmservicio
       ? servicioCompleto.servicio.kmservicio?.toLocaleString('es-AR')
       : '—';
@@ -588,7 +609,7 @@ export function drawServicePdfContent(
   };
 
   // Filas de servicios
-  doc.setFont('helvetica', 'normal');
+  setServicePdfFont(doc, 'normal');
   categoriasOrdenadas.forEach(([categoriaNombre, detalles]) => {
     // Determinar qué columnas mostrar para esta categoría
     const tieneProximo = detalles.some(d => d.proximoenkm !== null);
@@ -619,7 +640,7 @@ export function drawServicePdfContent(
         colorBgPrimary    // Derecha: --bg-primary (#04000C)
       );
       
-      doc.setFont('helvetica', 'bold');
+      setServicePdfFont(doc, 'bold');
       doc.setFontSize(9);
       doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
       
@@ -646,12 +667,12 @@ export function drawServicePdfContent(
       doc.setTextColor(...colorBlack); // Restaurar color negro
       
       yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
     } else {
       // Si solo hay una categoría, mostrar encabezados aquí
       // Distribución: NOMBRE DEL SERVICIO (1/3), COMENTARIO (1/3), PRÓXIMO + ESTADO (1/3 compartido)
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
+      setServicePdfFont(doc, 'bold');
       let headerX = margin;
       
       // NOMBRE DEL SERVICIO (1/3) - aunque no se muestre el título, se reserva el espacio
@@ -672,10 +693,10 @@ export function drawServicePdfContent(
       doc.text('ESTADO', estadoHeaderRightX, yPos, { align: 'right' });
       
       yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
-      doc.setFont('helvetica', 'normal');
+      setServicePdfFont(doc, 'normal');
     }
 
-    detalles.forEach((detalle, detalleIndex) => {
+    detalles.forEach((detalle) => {
       if (yPos > pageHeight - 30) {
         doc.addPage();
         yPos = margin;
@@ -818,7 +839,7 @@ export function drawServicePdfContent(
       colorBgPrimary    // Derecha: --bg-primary (#04000C)
     );
     
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.setFontSize(9);
     doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
     doc.text('OBSERVACIONES', margin, yPos);
@@ -827,7 +848,7 @@ export function drawServicePdfContent(
     // Más espacio entre el header y el contenido (sin border bottom)
     yPos += 8; // Aumentado de 4 a 8 para más espacio
     doc.setFontSize(7.5); // Mismo tamaño que los servicios y detalles
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     doc.text(servicioCompleto.servicio.comentario, margin, yPos, {
       maxWidth: pageWidth - 2 * margin,
     });
@@ -860,13 +881,13 @@ export function drawServicePdfContent(
 
     // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea (texto blanco sobre fondo con gradiente)
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
+    setServicePdfFont(doc, 'bold');
     doc.setTextColor(255, 255, 255); // Texto blanco
     doc.text('RIDER.BROSS', iconX + iconWidth + 5, iconY + iconHeight / 2 + 2);
     
     // URL del sitio web a la derecha en la misma línea (texto blanco, solo www.riderbross.com en mayúscula)
     doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
+    setServicePdfFont(doc, 'normal');
     doc.setTextColor(255, 255, 255); // Texto blanco
     doc.text('WWW.RIDERBROSS.COM', pageWidth - margin, iconY + iconHeight / 2 + 2, { align: 'right' });
   } catch (error) {

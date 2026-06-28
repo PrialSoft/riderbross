@@ -195,7 +195,7 @@ export default function Navbar() {
               className={styles.logoLink}
             >
               <Image
-                src="/images/Logo.png"
+                src="/images/Logo_Descripcion.png"
                 alt="RiderBross Logo"
                 width={120}
                 height={38}
