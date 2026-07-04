@@ -261,6 +261,43 @@ function truncateTextToMaxWidth(doc: jsPDF, text: string, maxWidth: number): str
   return doc.getTextWidth(ellipsis) <= maxWidth ? ellipsis : '';
 }
 
+function normalizePdfCategoryName(nombre: string): string {
+  return nombre
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .trim();
+}
+
+function isSistemaIluminacionCategory(nombre: string): boolean {
+  return normalizePdfCategoryName(nombre).includes('SISTEMA DE ILUMINACION');
+}
+
+function buildServicioTexto(nombreServicio: string, referencia: string | null | undefined): string {
+  let servicioTexto = nombreServicio;
+  if (referencia?.trim()) {
+    let referenciaLimpia = referencia.trim();
+    if (referenciaLimpia.startsWith('(') && referenciaLimpia.endsWith(')')) {
+      referenciaLimpia = referenciaLimpia.slice(1, -1).trim();
+    }
+    servicioTexto += ` (${referenciaLimpia})`;
+  }
+  return servicioTexto;
+}
+
+function getEstadoSphereColor(
+  estado: string,
+  colorOk: [number, number, number],
+  colorRegular: [number, number, number],
+  colorMalo: [number, number, number]
+): [number, number, number] {
+  const estadoLower = estado.toLowerCase();
+  if (estadoLower.includes('ok')) return colorOk;
+  if (estadoLower.includes('regular')) return colorRegular;
+  if (estadoLower.includes('malo')) return colorMalo;
+  return [0, 0, 0];
+}
+
 function addLogoToPdf(doc: jsPDF, logoDataUrl: string | null, margin: number, yPos: number): void {
   if (!logoDataUrl) return;
   try {
@@ -644,12 +681,138 @@ export function drawServicePdfContent(
     }
   };
 
+  const drawCategoryHeaderBar = (titulo: string, showTableHeaders: boolean, tieneProximo: boolean) => {
+    const categoriaX = margin - 2;
+    const categoriaY = yPos - 4;
+    const categoriaWidth = pageWidth - 2 * margin + 4;
+    const categoriaHeight = 6;
+
+    drawGradient(
+      categoriaX,
+      categoriaY,
+      categoriaWidth,
+      categoriaHeight,
+      colorBgSecondary,
+      colorBgPrimary
+    );
+
+    setServicePdfFont(doc, 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(titulo.toUpperCase(), margin, yPos);
+
+    if (showTableHeaders) {
+      let headerX = margin + colWidths.servicio;
+      doc.text('COMENTARIO', headerX, yPos);
+      headerX += colWidths.comentario;
+
+      if (tieneProximo) {
+        const proximoHeaderX =
+          startX + colWidths.servicio + colWidths.comentario + colWidths.proximo / 2;
+        doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
+      }
+
+      doc.text('ESTADO', pageWidth - margin, yPos, { align: 'right' });
+    }
+
+    doc.setTextColor(...colorBlack);
+    yPos += 6;
+    setServicePdfFont(doc, 'normal');
+  };
+
+  const drawIluminacionItemCell = (
+    detalle: ServicioCompleto['detalles'][number],
+    cellX: number,
+    cellWidth: number,
+    rowY: number
+  ) => {
+    const nombreServicio = detalle.tiposservicio?.nombre || '—';
+    const referencia = detalle.tiposservicio?.referencia || null;
+    const estado = detalle.estados?.descripcion || '—';
+    const servicioTexto = buildServicioTexto(nombreServicio, referencia);
+    const sphereRadius = 0.9;
+    const sphereX = cellX + cellWidth - 2;
+    const sphereY = rowY - 1.5;
+    const textMaxWidth = cellWidth - 7;
+
+    setServicePdfFont(doc, 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...colorBlack);
+    doc.text(truncateTextToMaxWidth(doc, servicioTexto, textMaxWidth), cellX, rowY);
+
+    doc.setFillColor(
+      ...getEstadoSphereColor(estado, colorEstadoOk, colorEstadoRegular, colorEstadoMalo)
+    );
+    doc.circle(sphereX, sphereY, sphereRadius, 'F');
+  };
+
   // Filas de servicios
   setServicePdfFont(doc, 'normal');
   categoriasOrdenadas.forEach(([categoriaNombre, detalles]) => {
+    // SISTEMA DE ILUMINACIÓN: 2 columnas de hasta 5 ítems, cada uno con su estado.
+    if (isSistemaIluminacionCategory(categoriaNombre)) {
+      const itemsPerColumn = 5;
+      const itemsPerBlock = itemsPerColumn * 2;
+      const columnGap = 8;
+      const columnWidth = (availableWidth - columnGap) / 2;
+      const leftColumnX = margin;
+      const rightColumnX = margin + columnWidth + columnGap;
+      const rowHeight = 5;
+      const blockRowsHeight = itemsPerColumn * rowHeight;
+      const headerHeight = categoriasOrdenadas.length > 1 ? 6 : 0;
+
+      for (let offset = 0; offset < detalles.length; offset += itemsPerBlock) {
+        const needsHeader = offset === 0 && categoriasOrdenadas.length > 1;
+        const espacioNecesario = (needsHeader ? headerHeight : 0) + blockRowsHeight + 4;
+        if (yPos + espacioNecesario > pageHeight - 30) {
+          doc.addPage();
+          yPos = margin;
+        }
+
+        if (needsHeader) {
+          drawCategoryHeaderBar(categoriaNombre, false, false);
+        } else if (offset === 0) {
+          // Única categoría en el informe: solo etiqueta ESTADO en cada columna.
+          setServicePdfFont(doc, 'bold');
+          doc.setFontSize(8);
+          doc.text('ESTADO', leftColumnX + columnWidth - 2, yPos, { align: 'right' });
+          doc.text('ESTADO', rightColumnX + columnWidth - 2, yPos, { align: 'right' });
+          yPos += 6;
+          setServicePdfFont(doc, 'normal');
+        }
+
+        const blockItems = detalles.slice(offset, offset + itemsPerBlock);
+        const leftItems = blockItems.slice(0, itemsPerColumn);
+        const rightItems = blockItems.slice(itemsPerColumn, itemsPerBlock);
+        const rowsInBlock = Math.max(leftItems.length, rightItems.length);
+
+        for (let row = 0; row < rowsInBlock; row++) {
+          const rowY = yPos;
+          const leftItem = leftItems[row];
+          const rightItem = rightItems[row];
+
+          if (leftItem) {
+            drawIluminacionItemCell(leftItem, leftColumnX, columnWidth, rowY);
+          }
+          if (rightItem) {
+            drawIluminacionItemCell(rightItem, rightColumnX, columnWidth, rowY);
+          }
+
+          const lineaY = rowY + 0.5;
+          doc.setDrawColor(220, 220, 220);
+          doc.setLineWidth(0.1);
+          doc.line(margin, lineaY, pageWidth - margin, lineaY);
+
+          yPos += rowHeight;
+        }
+      }
+
+      return;
+    }
+
     // Determinar qué columnas mostrar para esta categoría
-    const tieneProximo = detalles.some(d => d.proximoenkm !== null);
-    
+    const tieneProximo = detalles.some((d) => d.proximoenkm !== null);
+
     // Verificar si hay espacio suficiente para la cabecera + al menos una fila de datos
     // Altura necesaria: cabecera (6) + espacio después (6) + altura mínima de fila (8) = 20
     const espacioNecesario = 20;
@@ -658,77 +821,28 @@ export function drawServicePdfContent(
       doc.addPage();
       yPos = margin;
     }
-    
+
     // Título de categoría con gradiente de fondo
     if (categoriasOrdenadas.length > 1) {
-      // Gradiente de --bg-secondary (izquierda) a --bg-primary (derecha)
-      const categoriaX = margin - 2;
-      const categoriaY = yPos - 4;
-      const categoriaWidth = pageWidth - 2 * margin + 4;
-      const categoriaHeight = 6;
-      
-      drawGradient(
-        categoriaX,
-        categoriaY,
-        categoriaWidth,
-        categoriaHeight,
-        colorBgSecondary, // Izquierda: --bg-secondary (#470707)
-        colorBgPrimary    // Derecha: --bg-primary (#04000C)
-      );
-      
-      setServicePdfFont(doc, 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
-      
-      // Nombre de categoría y encabezados de columna en la misma línea
-      // Distribución: NOMBRE DEL SERVICIO (1/3), COMENTARIO (1/3), PRÓXIMO + ESTADO (1/3 compartido)
-      let headerX = margin;
-      doc.text(categoriaNombre.toUpperCase(), headerX, yPos);
-      headerX += colWidths.servicio; // NOMBRE DEL SERVICIO ocupa 1/3
-      
-      doc.text('COMENTARIO', headerX, yPos);
-      headerX += colWidths.comentario; // COMENTARIO ocupa 1/3
-      
-      // PRÓXIMO y ESTADO comparten el último 1/3
-      // Calcular posición de PRÓXIMO para alinearlo con los datos (centrado en su columna)
-      if (tieneProximo) {
-        const proximoHeaderX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
-        doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
-      }
-      
-      // ESTADO al margen derecho, alineado a la derecha
-      const estadoHeaderRightX = pageWidth - margin;
-      doc.text('ESTADO', estadoHeaderRightX, yPos, { align: 'right' });
-      
-      doc.setTextColor(...colorBlack); // Restaurar color negro
-      
-      yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
-      setServicePdfFont(doc, 'normal');
+      drawCategoryHeaderBar(categoriaNombre, true, tieneProximo);
     } else {
       // Si solo hay una categoría, mostrar encabezados aquí
-      // Distribución: NOMBRE DEL SERVICIO (1/3), COMENTARIO (1/3), PRÓXIMO + ESTADO (1/3 compartido)
       doc.setFontSize(8);
       setServicePdfFont(doc, 'bold');
-      let headerX = margin;
-      
-      // NOMBRE DEL SERVICIO (1/3) - aunque no se muestre el título, se reserva el espacio
-      headerX += colWidths.servicio;
-      
+      let headerX = margin + colWidths.servicio;
+
       doc.text('COMENTARIO', headerX, yPos);
-      headerX += colWidths.comentario; // COMENTARIO ocupa 1/3
-      
-      // PRÓXIMO y ESTADO comparten el último 1/3
-      // Calcular posición de PRÓXIMO para alinearlo con los datos (centrado en su columna)
+      headerX += colWidths.comentario;
+
       if (tieneProximo) {
-        const proximoHeaderX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
+        const proximoHeaderX =
+          startX + colWidths.servicio + colWidths.comentario + colWidths.proximo / 2;
         doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
       }
-      
-      // ESTADO al margen derecho, alineado a la derecha
-      const estadoHeaderRightX = pageWidth - margin;
-      doc.text('ESTADO', estadoHeaderRightX, yPos, { align: 'right' });
-      
-      yPos += 6; // Aumentar espacio entre headers y el primer registro para evitar que se encime
+
+      doc.text('ESTADO', pageWidth - margin, yPos, { align: 'right' });
+
+      yPos += 6;
       setServicePdfFont(doc, 'normal');
     }
 
@@ -749,51 +863,35 @@ export function drawServicePdfContent(
       let xPos = startX;
       doc.setFontSize(7.5);
       doc.setTextColor(...colorBlack);
-      
-      // SERVICIOS APLICADOS: Nombre + (Referencia) si existe
-      let servicioTexto = nombreServicio;
-      if (referencia && referencia.trim()) {
-        // Limpiar la referencia de paréntesis existentes para evitar dobles paréntesis
-        let referenciaLimpia = referencia.trim();
-        // Remover paréntesis al inicio y final si existen
-        if (referenciaLimpia.startsWith('(') && referenciaLimpia.endsWith(')')) {
-          referenciaLimpia = referenciaLimpia.slice(1, -1).trim();
-        }
-        servicioTexto += ` (${referenciaLimpia})`;
-      }
+
+      const servicioTexto = buildServicioTexto(nombreServicio, referencia);
       const lines = doc.splitTextToSize(servicioTexto, colWidths.servicio - 2);
       const numLines = lines.length;
-      const lineHeight = 3.5; // Altura entre líneas
-      
-      // Dibujar todas las líneas del servicio (alineado a la izquierda)
+      const lineHeight = 3.5;
+
       lines.forEach((line: string, index: number) => {
-        doc.text(line, xPos, yPos + (index * lineHeight), { align: 'left' });
+        doc.text(line, xPos, yPos + index * lineHeight, { align: 'left' });
       });
-      
+
       xPos += colWidths.servicio;
-      
-      // Comentario (si existe) - puede ocupar múltiples líneas también, alineado a la izquierda
-      // Orden: Servicios (1/3), Comentario (1/3), Próximo (1/6), Estado (1/6)
+
       let comentarioLines: string[] = [''];
       if (comentario && comentario.trim()) {
-        // Cambiar color a gris oscuro para el comentario
-        doc.setTextColor(90, 90, 90); // Gris oscuro
+        doc.setTextColor(90, 90, 90);
         comentarioLines = doc.splitTextToSize(comentario.trim(), colWidths.comentario - 2);
         comentarioLines.forEach((line: string, index: number) => {
-          doc.text(line, xPos, yPos + (index * lineHeight), {
+          doc.text(line, xPos, yPos + index * lineHeight, {
             align: 'left',
             maxWidth: colWidths.comentario - 2,
           });
         });
-        // Restaurar color negro
         doc.setTextColor(...colorBlack);
       }
       xPos += colWidths.comentario;
-      
-      // Próximo en KM (solo si la categoría tiene este campo) - en rojo, centrado
-      // Calcular posición para alinearlo con el header
+
       if (tieneProximo) {
-        const proximoCenterX = startX + colWidths.servicio + colWidths.comentario + (colWidths.proximo / 2);
+        const proximoCenterX =
+          startX + colWidths.servicio + colWidths.comentario + colWidths.proximo / 2;
         if (proximo) {
           doc.setTextColor(...colorRed);
           const proximoText = proximo.length > 12 ? proximo.substring(0, 12) : proximo;
@@ -805,49 +903,32 @@ export function drawServicePdfContent(
         }
         xPos += colWidths.proximo;
       } else {
-        // Si no hay PRÓXIMO, reservar el espacio igual
         xPos += colWidths.proximo;
       }
-      
+
       // Estado - esfera de color al margen derecho, centrada verticalmente
-      // Colores según el estado: OK = verde, Regular = amarillo, Malo = rojo
-      const estadoRightX = pageWidth - margin - 2; // Un poco más a la izquierda para centrar la esfera
-      const estadoLower = estado.toLowerCase();
-      const sphereRadius = 0.9; // Radio de la esfera (90% del tamaño anterior)
-      const sphereY = yPos - 1.5; // Centrar verticalmente con el texto
-      
-      let estadoColor: [number, number, number] = [0, 0, 0]; // Negro por defecto
-      if (estadoLower.includes('ok')) {
-        estadoColor = colorEstadoOk; // Verde
-      } else if (estadoLower.includes('regular')) {
-        estadoColor = colorEstadoRegular; // Amarillo
-      } else if (estadoLower.includes('malo')) {
-        estadoColor = colorEstadoMalo; // Rojo más oscuro
-      }
-      
-      // Dibujar esfera de color
+      const estadoRightX = pageWidth - margin - 2;
+      const sphereRadius = 0.9;
+      const sphereY = yPos - 1.5;
+      const estadoColor = getEstadoSphereColor(
+        estado,
+        colorEstadoOk,
+        colorEstadoRegular,
+        colorEstadoMalo
+      );
+
       doc.setFillColor(...estadoColor);
       doc.circle(estadoRightX, sphereY, sphereRadius, 'F');
 
-      // Calcular la altura de la fila según la altura máxima (servicio o comentario)
       const maxLinesInRow = Math.max(numLines, comentarioLines.length);
-      const rowHeight = maxLinesInRow > 1 ? 5 + ((maxLinesInRow - 1) * lineHeight) : 5;
-      
-      // Calcular la altura real del contenido (basada en las líneas de texto)
-      // El texto se dibuja empezando en yPos, y cada línea adicional está a lineHeight (3.5) de distancia
-      // La altura real del contenido es: primera línea (3.5) + líneas adicionales (lineHeight cada una)
-      // Para 1 línea: 3.5, para 2 líneas: 3.5 + 3.5 = 7, para N líneas: N * 3.5
+      const rowHeight = maxLinesInRow > 1 ? 5 + (maxLinesInRow - 1) * lineHeight : 5;
       const alturaRealContenido = maxLinesInRow * 0.5;
-      
-      // Línea sutil y delgada entre cada fila para ayudar a la lectura
-      // Dibujar la línea justo después del contenido real del texto
-      // Dibujar para TODOS los detalles, incluyendo el primero y el último
-      const lineaY = yPos + alturaRealContenido + 0.5; // Justo después del contenido real + pequeño espacio
-      doc.setDrawColor(220, 220, 220); // Gris muy claro y sutil
-      doc.setLineWidth(0.1); // Línea muy delgada
+
+      const lineaY = yPos + alturaRealContenido + 0.5;
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.1);
       doc.line(margin, lineaY, pageWidth - margin, lineaY);
-      
-      // Incrementar yPos para la siguiente fila
+
       yPos += rowHeight;
     });
   });
