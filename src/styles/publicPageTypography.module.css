@@ -1,0 +1,182 @@
+.hero {
+  background: transparent;
+  position: relative;
+  overflow: visible;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.heroContent {
+  text-align: center;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  color: var(--text-primary);
+}
+
+.heroTitle,
+.heroTitle.MuiTypography-root,
+.heroTitle.MuiTypography-h1 {
+  margin: 0 0 1rem !important;
+  font-weight: 700 !important;
+  font-size: 2rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 15px rgba(139, 26, 26, 0.6) !important;
+  color: var(--text-primary) !important;
+}
+
+.heroSubtitle,
+.heroSubtitle.MuiTypography-root,
+.heroSubtitle.MuiTypography-h5 {
+  margin: 0 auto !important;
+  max-width: 900px !important;
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.6 !important;
+  text-align: center !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+  color: var(--text-secondary) !important;
+}
+
+.contentSection {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.sectionTitle,
+.sectionTitle.MuiTypography-root,
+.sectionTitle.MuiTypography-h3 {
+  text-align: center !important;
+  margin: 0 0 2rem !important;
+  font-weight: 700 !important;
+  font-size: 1.75rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.3 !important;
+  color: var(--text-primary) !important;
+}
+
+.panelSectionTitle,
+.panelSectionTitle.MuiTypography-root,
+.panelSectionTitle.MuiTypography-h3 {
+  text-align: left !important;
+  margin: 0 0 1rem !important;
+  font-weight: 700 !important;
+  font-size: 1.75rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.3 !important;
+  color: var(--text-primary) !important;
+}
+
+.cardTitle,
+.cardTitle.MuiTypography-root,
+.cardTitle.MuiTypography-h5 {
+  margin: 0 0 0.5rem !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.4 !important;
+  color: var(--text-primary) !important;
+}
+
+.bodyText,
+.bodyText.MuiTypography-root,
+.bodyText.MuiTypography-body1 {
+  margin: 0 0 1rem !important;
+  font-size: 1rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.7 !important;
+  color: var(--text-primary) !important;
+}
+
+.bodyTextSecondary,
+.bodyTextSecondary.MuiTypography-root,
+.bodyTextSecondary.MuiTypography-body1 {
+  margin: 0 0 1rem !important;
+  font-size: 1rem !important;
+  font-family: var(--font-family-body) !important;
+  line-height: 1.7 !important;
+  color: var(--text-secondary) !important;
+}
+
+.bodyText:last-child,
+.bodyTextSecondary:last-child {
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 600px) {
+  .heroTitle,
+  .heroTitle.MuiTypography-root,
+  .heroTitle.MuiTypography-h1 {
+    font-size: 2.5rem !important;
+  }
+
+  .heroSubtitle,
+  .heroSubtitle.MuiTypography-root,
+  .heroSubtitle.MuiTypography-h5 {
+    font-size: 1.25rem !important;
+  }
+
+  .sectionTitle,
+  .sectionTitle.MuiTypography-root,
+  .sectionTitle.MuiTypography-h3,
+  .panelSectionTitle,
+  .panelSectionTitle.MuiTypography-root,
+  .panelSectionTitle.MuiTypography-h3 {
+    font-size: 2rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .heroContent {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .heroTitle,
+  .heroTitle.MuiTypography-root,
+  .heroTitle.MuiTypography-h1 {
+    font-size: 3rem !important;
+  }
+
+  .heroSubtitle,
+  .heroSubtitle.MuiTypography-root,
+  .heroSubtitle.MuiTypography-h5 {
+    font-size: 1.5rem !important;
+  }
+
+  .contentSection {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .sectionTitle,
+  .sectionTitle.MuiTypography-root,
+  .sectionTitle.MuiTypography-h3,
+  .panelSectionTitle,
+  .panelSectionTitle.MuiTypography-root,
+  .panelSectionTitle.MuiTypography-h3 {
+    font-size: 2.5rem !important;
+  }
+
+  .cardTitle,
+  .cardTitle.MuiTypography-root,
+  .cardTitle.MuiTypography-h5 {
+    font-size: 1.5rem !important;
+  }
+
+  .bodyText,
+  .bodyText.MuiTypography-root,
+  .bodyText.MuiTypography-body1,
+  .bodyTextSecondary,
+  .bodyTextSecondary.MuiTypography-root,
+  .bodyTextSecondary.MuiTypography-body1 {
+    font-size: 1.125rem !important;
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Container,
@@ -62,7 +63,12 @@ export default function Home() {
     router.push(`/consulta?patente=${patenteClean}`);
   };
 
-  const servicios = [
+  const servicios: Array<{
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    href?: string;
+  }> = [
     {
       icon: <TwoWheelerIcon className={styles.serviceIconSize} />,
       title: 'Mantenimiento Preventivo',
@@ -81,7 +87,8 @@ export default function Home() {
     {
       icon: <SearchIcon className={styles.serviceIconSize} />,
       title: 'Inspección Pre\u2011compra',
-      description: '¿Vas a comprar una moto usada? Realizamos un peritaje exhaustivo para que inviertas con total seguridad y sin sorpresas ocultas.',
+      description: '¿Vas a comprar una moto usada? Realizamos un peritaje exhaustivo para que inviertas con total seguridad y sin sorpresas.',
+      href: '/inspeccionPreCompra',
     },
   ];
 
@@ -129,8 +136,8 @@ export default function Home() {
             </Typography>
 
             <Box className={styles.servicesContainer}>
-              {servicios.map((servicio, index) => (
-                <Box key={index} className={styles.serviceCardWrapper}>
+              {servicios.map((servicio, index) => {
+                const card = (
                   <Card className={styles.serviceCard}>
                     <CardContent className={styles.serviceCardContent}>
                       <Box className={styles.serviceIcon}>
@@ -139,13 +146,25 @@ export default function Home() {
                       <Typography variant="h5" component="h3" className={styles.serviceTitle}>
                         {servicio.title}
                       </Typography>
-                      <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
+                      <Typography variant="body1" color="text.secondary" className={styles.serviceDescription}>
                         {servicio.description}
                       </Typography>
                     </CardContent>
                   </Card>
-                </Box>
-              ))}
+                );
+
+                return (
+                  <Box key={index} className={styles.serviceCardWrapper}>
+                    {servicio.href ? (
+                      <Link href={servicio.href} className={styles.serviceCardLink}>
+                        {card}
+                      </Link>
+                    ) : (
+                      card
+                    )}
+                  </Box>
+                );
+              })}
             </Box>
           </Container>
 

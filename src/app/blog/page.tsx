@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { CalendarToday, ArrowForward } from '@mui/icons-material';
 import styles from './page.module.css';
+import typography from '@/styles/publicPageTypography.module.css';
 
 // Datos de las entradas del blog
 const blogPosts = [
@@ -113,21 +114,20 @@ export default function BlogPage() {
   return (
     <Box className={styles.pageWrapper}>
       {/* Hero Section */}
-      <Box className={styles.hero}>
+      <Box className={typography.hero}>
         <Container maxWidth="lg">
-          <Box className={styles.heroContent}>
-            <Typography variant="h1" component="h1" className={styles.heroTitle}>
+          <Box className={typography.heroContent}>
+            <Typography variant="h1" component="h1" className={typography.heroTitle}>
               Blog RiderBross
             </Typography>
-            <Typography variant="h5" component="h2" className={styles.heroSubtitle}>
+            <Typography variant="h5" component="h2" className={typography.heroSubtitle}>
               Consejos, tips y guías para mantener tu moto en perfecto estado
             </Typography>
           </Box>
         </Container>
       </Box>
 
-      {/* Lista de Entradas */}
-      <Container maxWidth="lg" className={styles.postsContainer}>
+      <Container maxWidth="lg" className={`${typography.contentSection} ${styles.postsContainer}`}>
         <Grid container spacing={4}>
           {blogPosts.map((post) => (
             <Grid size={{ xs: 12, md: 6, lg: 4 }} key={post.slug}>

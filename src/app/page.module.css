@@ -530,6 +530,17 @@
   width: 100%;
 }
 
+.serviceCardLink {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.serviceDescription {
+  flex-grow: 1;
+}
+
 @media (min-width: 900px) {
   .serviceCardWrapper {
     flex: 1;

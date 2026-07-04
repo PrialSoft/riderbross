@@ -9,6 +9,7 @@ import {
   Paper,
 } from '@mui/material';
 import Image from 'next/image';
+import typography from '@/styles/publicPageTypography.module.css';
 import styles from './page.module.css';
 
 const consejos = [
@@ -74,50 +75,20 @@ export default function ConsejosPage() {
   return (
     <Box className={styles.pageWrapper}>
       {/* Hero Section */}
-      <Box className={styles.hero}>
+      <Box className={typography.hero}>
         <Container maxWidth="lg">
-          <Box
-            sx={{
-              textAlign: 'center',
-              py: { xs: 6, md: 8 },
-              color: 'var(--text-primary)',
-            }}
-          >
-            <Typography
-              variant="h1"
-              component="h1"
-              sx={{
-                mb: 2,
-                fontWeight: 700,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                fontFamily: 'var(--font-family-body)',
-                textShadow: '2px 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(139, 26, 26, 0.6)',
-                color: 'var(--text-primary)',
-              }}
-            >
+          <Box className={typography.heroContent}>
+            <Typography variant="h1" component="h1" className={typography.heroTitle}>
               Mantenimiento de tu Moto
             </Typography>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{
-                fontWeight: 400,
-                fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                fontFamily: 'var(--font-family-body)',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                maxWidth: '900px',
-                mx: 'auto',
-                color: 'var(--text-secondary)',
-              }}
-            >
+            <Typography variant="h5" component="h2" className={typography.heroSubtitle}>
               Qué y cuándo revisar para mantener tu moto en perfectas condiciones
             </Typography>
           </Box>
         </Container>
       </Box>
 
-      {/* Introducción */}
-      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Container maxWidth="lg" className={typography.contentSection}>
         <Paper
           elevation={0}
           sx={{
@@ -130,55 +101,19 @@ export default function ConsejosPage() {
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 26, 26, 0.1)',
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{
-              mb: 2,
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              lineHeight: 1.7,
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-family-body)',
-            }}
-          >
+          <Typography variant="body1" component="p" className={typography.bodyText}>
             Para muchos motoristas mantener su moto en perfectas condiciones de uso es un placer que se reservan para ellos mismos. No es tanto por no pagar a un taller especializado, sino por el hecho de cuidar con sus propias manos a su fiel compañera de viaje. Quizás tú hasta ahora no te has atrevido porque crees que te llevará mucho tiempo o porque te defines como el típico manazas que no se lleva bien con las herramientas. No obstante, para mantener una moto a punto sólo se necesita un espacio adecuado, planificación, algunos conocimientos y paciencia.
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              mb: 2,
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              lineHeight: 1.7,
-              color: 'var(--text-primary)',
-              fontFamily: 'var(--font-family-body)',
-            }}
-          >
+          <Typography variant="body1" component="p" className={typography.bodyText}>
             En ese sentido, recuerda que lavar y/o arreglar tu moto en la calle está prohibido. Ambas acciones están tipificadas como sanciones medioambientales y, aunque depende de las ordenanzas de cada municipio, puedes terminar pagando una multa de entre 30 y 1.200 euros. Si no dispones de garaje o no tienes un amigo que te preste el suyo para hacer las labores de mantenimiento de tu moto, es mejor no arriesgarse. Puede que la Policía no te vea, pero probablemente a algún vecino no le va a parecer buena idea que cambies el aceite en la calle y te denuncie. Olvídate también de ir al campo o al monte a hacerlo. Sólo conseguirás contaminar una zona verde.
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              fontSize: { xs: '1rem', md: '1.125rem' },
-              lineHeight: 1.8,
-              color: 'var(--text-primary)',
-            }}
-          >
+          <Typography variant="body1" component="p" className={typography.bodyText}>
             Si, por el contrario, tienes garaje o un sitio adecuado, lo más importante es que planifiques los trabajos de mantenimiento. Es importante que conozcas cuándo es necesario cambiar los diferentes elementos de tu moto para que funcione correctamente y no te deje tirado, por ejemplo, en mitad de un viaje o provoque un accidente. Esto no quiere decir que hasta el momento de la renovación o sustitución no tengas que preocuparte. De hecho, un buen mantenimiento incluye revisiones periódicas de carácter preventivo, o lo que es lo mismo, todas aquellas comprobaciones que pueden alargar la vida de algunos componentes (o al menos que no se desgasten antes de tiempo) y hacer que pilotes en condiciones de seguridad. En este punto no hay excusas. Por muy manazas que seas, tienes que aprender a mirar, hacer y reaccionar.
           </Typography>
         </Paper>
 
         {/* Título de sección */}
-        <Typography
-          variant="h3"
-          component="h2"
-          sx={{
-            textAlign: 'center',
-            mb: 4,
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
-            fontFamily: 'var(--font-family-body)',
-          }}
-        >
+        <Typography variant="h3" component="h2" className={typography.sectionTitle}>
           Revisiones que no deben faltar
         </Typography>
 
@@ -248,29 +183,10 @@ export default function ConsejosPage() {
                       }}
                     />
                   </Box>
-                  <Typography
-                    variant="h5"
-                    component="h3"
-                    sx={{
-                      mb: 2,
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      fontSize: { xs: '1.25rem', md: '1.5rem' },
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
+                  <Typography variant="h5" component="h3" className={typography.cardTitle}>
                     {consejo.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'var(--text-secondary)',
-                      fontSize: { xs: '0.9375rem', md: '1rem' },
-                      lineHeight: 1.7,
-                      flexGrow: 1,
-                      fontFamily: 'var(--font-family-body)',
-                    }}
-                  >
+                  <Typography variant="body2" className={styles.cardDescription}>
                     {consejo.description}
                   </Typography>
                 </CardContent>

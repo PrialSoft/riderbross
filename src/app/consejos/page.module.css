@@ -43,4 +43,21 @@
   z-index: 1;
 }
 
+.cardDescription,
+.cardDescription.MuiTypography-root,
+.cardDescription.MuiTypography-body2 {
+  color: var(--text-secondary) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.7 !important;
+  flex-grow: 1 !important;
+  font-family: var(--font-family-body) !important;
+}
+
+@media (min-width: 900px) {
+  .cardDescription,
+  .cardDescription.MuiTypography-root,
+  .cardDescription.MuiTypography-body2 {
+    font-size: 1rem !important;
+  }
+}
 

@@ -1,0 +1,122 @@
+.pageWrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
+.pageWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  background: var(--bg-primary);
+  background-image: url('/images/inspeccionPreCompra.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.pageWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(180deg, rgba(4, 0, 12, 0.7) 0%, rgba(4, 0, 12, 0.85) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.contentStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.panel {
+  padding: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 26, 26, 0.2) 0%,
+    rgba(4, 0, 23, 0.95) 50%,
+    rgba(44, 62, 80, 0.2) 100%
+  );
+  backdrop-filter: blur(15px);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 26, 26, 0.1);
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.listItem {
+  font-family: var(--font-family-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.listItem strong {
+  font-weight: 700;
+}
+
+.highlightBox {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-left: 3px solid var(--primary-light);
+  background: rgba(71, 7, 7, 0.35);
+  border-radius: var(--border-radius-sm);
+}
+
+.noteList {
+  margin: 1rem 0 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.noteItem {
+  font-family: var(--font-family-body);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.ctaPanel {
+  text-align: center;
+}
+
+.ctaActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 600px) {
+  .ctaActions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 900px) {
+  .panel {
+    padding: 2rem;
+  }
+
+  .listItem {
+    font-size: 1.125rem;
+  }
+}
