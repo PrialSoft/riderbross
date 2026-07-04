@@ -541,6 +541,29 @@
   flex-grow: 1;
 }
 
+.serviceCardMore,
+.serviceCardMore.MuiTypography-root {
+  margin-top: auto;
+  padding: 0.5rem 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  background: rgba(139, 26, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--border-radius-full);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.serviceCardLink:hover .serviceCardMore,
+.serviceCardLink:hover .serviceCardMore.MuiTypography-root {
+  background: rgba(139, 26, 26, 0.95);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 14px rgba(139, 26, 26, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
 @media (min-width: 900px) {
   .serviceCardWrapper {
     flex: 1;

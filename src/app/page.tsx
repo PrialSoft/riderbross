@@ -149,6 +149,11 @@ export default function Home() {
                       <Typography variant="body1" color="text.secondary" className={styles.serviceDescription}>
                         {servicio.description}
                       </Typography>
+                      {servicio.href && (
+                        <Typography variant="body2" className={styles.serviceCardMore}>
+                          Ver más...
+                        </Typography>
+                      )}
                     </CardContent>
                   </Card>
                 );
