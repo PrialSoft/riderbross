@@ -94,8 +94,8 @@ export default function Navbar() {
           <Image
             src="/images/Logo.png"
             alt="RiderBross Logo"
-            width={120}
-            height={40}
+            width={96}
+            height={32}
             priority
             className={styles.drawerLogoImage}
           />
