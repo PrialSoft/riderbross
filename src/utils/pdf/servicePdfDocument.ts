@@ -126,86 +126,125 @@ export async function fetchServicioCompletoForPdf(
     cliente = clienteData;
   }
 
-  // Obtener detalles del servicio con tipos y categorías
+  // Detalles del servicio: join manual de tipos/categorías/estados
+  // (mismo enfoque robusto que ServicioForm; no depende del nested PostgREST).
   const { data: detallesData } = await supabase
     .from('detallesservicio')
-    .select(
-      `
-      idtiposervicio,
-      proximoenkm,
-      comentario,
-      idestado,
-      tiposservicio (
-        nombre,
-        referencia,
-        categoriasservicio (
-          nombre,
-          orden
-        )
-      ),
-      estados (
-        descripcion
-      )
-    `
-    )
+    .select('idtiposervicio, proximoenkm, comentario, idestado')
     .eq('idservicio', servicioId);
 
-  const detalles = ((detallesData as unknown[]) ?? []).map((d: unknown) => {
-    const detalle = d as {
-      idtiposervicio?: number | null;
-      proximoenkm?: number | null;
-      comentario?: string | null;
-      idestado?: number | null;
-      tiposservicio?: unknown;
-      estados?: unknown;
-    };
+  const detallesRaw = (detallesData as Array<{
+    idtiposervicio?: number | null;
+    proximoenkm?: number | null;
+    comentario?: string | null;
+    idestado?: number | null;
+  }>) ?? [];
 
-    const idtiposervicioValue: number | null =
-      typeof detalle.idtiposervicio === 'number' ? detalle.idtiposervicio : null;
-    let tiposservicio: {
+  const tipoIds = Array.from(
+    new Set(
+      detallesRaw
+        .map((d) => d.idtiposervicio)
+        .filter((id): id is number => typeof id === 'number')
+    )
+  );
+  const estadoIds = Array.from(
+    new Set(
+      detallesRaw
+        .map((d) => d.idestado)
+        .filter((id): id is number => typeof id === 'number')
+    )
+  );
+
+  const tiposById = new Map<
+    number,
+    {
       nombre: string;
       referencia: string | null;
-      categoriasservicio: { nombre: string; orden: number } | null;
-    } | null = null;
-    if (detalle.tiposservicio) {
-      if (Array.isArray(detalle.tiposservicio)) {
-        tiposservicio = (detalle.tiposservicio[0] as unknown as {
-          nombre: string;
-          referencia: string | null;
-          categoriasservicio: { nombre: string; orden: number } | null;
-        }) || null;
-      } else {
-        tiposservicio = (detalle.tiposservicio as unknown) as typeof tiposservicio;
-      }
-      
-      // Normalizar categoriasservicio dentro de tiposservicio
-      if (tiposservicio?.categoriasservicio) {
-        if (Array.isArray(tiposservicio.categoriasservicio)) {
-          tiposservicio.categoriasservicio = tiposservicio.categoriasservicio[0] || null;
-        }
-        // Asegurar que orden tenga un valor por defecto
-        if (tiposservicio.categoriasservicio && typeof tiposservicio.categoriasservicio.orden !== 'number') {
-          tiposservicio.categoriasservicio.orden = 0;
-        }
-      }
+      idcategoriaservicio: number | null;
     }
+  >();
+  const categoriasById = new Map<number, { nombre: string; orden: number }>();
+  const estadosById = new Map<number, { descripcion: string }>();
 
-    let estados: { descripcion: string } | null = null;
-    if (detalle.estados) {
-      if (Array.isArray(detalle.estados)) {
-        estados = (detalle.estados[0] as unknown as { descripcion: string }) || null;
-      } else {
-        estados = (detalle.estados as unknown) as typeof estados;
-      }
+  if (tipoIds.length > 0) {
+    const { data: tiposData } = await supabase
+      .from('tiposservicio')
+      .select('id, nombre, referencia, idcategoriaservicio')
+      .in('id', tipoIds);
+
+    ((tiposData as Array<{
+      id: number;
+      nombre: string;
+      referencia: string | null;
+      idcategoriaservicio: number | null;
+    }>) ?? []).forEach((t) => {
+      tiposById.set(t.id, {
+        nombre: t.nombre,
+        referencia: t.referencia ?? null,
+        idcategoriaservicio: t.idcategoriaservicio ?? null,
+      });
+    });
+
+    const categoriaIds = Array.from(
+      new Set(
+        Array.from(tiposById.values())
+          .map((t) => t.idcategoriaservicio)
+          .filter((id): id is number => typeof id === 'number')
+      )
+    );
+
+    if (categoriaIds.length > 0) {
+      const { data: catsData } = await supabase
+        .from('categoriasservicio')
+        .select('id, nombre, orden')
+        .in('id', categoriaIds);
+
+      ((catsData as Array<{ id: number; nombre: string; orden: number | null }>) ?? []).forEach(
+        (c) => {
+          categoriasById.set(c.id, {
+            nombre: c.nombre,
+            orden: typeof c.orden === 'number' ? c.orden : 0,
+          });
+        }
+      );
     }
+  }
+
+  if (estadoIds.length > 0) {
+    const { data: estadosData } = await supabase
+      .from('estados')
+      .select('id, descripcion')
+      .in('id', estadoIds);
+
+    ((estadosData as Array<{ id: number; descripcion: string }>) ?? []).forEach((e) => {
+      estadosById.set(e.id, { descripcion: e.descripcion });
+    });
+  }
+
+  const detalles: ServicioCompleto['detalles'] = detallesRaw.map((detalle) => {
+    const idtiposervicioValue =
+      typeof detalle.idtiposervicio === 'number' ? detalle.idtiposervicio : null;
+    const idestadoValue = typeof detalle.idestado === 'number' ? detalle.idestado : null;
+
+    const tipo = idtiposervicioValue !== null ? tiposById.get(idtiposervicioValue) : undefined;
+    const categoria =
+      tipo?.idcategoriaservicio != null
+        ? categoriasById.get(tipo.idcategoriaservicio) ?? null
+        : null;
 
     return {
       idtiposervicio: idtiposervicioValue,
       proximoenkm: detalle.proximoenkm ?? null,
       comentario: detalle.comentario ?? null,
-      idestado: detalle.idestado ?? null,
-      tiposservicio: tiposservicio ?? null,
-      estados: estados ?? null,
+      idestado: idestadoValue,
+      tiposservicio: tipo
+        ? {
+            nombre: tipo.nombre,
+            referencia: tipo.referencia,
+            categoriasservicio: categoria,
+          }
+        : null,
+      estados: idestadoValue !== null ? estadosById.get(idestadoValue) ?? null : null,
     };
   });
 
@@ -759,10 +798,10 @@ export function drawServicePdfContent(
       const rightColumnX = margin + columnWidth + columnGap;
       const rowHeight = 5;
       const blockRowsHeight = itemsPerColumn * rowHeight;
-      const headerHeight = categoriasOrdenadas.length > 1 ? 6 : 0;
+      const headerHeight = 6;
 
       for (let offset = 0; offset < detalles.length; offset += itemsPerBlock) {
-        const needsHeader = offset === 0 && categoriasOrdenadas.length > 1;
+        const needsHeader = offset === 0;
         const espacioNecesario = (needsHeader ? headerHeight : 0) + blockRowsHeight + 4;
         if (yPos + espacioNecesario > pageHeight - 30) {
           doc.addPage();
@@ -771,14 +810,6 @@ export function drawServicePdfContent(
 
         if (needsHeader) {
           drawCategoryHeaderBar(categoriaNombre, false, false);
-        } else if (offset === 0) {
-          // Única categoría en el informe: solo etiqueta ESTADO en cada columna.
-          setServicePdfFont(doc, 'bold');
-          doc.setFontSize(8);
-          doc.text('ESTADO', leftColumnX + columnWidth - 2, yPos, { align: 'right' });
-          doc.text('ESTADO', rightColumnX + columnWidth - 2, yPos, { align: 'right' });
-          yPos += 6;
-          setServicePdfFont(doc, 'normal');
         }
 
         const blockItems = detalles.slice(offset, offset + itemsPerBlock);
@@ -822,29 +853,8 @@ export function drawServicePdfContent(
       yPos = margin;
     }
 
-    // Título de categoría con gradiente de fondo
-    if (categoriasOrdenadas.length > 1) {
-      drawCategoryHeaderBar(categoriaNombre, true, tieneProximo);
-    } else {
-      // Si solo hay una categoría, mostrar encabezados aquí
-      doc.setFontSize(8);
-      setServicePdfFont(doc, 'bold');
-      let headerX = margin + colWidths.servicio;
-
-      doc.text('COMENTARIO', headerX, yPos);
-      headerX += colWidths.comentario;
-
-      if (tieneProximo) {
-        const proximoHeaderX =
-          startX + colWidths.servicio + colWidths.comentario + colWidths.proximo / 2;
-        doc.text('PRÓXIMO', proximoHeaderX, yPos, { align: 'center' });
-      }
-
-      doc.text('ESTADO', pageWidth - margin, yPos, { align: 'right' });
-
-      yPos += 6;
-      setServicePdfFont(doc, 'normal');
-    }
+    // Título de categoría con gradiente de fondo (siempre, aunque haya una sola)
+    drawCategoryHeaderBar(categoriaNombre, true, tieneProximo);
 
     detalles.forEach((detalle) => {
       if (yPos > pageHeight - 30) {

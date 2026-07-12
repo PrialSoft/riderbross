@@ -12,6 +12,7 @@
   --secondary: rgb(4, 0, 12);
   --secondary-light: #1b0a3b;
   
+  
   /* Colores Funcionales */
   --success: #4CAF50;
   --warning: #FF9800;
@@ -28,6 +29,7 @@
   --bg-secondary: #470707;
   --bg-dark: #1E2A35; /* Azul-gris oscuro del logo */
   --bg-dark-secondary: #2C3E50; /* Azul-gris medio */
+  --bg-dark-tertiary: #153d63; /* Azul de las categorias del PDF */
   
   /* Breakpoints (Mobile-First) */
   --breakpoint-xs: 0px;
