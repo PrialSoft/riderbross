@@ -261,8 +261,8 @@ export default function ServicioForm(props: {
   const [detalles, setDetalles] = useState<DetalleServicioDraft[]>(() => {
     const fromInitial = props.initial?.detalles ?? [];
     return fromInitial.map((d, idx) => {
-      // Mapear idestado a los checkboxes - siempre por defecto Ok (id 1)
-      const idestado = d.idestado ?? 1; // Por defecto Ok (id 1)
+      // Mapear idestado a los checkboxes - siempre por defecto Bueno (id 1)
+      const idestado = d.idestado ?? 1; // Por defecto Bueno (id 1)
       return {
         key: `init-${d.id ?? idx}`,
         idtiposervicio: d.idtiposervicio ?? null,
@@ -529,7 +529,7 @@ export default function ServicioForm(props: {
         idtiposervicio: null,
         proximoenkm: '',
         comentario: '',
-        idestado: 1, // Por defecto Ok (id 1)
+        idestado: 1, // Por defecto Bueno (id 1)
         resultadoestadoOk: true,
         resultadoestadoRegular: false,
         resultadoestadoMalo: false,
@@ -565,7 +565,7 @@ export default function ServicioForm(props: {
           idtiposervicio: t.id,
           proximoenkm: '',
           comentario: '',
-          idestado: 1, // Por defecto Ok (id 1)
+          idestado: 1, // Por defecto Bueno (id 1)
           resultadoestadoOk: true,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
@@ -597,7 +597,7 @@ export default function ServicioForm(props: {
           idtiposervicio: t.id,
           proximoenkm: '',
           comentario: '',
-          idestado: 1, // Por defecto Ok (id 1)
+          idestado: 1, // Por defecto Bueno (id 1)
           resultadoestadoOk: true,
           resultadoestadoRegular: false,
           resultadoestadoMalo: false,
@@ -1105,7 +1105,7 @@ export default function ServicioForm(props: {
                       idtiposervicio: t.id,
                       proximoenkm: '',
                       comentario: comentarioPorDefecto,
-                      idestado: 1, // Por defecto Ok (id 1)
+                      idestado: 1, // Por defecto Bueno (id 1)
                       resultadoestadoOk: true,
                       resultadoestadoRegular: false,
                       resultadoestadoMalo: false,
@@ -1429,7 +1429,7 @@ export default function ServicioForm(props: {
                     
                     // Determinar qué campos mostrar según el tipo de servicio
                     const showProximoenkm = tipoValue?.proximoenkm ?? false;
-                    // Siempre se muestra el estado - siempre se asigna un estado (Ok, Regular, Malo)
+                    // Siempre se muestra el estado - siempre se asigna un estado (Bueno, Regular, Malo)
 
                     return (
                       <Box
@@ -1616,7 +1616,7 @@ export default function ServicioForm(props: {
                             <FormControlLabel
                               value="1"
                               control={<Radio sx={{ color: '#4CAF50', '&.Mui-checked': { color: '#4CAF50' }, py: 0.25 }} />}
-                              label="Ok"
+                              label="Bueno"
                               sx={{ color: '#4CAF50', mb: 0, mt: 0 }}
                             />
                             <FormControlLabel

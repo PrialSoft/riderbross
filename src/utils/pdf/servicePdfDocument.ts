@@ -331,13 +331,18 @@ function getEstadoSphereColor(
   colorMalo: [number, number, number]
 ): [number, number, number] {
   const estadoLower = estado.toLowerCase();
-  if (estadoLower.includes('ok')) return colorOk;
+  if (estadoLower.includes('bueno') || estadoLower.includes('ok')) return colorOk;
   if (estadoLower.includes('regular')) return colorRegular;
   if (estadoLower.includes('malo')) return colorMalo;
   return [0, 0, 0];
 }
 
-function addLogoToPdf(doc: jsPDF, logoDataUrl: string | null, margin: number, yPos: number): void {
+function addLogoToPdf(
+  doc: jsPDF,
+  logoDataUrl: string | null,
+  margin: number,
+  headerHeight: number
+): void {
   if (!logoDataUrl) return;
   try {
     const fmt =
@@ -345,7 +350,8 @@ function addLogoToPdf(doc: jsPDF, logoDataUrl: string | null, margin: number, yP
     const props = doc.getImageProperties(logoDataUrl);
     const logoWidth = 30;
     const logoHeight = (props.height / props.width) * logoWidth;
-    doc.addImage(logoDataUrl, fmt, margin, yPos, logoWidth, logoHeight);
+    const logoY = Math.max(0, (headerHeight - logoHeight) / 2);
+    doc.addImage(logoDataUrl, fmt, margin, logoY, logoWidth, logoHeight);
   } catch {
     /* logo opcional */
   }
@@ -382,33 +388,51 @@ export function drawServicePdfContent(
   const colorGrayDark: [number, number, number] = [150, 150, 150]; // Gris oscuro para border bottom de categorías
   const colorBgPrimary: [number, number, number] = [4, 0, 12]; // #04000C --bg-primary
   const colorBgSecondary: [number, number, number] = [71, 7, 7]; // #470707 --bg-secondary
+  const colorBgDark: [number, number, number] = [30, 42, 53]; // #1E2A35 --bg-dark
   const colorEstadoOk: [number, number, number] = [76, 175, 80];
   const colorEstadoRegular: [number, number, number] = [255, 193, 7];
   const colorEstadoMalo: [number, number, number] = [200, 50, 45];
 
   // Header con fondo y borde
-  const headerHeight = 35;
+  const headerHeight = 35 * 0.8; // 20% menos de altura
   const headerStartY = yPos;
   
-  // Fondo del header (desde arriba de todo)
-  doc.setFillColor(...colorBgPrimary);
-  doc.rect(0, 0, pageWidth, headerHeight + 5, 'F');
+  // Fondo del header: gradiente L→R (--bg-primary → --bg-dark)
+  const headerBgHeight = headerHeight + 5;
+  const headerGradientSteps = 60;
+  const headerStepWidth = pageWidth / headerGradientSteps;
+  for (let i = 0; i < headerGradientSteps; i++) {
+    const ratio = i / (headerGradientSteps - 1);
+    const r = Math.round(colorBgPrimary[0] + (colorBgDark[0] - colorBgPrimary[0]) * ratio);
+    const g = Math.round(colorBgPrimary[1] + (colorBgDark[1] - colorBgPrimary[1]) * ratio);
+    const b = Math.round(colorBgPrimary[2] + (colorBgDark[2] - colorBgPrimary[2]) * ratio);
+    doc.setFillColor(r, g, b);
+    doc.rect(i * headerStepWidth, 0, headerStepWidth + 0.2, headerBgHeight, 'F');
+  }
   
-  addLogoToPdf(doc, logoDataUrl, margin, yPos);
+  addLogoToPdf(doc, logoDataUrl, margin, headerBgHeight);
 
-  // Título centrado (en blanco sobre fondo oscuro) - un poco más abajo
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16);
-  setServicePdfFont(doc, 'bold');
-  doc.text('INFORME DE SERVICIO TÉCNICO', pageWidth / 2, yPos + 16, { align: 'center' });
-  
-  // Fecha a la derecha (en blanco sobre fondo oscuro)
-  doc.setFontSize(10);
-  setServicePdfFont(doc, 'normal');
+  // Título alineado a la derecha + fecha debajo, bloque centrado verticalmente
   const fecha = servicioCompleto.servicio.fechaservicio
     ? dayjs(servicioCompleto.servicio.fechaservicio).format('DD/MM/YYYY')
     : '—';
-  doc.text(fecha, pageWidth - margin, yPos + 12, { align: 'right' });
+  const titleText = 'INFORME DE SERVICIO TÉCNICO';
+  const titleLineHeight = 6;
+  const dateLineHeight = 4.5;
+  const titleDateGap = 1.5;
+  const textBlockHeight = titleLineHeight + titleDateGap + dateLineHeight;
+  const textBlockTop = (headerBgHeight - textBlockHeight) / 2;
+  const titleBaselineY = textBlockTop + titleLineHeight * 0.78;
+  const dateBaselineY = textBlockTop + titleLineHeight + titleDateGap + dateLineHeight * 0.78;
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  setServicePdfFont(doc, 'bold');
+  doc.text(titleText, pageWidth - margin, titleBaselineY, { align: 'right' });
+
+  doc.setFontSize(10);
+  setServicePdfFont(doc, 'normal');
+  doc.text(fecha, pageWidth - margin, dateBaselineY, { align: 'right' });
   
   // Restaurar color de texto y avanzar posición
   doc.setTextColor(...colorBlack);
@@ -526,13 +550,13 @@ export function drawServicePdfContent(
 
   // Borde separador antes de la nota general
   doc.setDrawColor(...colorGrayDark);
-  doc.setLineWidth(0.8);
+  doc.setLineWidth(0.4); // Mitad del grosor anterior (0.8)
   doc.line(margin, yPos, pageWidth - margin, yPos);
   yPos += 6; // Aumentar espacio después de la línea gris para separar el texto
 
   // Nota general
   doc.setFontSize(9);
-  doc.setTextColor(...colorGray);
+  doc.setTextColor(...colorBlack);
   const notaTexto = 'Por favor, prestá atención a nuestras recomendaciones y recorda realizar los mantenimientos preventivos una vez cumplida la cantidad de kilómetros remarcados en rojo.';
   const palabraRojo = 'rojo';
   const indiceRojo = notaTexto.toLowerCase().indexOf(palabraRojo);
@@ -549,7 +573,7 @@ export function drawServicePdfContent(
     const lineHeight = 4;
     const maxWidth = pageWidth - 2 * margin;
     
-    // Dibujar texto antes de "rojo" en gris
+    // Dibujar texto antes de "rojo" en negro
     if (textoAntes.trim()) {
       const linesAntes = doc.splitTextToSize(textoAntes, maxWidth);
       for (let i = 0; i < linesAntes.length; i++) {
@@ -574,7 +598,7 @@ export function drawServicePdfContent(
       // Dibujar "rojo" en rojo en la misma línea
       doc.setTextColor(...colorRed);
       doc.text(textoRojo, xPosRojo, currentY);
-      doc.setTextColor(...colorGray);
+      doc.setTextColor(...colorBlack);
       
       // Dibujar texto después en la misma línea o nueva línea
       if (textoDespues.trim()) {
@@ -593,7 +617,7 @@ export function drawServicePdfContent(
       currentY += lineHeight;
       doc.setTextColor(...colorRed);
       doc.text(textoRojo, margin, currentY);
-      doc.setTextColor(...colorGray);
+      doc.setTextColor(...colorBlack);
       
       // Dibujar texto después
       if (textoDespues.trim()) {
@@ -615,7 +639,7 @@ export function drawServicePdfContent(
     
     yPos = currentY + 6;
   } else {
-    // Si no se encuentra "rojo", dibujar el texto completo en gris (fallback)
+    // Si no se encuentra "rojo", dibujar el texto completo en negro (fallback)
     doc.text(notaTexto, margin, yPos, { maxWidth: pageWidth - 2 * margin });
     yPos += 10;
   }
@@ -627,7 +651,7 @@ export function drawServicePdfContent(
   const legendY = yPos;
   const legendCircleY = legendY - 1.4;
   const legendItems: Array<{ label: string; color: [number, number, number] }> = [
-    { label: 'Ok', color: colorEstadoOk },
+    { label: 'Bueno', color: colorEstadoOk },
     { label: 'Regular', color: colorEstadoRegular },
     { label: 'Malo', color: colorEstadoMalo },
   ];
@@ -726,14 +750,8 @@ export function drawServicePdfContent(
     const categoriaWidth = pageWidth - 2 * margin + 4;
     const categoriaHeight = 6;
 
-    drawGradient(
-      categoriaX,
-      categoriaY,
-      categoriaWidth,
-      categoriaHeight,
-      colorBgSecondary,
-      colorBgPrimary
-    );
+    doc.setFillColor(...colorBgDark); // --bg-dark (#1E2A35)
+    doc.rect(categoriaX, categoriaY, categoriaWidth, categoriaHeight, 'F');
 
     setServicePdfFont(doc, 'bold');
     doc.setFontSize(9);
@@ -763,7 +781,8 @@ export function drawServicePdfContent(
     detalle: ServicioCompleto['detalles'][number],
     cellX: number,
     cellWidth: number,
-    rowY: number
+    rowY: number,
+    textColor: [number, number, number] = colorBlack
   ) => {
     const nombreServicio = detalle.tiposservicio?.nombre || '—';
     const referencia = detalle.tiposservicio?.referencia || null;
@@ -776,13 +795,24 @@ export function drawServicePdfContent(
 
     setServicePdfFont(doc, 'normal');
     doc.setFontSize(7.5);
-    doc.setTextColor(...colorBlack);
+    doc.setTextColor(...textColor);
     doc.text(truncateTextToMaxWidth(doc, servicioTexto, textMaxWidth), cellX, rowY);
 
     doc.setFillColor(
       ...getEstadoSphereColor(estado, colorEstadoOk, colorEstadoRegular, colorEstadoMalo)
     );
     doc.circle(sphereX, sphereY, sphereRadius, 'F');
+  };
+
+  const colorZebraWhite: [number, number, number] = [255, 255, 255];
+  const colorZebraAlt: [number, number, number] = [236, 240, 243]; // Gris-azulado muy claro (contraste suave con blanco)
+  const colorZebraTextOnDark: [number, number, number] = colorBlack;
+  const colorComentarioOnDark: [number, number, number] = [90, 90, 90];
+  const colorComentarioOnLight: [number, number, number] = [90, 90, 90];
+
+  const drawZebraRowBackground = (rowTop: number, rowHeight: number, isAlt: boolean) => {
+    doc.setFillColor(...(isAlt ? colorZebraAlt : colorZebraWhite));
+    doc.rect(margin, rowTop, pageWidth - 2 * margin, rowHeight, 'F');
   };
 
   // Filas de servicios
@@ -818,21 +848,21 @@ export function drawServicePdfContent(
         const rowsInBlock = Math.max(leftItems.length, rightItems.length);
 
         for (let row = 0; row < rowsInBlock; row++) {
+          const isDark = row % 2 === 1;
+          const rowTop = yPos - 3.5;
+          drawZebraRowBackground(rowTop, rowHeight, isDark);
+
           const rowY = yPos;
           const leftItem = leftItems[row];
           const rightItem = rightItems[row];
+          const rowTextColor = isDark ? colorZebraTextOnDark : colorBlack;
 
           if (leftItem) {
-            drawIluminacionItemCell(leftItem, leftColumnX, columnWidth, rowY);
+            drawIluminacionItemCell(leftItem, leftColumnX, columnWidth, rowY, rowTextColor);
           }
           if (rightItem) {
-            drawIluminacionItemCell(rightItem, rightColumnX, columnWidth, rowY);
+            drawIluminacionItemCell(rightItem, rightColumnX, columnWidth, rowY, rowTextColor);
           }
-
-          const lineaY = rowY + 0.5;
-          doc.setDrawColor(220, 220, 220);
-          doc.setLineWidth(0.1);
-          doc.line(margin, lineaY, pageWidth - margin, lineaY);
 
           yPos += rowHeight;
         }
@@ -856,12 +886,13 @@ export function drawServicePdfContent(
     // Título de categoría con gradiente de fondo (siempre, aunque haya una sola)
     drawCategoryHeaderBar(categoriaNombre, true, tieneProximo);
 
-    detalles.forEach((detalle) => {
+    detalles.forEach((detalle, index) => {
       if (yPos > pageHeight - 30) {
         doc.addPage();
         yPos = margin;
       }
 
+      const isDark = index % 2 === 1;
       const nombreServicio = detalle.tiposservicio?.nombre || '—';
       const referencia = detalle.tiposservicio?.referencia || null;
       const proximo = detalle.proximoenkm
@@ -870,32 +901,41 @@ export function drawServicePdfContent(
       const comentario = detalle.comentario || null;
       const estado = detalle.estados?.descripcion || '—';
 
-      let xPos = startX;
+      const lineHeight = 3.5;
       doc.setFontSize(7.5);
-      doc.setTextColor(...colorBlack);
-
       const servicioTexto = buildServicioTexto(nombreServicio, referencia);
       const lines = doc.splitTextToSize(servicioTexto, colWidths.servicio - 2);
       const numLines = lines.length;
-      const lineHeight = 3.5;
 
-      lines.forEach((line: string, index: number) => {
-        doc.text(line, xPos, yPos + index * lineHeight, { align: 'left' });
+      let comentarioLines: string[] = [''];
+      if (comentario && comentario.trim()) {
+        comentarioLines = doc.splitTextToSize(comentario.trim(), colWidths.comentario - 2);
+      }
+
+      const maxLinesInRow = Math.max(numLines, comentarioLines.length);
+      const rowHeight = maxLinesInRow > 1 ? 5 + (maxLinesInRow - 1) * lineHeight : 5;
+      const rowTop = yPos - 3.5;
+      drawZebraRowBackground(rowTop, rowHeight, isDark);
+
+      let xPos = startX;
+      doc.setFontSize(7.5);
+      doc.setTextColor(...(isDark ? colorZebraTextOnDark : colorBlack));
+
+      lines.forEach((line: string, lineIndex: number) => {
+        doc.text(line, xPos, yPos + lineIndex * lineHeight, { align: 'left' });
       });
 
       xPos += colWidths.servicio;
 
-      let comentarioLines: string[] = [''];
       if (comentario && comentario.trim()) {
-        doc.setTextColor(90, 90, 90);
-        comentarioLines = doc.splitTextToSize(comentario.trim(), colWidths.comentario - 2);
-        comentarioLines.forEach((line: string, index: number) => {
-          doc.text(line, xPos, yPos + index * lineHeight, {
+        doc.setTextColor(...(isDark ? colorComentarioOnDark : colorComentarioOnLight));
+        comentarioLines.forEach((line: string, lineIndex: number) => {
+          doc.text(line, xPos, yPos + lineIndex * lineHeight, {
             align: 'left',
             maxWidth: colWidths.comentario - 2,
           });
         });
-        doc.setTextColor(...colorBlack);
+        doc.setTextColor(...(isDark ? colorZebraTextOnDark : colorBlack));
       }
       xPos += colWidths.comentario;
 
@@ -909,7 +949,7 @@ export function drawServicePdfContent(
             align: 'center',
             maxWidth: colWidths.proximo - 2,
           });
-          doc.setTextColor(...colorBlack);
+          doc.setTextColor(...(isDark ? colorZebraTextOnDark : colorBlack));
         }
         xPos += colWidths.proximo;
       } else {
@@ -929,15 +969,6 @@ export function drawServicePdfContent(
 
       doc.setFillColor(...estadoColor);
       doc.circle(estadoRightX, sphereY, sphereRadius, 'F');
-
-      const maxLinesInRow = Math.max(numLines, comentarioLines.length);
-      const rowHeight = maxLinesInRow > 1 ? 5 + (maxLinesInRow - 1) * lineHeight : 5;
-      const alturaRealContenido = maxLinesInRow * 0.5;
-
-      const lineaY = yPos + alturaRealContenido + 0.5;
-      doc.setDrawColor(220, 220, 220);
-      doc.setLineWidth(0.1);
-      doc.line(margin, lineaY, pageWidth - margin, lineaY);
 
       yPos += rowHeight;
     });
@@ -983,7 +1014,7 @@ export function drawServicePdfContent(
   }
 
   // Footer - se agregará al final de la última página con el mismo fondo del encabezado
-  const footerHeight = 20;
+  const footerHeight = 20 * (2 / 3); // ~13.3mm (1/3 menos de altura)
   const footerY = pageHeight - footerHeight;
   
   doc.setFillColor(...colorBgPrimary);
@@ -991,20 +1022,20 @@ export function drawServicePdfContent(
   
   try {
     const footerCenterY = footerY + footerHeight / 2;
-    const footerTextY = footerCenterY + 1.25;
-    const iconSize = 4.2;
-    const iconTextGap = 3;
-    const separatorGap = 6;
-    const separatorHeight = 13;
+    const footerTextY = footerCenterY + 1;
+    const iconSize = 3.6;
+    const iconTextGap = 2.5;
+    const separatorGap = 5;
+    const separatorHeight = 8.5;
     const labelText = 'RIDER.BROSS';
     const webText = 'www.riderbross.com';
     const webLetterSpacing = 0.35;
 
     setServicePdfFont(doc, 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     const labelWidth = doc.getTextWidth(labelText);
     setServicePdfFont(doc, 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     const webWidth =
       doc.getTextWidth(webText) + Math.max(0, webText.length - 1) * webLetterSpacing;
 
@@ -1016,24 +1047,24 @@ export function drawServicePdfContent(
     const separatorX = labelX + labelWidth + separatorGap;
     const webX = separatorX + separatorGap;
 
-    // Resplandor radial amplio y sutil, contenido dentro del footer.
-    const glowColor: [number, number, number] = [180, 210, 255];
-    for (let i = 0; i < 72; i++) {
-      const ratio = i / 71;
-      const glow = Math.pow(ratio, 2.9) * 0.075;
+    // Resplandor radial más difuminado y celeste alrededor de los ítems centrales.
+    const glowColor: [number, number, number] = [140, 210, 255];
+    for (let i = 0; i < 96; i++) {
+      const ratio = i / 95;
+      const glow = Math.pow(ratio, 1.55) * 0.14;
       const r = Math.round(colorBgPrimary[0] + (glowColor[0] - colorBgPrimary[0]) * glow);
       const g = Math.round(colorBgPrimary[1] + (glowColor[1] - colorBgPrimary[1]) * glow);
       const b = Math.round(colorBgPrimary[2] + (glowColor[2] - colorBgPrimary[2]) * glow);
-      const radiusX = 96 - ratio * 54;
-      const radiusY = 9.1 - ratio * 5.6;
+      const radiusX = 102 - ratio * 58;
+      const radiusY = 7.4 - ratio * 4.6;
       doc.setFillColor(r, g, b);
       doc.ellipse(pageWidth / 2, footerCenterY, radiusX, radiusY, 'F');
     }
 
-    drawInstagramIconVector(doc, iconX, iconY - 0.15, iconSize);
+    drawInstagramIconVector(doc, iconX, iconY - 0.1, iconSize);
 
     // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea.
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     setServicePdfFont(doc, 'bold');
     doc.setTextColor(255, 255, 255);
     doc.text(labelText, labelX, footerTextY);
@@ -1048,7 +1079,7 @@ export function drawServicePdfContent(
     );
     
     // URL del sitio web a la derecha del separador.
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     setServicePdfFont(doc, 'normal');
     doc.setTextColor(255, 255, 255);
     let webCharX = webX;

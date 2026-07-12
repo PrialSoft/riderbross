@@ -31,6 +31,7 @@
   --bg-dark-secondary: #2C3E50; /* Azul-gris medio */
   --bg-dark-tertiary: #153d63; /* Azul de las categorias del PDF */
   
+  
   /* Breakpoints (Mobile-First) */
   --breakpoint-xs: 0px;
   --breakpoint-sm: 600px;

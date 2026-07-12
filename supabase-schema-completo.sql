@@ -120,7 +120,7 @@ CREATE INDEX IF NOT EXISTS idx_tipos_servicio_idcategoria ON tiposservicio(idcat
 CREATE INDEX IF NOT EXISTS idx_tipos_servicio_nombre ON tiposservicio(nombre);
 CREATE INDEX IF NOT EXISTS idx_tiposservicio_predeterminado ON tiposservicio(predeterminado) WHERE predeterminado = true;
 
-COMMENT ON COLUMN tiposservicio.resultadotipoestado IS 'Siempre se asigna un estado (Ok, Regular, Malo); la app fuerza true';
+COMMENT ON COLUMN tiposservicio.resultadotipoestado IS 'Siempre se asigna un estado (Bueno, Regular, Malo); la app fuerza true';
 COMMENT ON COLUMN tiposservicio.comentariopordefecto IS 'Texto por defecto del cuadro de comentario en el detalle de servicio';
 COMMENT ON COLUMN tiposservicio.proximoenkm IS 'Si true, el detalle permite/editar próximo KM para este tipo';
 
