@@ -387,7 +387,6 @@ export function drawServicePdfContent(
   const colorGray: [number, number, number] = [128, 128, 128];
   const colorGrayDark: [number, number, number] = [150, 150, 150]; // Gris oscuro para border bottom de categorías
   const colorBgPrimary: [number, number, number] = [4, 0, 12]; // #04000C --bg-primary
-  const colorBgSecondary: [number, number, number] = [71, 7, 7]; // #470707 --bg-secondary
   const colorBgDark: [number, number, number] = [30, 42, 53]; // #1E2A35 --bg-dark
   const colorEstadoOk: [number, number, number] = [76, 175, 80];
   const colorEstadoRegular: [number, number, number] = [255, 193, 7];
@@ -721,29 +720,6 @@ export function drawServicePdfContent(
   };
   const startX = margin;
 
-  // Función para dibujar gradiente horizontal
-  const drawGradient = (
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    colorStart: [number, number, number],
-    colorEnd: [number, number, number]
-  ) => {
-    const steps = 50; // Número de pasos para el gradiente
-    const stepWidth = width / steps;
-    
-    for (let i = 0; i < steps; i++) {
-      const ratio = i / (steps - 1);
-      const r = Math.round(colorStart[0] + (colorEnd[0] - colorStart[0]) * ratio);
-      const g = Math.round(colorStart[1] + (colorEnd[1] - colorStart[1]) * ratio);
-      const b = Math.round(colorStart[2] + (colorEnd[2] - colorStart[2]) * ratio);
-      
-      doc.setFillColor(r, g, b);
-      doc.rect(x + i * stepWidth, y, stepWidth, height, 'F');
-    }
-  };
-
   const drawCategoryHeaderBar = (titulo: string, showTableHeaders: boolean, tieneProximo: boolean) => {
     const categoriaX = margin - 2;
     const categoriaY = yPos - 4;
@@ -982,24 +958,18 @@ export function drawServicePdfContent(
     }
     yPos += 8;
     
-    // Título de OBSERVACIONES con gradiente de fondo (igual que categorías)
+    // Título de OBSERVACIONES con fondo --bg-dark (igual que categorías)
     const observacionesX = margin - 2;
     const observacionesY = yPos - 4;
     const observacionesWidth = pageWidth - 2 * margin + 4;
     const observacionesHeight = 6;
     
-    drawGradient(
-      observacionesX,
-      observacionesY,
-      observacionesWidth,
-      observacionesHeight,
-      colorBgSecondary, // Izquierda: --bg-secondary (#470707)
-      colorBgPrimary    // Derecha: --bg-primary (#04000C)
-    );
+    doc.setFillColor(...colorBgDark); // --bg-dark (#1E2A35)
+    doc.rect(observacionesX, observacionesY, observacionesWidth, observacionesHeight, 'F');
     
     setServicePdfFont(doc, 'bold');
     doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo con gradiente
+    doc.setTextColor(255, 255, 255); // Texto blanco sobre fondo oscuro
     doc.text('OBSERVACIONES', margin, yPos);
     doc.setTextColor(...colorBlack); // Restaurar color negro
     
@@ -1089,6 +1059,24 @@ export function drawServicePdfContent(
     }
   } catch (error) {
     console.warn('Error al dibujar el pie de página:', error);
+  }
+
+  // Numeración de páginas en el margen inferior derecho (todas las páginas)
+  const totalPages = doc.getNumberOfPages();
+  for (let page = 1; page <= totalPages; page++) {
+    doc.setPage(page);
+    setServicePdfFont(doc, 'normal');
+    doc.setFontSize(8);
+    const pageLabel = `${page} / ${totalPages}`;
+
+    if (page === totalPages) {
+      // Última página: sobre el footer oscuro
+      doc.setTextColor(255, 255, 255);
+      doc.text(pageLabel, pageWidth - margin, footerY + footerHeight / 2 + 1, { align: 'right' });
+    } else {
+      doc.setTextColor(...colorBlack);
+      doc.text(pageLabel, pageWidth - margin, pageHeight - 5, { align: 'right' });
+    }
   }
 }
 
