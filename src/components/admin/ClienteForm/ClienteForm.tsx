@@ -19,6 +19,7 @@ import CustomButton from '@/utils/ui/button/CustomButton';
 import dayjs from '@/lib/dayjs';
 import { supabase } from '@/lib/supabase/client';
 import { createCliente, updateCliente } from '@/app/admin/dashboard/_actions/clientes';
+import { toPascalCaseName } from '@/utils/nombre';
 
 type ProvinciaRow = { id: number; descripcion: string };
 
@@ -41,14 +42,12 @@ export default function ClienteForm(props: {
 }) {
   const router = useRouter();
 
-  // Función helper para capitalizar primera letra
-  const capitalizeFirst = (text: string): string => {
-    if (!text || text.length === 0) return text;
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-  };
-
-  const [nombres, setNombres] = useState(props.initial?.nombres ?? '');
-  const [apellidos, setApellidos] = useState(props.initial?.apellidos ?? '');
+  const [nombres, setNombres] = useState(
+    props.initial?.nombres ? toPascalCaseName(props.initial.nombres) : ''
+  );
+  const [apellidos, setApellidos] = useState(
+    props.initial?.apellidos ? toPascalCaseName(props.initial.apellidos) : ''
+  );
   const [email, setEmail] = useState(props.initial?.email ?? '');
   const [dni, setDni] = useState(
     props.initial?.dni && props.initial.dni !== 0 ? props.initial.dni.toString() : ''
@@ -115,8 +114,8 @@ export default function ClienteForm(props: {
       }
 
       const payload = {
-        nombres: nombres.trim(),
-        apellidos: apellidos.trim(),
+        nombres: toPascalCaseName(nombres),
+        apellidos: toPascalCaseName(apellidos),
         email,
         dni: dniNum,
         telefono: telNum,
@@ -179,35 +178,31 @@ export default function ClienteForm(props: {
             label="Nombres"
             value={nombres}
             onChange={(e) => {
-              const value = e.target.value;
-              // Permitir escribir normalmente, pero capitalizar al perder el foco
-              setNombres(value);
+              setNombres(e.target.value);
             }}
             onBlur={(e) => {
               const value = e.target.value.trim();
               if (value) {
-                setNombres(capitalizeFirst(value));
+                setNombres(toPascalCaseName(value));
               }
             }}
             required
-            helperText="Primera letra mayúscula, resto minúsculas"
+            helperText="Cada palabra inicia con mayúscula (ej: Juan Carlos)"
           />
           <TextField
             label="Apellidos"
             value={apellidos}
             onChange={(e) => {
-              const value = e.target.value;
-              // Permitir escribir normalmente, pero capitalizar al perder el foco
-              setApellidos(value);
+              setApellidos(e.target.value);
             }}
             onBlur={(e) => {
               const value = e.target.value.trim();
               if (value) {
-                setApellidos(capitalizeFirst(value));
+                setApellidos(toPascalCaseName(value));
               }
             }}
             required
-            helperText="Primera letra mayúscula, resto minúsculas"
+            helperText="Cada palabra inicia con mayúscula (ej: Pérez García)"
           />
         </Box>
 

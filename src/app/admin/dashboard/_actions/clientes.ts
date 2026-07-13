@@ -1,16 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-
-/**
- * Capitaliza la primera letra de un texto y convierte el resto a minúsculas
- * @param text - Texto a capitalizar
- * @returns Texto con primera letra mayúscula y resto minúsculas
- */
-function capitalizeFirst(text: string): string {
-  if (!text || text.length === 0) return text;
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-}
+import { toPascalCaseName } from '@/utils/nombre';
 
 export async function createCliente(input: {
   nombres: string;
@@ -28,8 +19,8 @@ export async function createCliente(input: {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth?.user) throw new Error('No autorizado');
 
-  const nombres = capitalizeFirst(input.nombres.trim());
-  const apellidos = capitalizeFirst(input.apellidos.trim());
+  const nombres = toPascalCaseName(input.nombres);
+  const apellidos = toPascalCaseName(input.apellidos);
   const email = input.email.trim().toLowerCase();
 
   if (!nombres) throw new Error('Nombres es obligatorio');
@@ -80,8 +71,8 @@ export async function updateCliente(
 
   if (!Number.isFinite(id) || id <= 0) throw new Error('ID inválido');
 
-  const nombres = capitalizeFirst(input.nombres.trim());
-  const apellidos = capitalizeFirst(input.apellidos.trim());
+  const nombres = toPascalCaseName(input.nombres);
+  const apellidos = toPascalCaseName(input.apellidos);
   const email = input.email.trim().toLowerCase();
 
   if (!nombres) throw new Error('Nombres es obligatorio');

@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import jsPDF from 'jspdf';
 import dayjs from '@/lib/dayjs';
 import { formatPatente } from '@/utils/patente';
+import { toPascalCaseName } from '@/utils/nombre';
 
 const SERVICE_PDF_FONT_FAMILY = 'Montserrat';
 const SERVICE_PDF_FONT_REGULAR_FILE = 'Montserrat_400Regular.ttf';
@@ -446,6 +447,9 @@ export function drawServicePdfContent(
 
   if (servicioCompleto.cliente) {
     const c = servicioCompleto.cliente;
+    const nombresCliente = toPascalCaseName(c.nombres);
+    const apellidosCliente = toPascalCaseName(c.apellidos);
+    const clienteDisplayName = `${apellidosCliente}, ${nombresCliente}`;
     const inner = pageWidth - 2 * margin;
     const y = currentY;
     const hasEmail = Boolean(c.email?.trim());
@@ -468,9 +472,8 @@ export function drawServicePdfContent(
     if (hasEmail) {
       const colW = pairW / 2;
       const maxClienteVal = colW - wLabelCliente - 2;
-      const clienteFull = `${c.apellidos}, ${c.nombres}`;
       setServicePdfFont(doc, 'normal');
-      doc.text(truncateTextToMaxWidth(doc, clienteFull, maxClienteVal), margin + wLabelCliente + 1, y);
+      doc.text(truncateTextToMaxWidth(doc, clienteDisplayName, maxClienteVal), margin + wLabelCliente + 1, y);
 
       const xEmail = margin + colW;
       setServicePdfFont(doc, 'bold');
@@ -484,7 +487,7 @@ export function drawServicePdfContent(
       const maxClienteVal = pairW - wLabelCliente - 2;
       setServicePdfFont(doc, 'normal');
       doc.text(
-        truncateTextToMaxWidth(doc, `${c.apellidos}, ${c.nombres}`, maxClienteVal),
+        truncateTextToMaxWidth(doc, clienteDisplayName, maxClienteVal),
         margin + wLabelCliente + 1,
         y
       );
@@ -984,16 +987,16 @@ export function drawServicePdfContent(
   }
 
   // Footer + numeración en todas las páginas
-  const footerHeight = 20 * (2 / 3); // ~13.3mm (1/3 menos de altura)
+  const footerHeight = 20 * (2 / 3) * 0.85; // ~11.3mm (15% menos sobre la altura previa)
   const footerY = pageHeight - footerHeight;
   const totalPages = doc.getNumberOfPages();
 
   const footerCenterY = footerY + footerHeight / 2;
-  const footerTextY = footerCenterY + 1;
-  const iconSize = 3.6;
+  const footerTextY = footerCenterY + 0.9;
+  const iconSize = 3.2;
   const iconTextGap = 2.5;
   const separatorGap = 5;
-  const separatorHeight = 8.5;
+  const separatorHeight = 7.2;
   const labelText = 'RIDER.BROSS';
   const webText = 'www.riderbross.com';
   const webLetterSpacing = 0.35;
@@ -1022,7 +1025,8 @@ export function drawServicePdfContent(
       doc.setFillColor(...colorBgPrimary);
       doc.rect(0, footerY, pageWidth, footerHeight, 'F');
 
-      // Resplandor radial más difuminado y celeste alrededor de los ítems centrales.
+      // Resplandor contenido estrictamente dentro del pie (sin sobresalir arriba).
+      const maxGlowRadiusY = footerHeight / 2 - 0.35;
       for (let i = 0; i < 96; i++) {
         const ratio = i / 95;
         const glow = Math.pow(ratio, 1.55) * 0.14;
@@ -1030,7 +1034,7 @@ export function drawServicePdfContent(
         const g = Math.round(colorBgPrimary[1] + (glowColor[1] - colorBgPrimary[1]) * glow);
         const b = Math.round(colorBgPrimary[2] + (glowColor[2] - colorBgPrimary[2]) * glow);
         const radiusX = 102 - ratio * 58;
-        const radiusY = 7.4 - ratio * 4.6;
+        const radiusY = maxGlowRadiusY * (1 - ratio * 0.55);
         doc.setFillColor(r, g, b);
         doc.ellipse(pageWidth / 2, footerCenterY, radiusX, radiusY, 'F');
       }
