@@ -983,99 +983,90 @@ export function drawServicePdfContent(
     yPos += 10;
   }
 
-  // Footer - se agregará al final de la última página con el mismo fondo del encabezado
+  // Footer + numeración en todas las páginas
   const footerHeight = 20 * (2 / 3); // ~13.3mm (1/3 menos de altura)
   const footerY = pageHeight - footerHeight;
-  
-  doc.setFillColor(...colorBgPrimary);
-  doc.rect(0, footerY, pageWidth, footerHeight, 'F');
-  
-  try {
-    const footerCenterY = footerY + footerHeight / 2;
-    const footerTextY = footerCenterY + 1;
-    const iconSize = 3.6;
-    const iconTextGap = 2.5;
-    const separatorGap = 5;
-    const separatorHeight = 8.5;
-    const labelText = 'RIDER.BROSS';
-    const webText = 'www.riderbross.com';
-    const webLetterSpacing = 0.35;
-
-    setServicePdfFont(doc, 'bold');
-    doc.setFontSize(8);
-    const labelWidth = doc.getTextWidth(labelText);
-    setServicePdfFont(doc, 'normal');
-    doc.setFontSize(8);
-    const webWidth =
-      doc.getTextWidth(webText) + Math.max(0, webText.length - 1) * webLetterSpacing;
-
-    const footerContentWidth = iconSize + iconTextGap + labelWidth + separatorGap * 2 + webWidth;
-    const contentStartX = pageWidth / 2 - footerContentWidth / 2;
-    const iconX = contentStartX;
-    const iconY = footerCenterY - iconSize / 2;
-    const labelX = iconX + iconSize + iconTextGap;
-    const separatorX = labelX + labelWidth + separatorGap;
-    const webX = separatorX + separatorGap;
-
-    // Resplandor radial más difuminado y celeste alrededor de los ítems centrales.
-    const glowColor: [number, number, number] = [140, 210, 255];
-    for (let i = 0; i < 96; i++) {
-      const ratio = i / 95;
-      const glow = Math.pow(ratio, 1.55) * 0.14;
-      const r = Math.round(colorBgPrimary[0] + (glowColor[0] - colorBgPrimary[0]) * glow);
-      const g = Math.round(colorBgPrimary[1] + (glowColor[1] - colorBgPrimary[1]) * glow);
-      const b = Math.round(colorBgPrimary[2] + (glowColor[2] - colorBgPrimary[2]) * glow);
-      const radiusX = 102 - ratio * 58;
-      const radiusY = 7.4 - ratio * 4.6;
-      doc.setFillColor(r, g, b);
-      doc.ellipse(pageWidth / 2, footerCenterY, radiusX, radiusY, 'F');
-    }
-
-    drawInstagramIconVector(doc, iconX, iconY - 0.1, iconSize);
-
-    // Nombre "RIDER.BROSS" a la derecha del icono en la misma línea.
-    doc.setFontSize(8);
-    setServicePdfFont(doc, 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text(labelText, labelX, footerTextY);
-
-    doc.setDrawColor(255, 255, 255);
-    doc.setLineWidth(0.25);
-    doc.line(
-      separatorX,
-      footerCenterY - separatorHeight / 2,
-      separatorX,
-      footerCenterY + separatorHeight / 2
-    );
-    
-    // URL del sitio web a la derecha del separador.
-    doc.setFontSize(8);
-    setServicePdfFont(doc, 'normal');
-    doc.setTextColor(255, 255, 255);
-    let webCharX = webX;
-    for (const char of webText) {
-      doc.text(char, webCharX, footerTextY);
-      webCharX += doc.getTextWidth(char) + webLetterSpacing;
-    }
-  } catch (error) {
-    console.warn('Error al dibujar el pie de página:', error);
-  }
-
-  // Numeración de páginas en el margen inferior derecho (todas las páginas)
   const totalPages = doc.getNumberOfPages();
+
+  const footerCenterY = footerY + footerHeight / 2;
+  const footerTextY = footerCenterY + 1;
+  const iconSize = 3.6;
+  const iconTextGap = 2.5;
+  const separatorGap = 5;
+  const separatorHeight = 8.5;
+  const labelText = 'RIDER.BROSS';
+  const webText = 'www.riderbross.com';
+  const webLetterSpacing = 0.35;
+
+  setServicePdfFont(doc, 'bold');
+  doc.setFontSize(8);
+  const labelWidth = doc.getTextWidth(labelText);
+  setServicePdfFont(doc, 'normal');
+  doc.setFontSize(8);
+  const webWidth =
+    doc.getTextWidth(webText) + Math.max(0, webText.length - 1) * webLetterSpacing;
+
+  const footerContentWidth = iconSize + iconTextGap + labelWidth + separatorGap * 2 + webWidth;
+  const contentStartX = pageWidth / 2 - footerContentWidth / 2;
+  const iconX = contentStartX;
+  const iconY = footerCenterY - iconSize / 2;
+  const labelX = iconX + iconSize + iconTextGap;
+  const separatorX = labelX + labelWidth + separatorGap;
+  const webX = separatorX + separatorGap;
+  const glowColor: [number, number, number] = [140, 210, 255];
+
   for (let page = 1; page <= totalPages; page++) {
     doc.setPage(page);
-    setServicePdfFont(doc, 'normal');
-    doc.setFontSize(8);
-    const pageLabel = `${page} / ${totalPages}`;
 
-    if (page === totalPages) {
-      // Última página: sobre el footer oscuro
+    try {
+      doc.setFillColor(...colorBgPrimary);
+      doc.rect(0, footerY, pageWidth, footerHeight, 'F');
+
+      // Resplandor radial más difuminado y celeste alrededor de los ítems centrales.
+      for (let i = 0; i < 96; i++) {
+        const ratio = i / 95;
+        const glow = Math.pow(ratio, 1.55) * 0.14;
+        const r = Math.round(colorBgPrimary[0] + (glowColor[0] - colorBgPrimary[0]) * glow);
+        const g = Math.round(colorBgPrimary[1] + (glowColor[1] - colorBgPrimary[1]) * glow);
+        const b = Math.round(colorBgPrimary[2] + (glowColor[2] - colorBgPrimary[2]) * glow);
+        const radiusX = 102 - ratio * 58;
+        const radiusY = 7.4 - ratio * 4.6;
+        doc.setFillColor(r, g, b);
+        doc.ellipse(pageWidth / 2, footerCenterY, radiusX, radiusY, 'F');
+      }
+
+      drawInstagramIconVector(doc, iconX, iconY - 0.1, iconSize);
+
+      doc.setFontSize(8);
+      setServicePdfFont(doc, 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text(pageLabel, pageWidth - margin, footerY + footerHeight / 2 + 1, { align: 'right' });
-    } else {
-      doc.setTextColor(...colorBlack);
-      doc.text(pageLabel, pageWidth - margin, pageHeight - 5, { align: 'right' });
+      doc.text(labelText, labelX, footerTextY);
+
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.25);
+      doc.line(
+        separatorX,
+        footerCenterY - separatorHeight / 2,
+        separatorX,
+        footerCenterY + separatorHeight / 2
+      );
+
+      doc.setFontSize(8);
+      setServicePdfFont(doc, 'normal');
+      doc.setTextColor(255, 255, 255);
+      let webCharX = webX;
+      for (const char of webText) {
+        doc.text(char, webCharX, footerTextY);
+        webCharX += doc.getTextWidth(char) + webLetterSpacing;
+      }
+
+      // Numeración en el margen inferior derecho
+      doc.setFontSize(8);
+      setServicePdfFont(doc, 'normal');
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${page} / ${totalPages}`, pageWidth - margin, footerTextY, { align: 'right' });
+    } catch (error) {
+      console.warn(`Error al dibujar el pie de página (página ${page}):`, error);
     }
   }
 }
