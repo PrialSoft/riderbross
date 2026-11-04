@@ -158,9 +158,33 @@ export default function Footer() {
             </Typography>
           </Box>
 
-          {/* Columna 3: Vacía (reservada para futuro uso) */}
+          {/* Columna 3: Cómo llegar */}
           <Box className={styles.rightColumn}>
-            {/* Columna vacía por ahora */}
+            <Typography
+              variant="h6"
+              component="h3"
+              className={styles.sectionTitle}
+            >
+              Cómo llegar
+            </Typography>
+            <Link
+              href="https://www.google.com/maps/place/Rider+Bross/@36.5483141,-4.6284605,20z/data=!4m15!1m8!3m7!1s0xd72e2396a652e31:0x183645f55547671b!2sC.+Gomera,+5,+29640+Fuengirola,+M%C3%A1laga,+Espa%C3%B1a!3b1!8m2!3d36.5482507!4d-4.628345!16s%2Fg%2F11pw1cnqsn!3m5!1s0xd72e3d9d4a83bc7:0x78b55183b59d57ac!8m2!3d36.548315!4d-4.6281907!16s%2Fg%2F11z_62yws9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.mapContainerLink}
+              aria-label="Abrir ubicación de RiderBross en Google Maps"
+            >
+              <Box className={styles.mapContainer}>
+                <iframe
+                  title="Ubicación RiderBross en Google Maps"
+                  className={styles.mapIframe}
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d200.32753156409035!2d-4.628188442428996!3d36.54831355820713!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd72e3d9d4a83bc7%3A0x78b55183b59d57ac!2sRider%20Bross!5e0!3m2!1ses-419!2sar!4v1793819998345!5m2!1ses-419!2sar"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </Box>
+            </Link>
           </Box>
         </Box>
 
@@ -172,7 +196,7 @@ export default function Footer() {
             sx={{ color: '#FFFFFF' }}
             component="div"
           >
-            <span>RiderBross 2026 - Todos los derechos reservados</span>
+            <span>Rider Bross 2026 - Todos los derechos reservados</span>
             <span className={styles.copyrightSeparator}> | </span>
             <span>Developed By: PrialSoft</span>
           </Typography>

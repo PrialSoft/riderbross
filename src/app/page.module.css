@@ -107,20 +107,76 @@
   }
 }
 
-.heroLogo {
-  max-width: 95%;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.8)) drop-shadow(0 2px 10px rgba(250, 250, 250, 0.3));
+.heroLogoStage {
   position: relative;
-  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 95%;
+  max-width: 900px;
   margin-top: 20%;
+  isolation: isolate;
 }
 
 @media (min-width: 900px) {
-  .heroLogo {
+  .heroLogoStage {
     margin-top: 5%;
   }
+}
+
+/* Orbes de luz detrás del logo: movimiento lento y muy visible */
+.heroGlow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+
+.heroGlowWhite {
+  top: 50%;
+  left: 50%;
+  width: min(32%, 250px);
+  aspect-ratio: 1;
+  margin-top: calc(min(32%, 250px) / -2);
+  margin-left: calc(min(32%, 250px) / -2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.16) 50%, transparent 75%);
+  filter: blur(11px);
+}
+
+.heroGlowRed {
+  top: 50%;
+  left: 50%;
+  width: min(34%, 270px);
+  aspect-ratio: 1;
+  margin-top: calc(min(34%, 270px) / -2);
+  margin-left: calc(min(34%, 270px) / -2);
+  background: radial-gradient(circle, rgba(180, 35, 35, 0.7) 0%, rgba(139, 26, 26, 0.28) 50%, transparent 75%);
+  filter: blur(12px);
+}
+
+.heroGlowSoft {
+  top: 50%;
+  left: 50%;
+  width: min(28%, 210px);
+  aspect-ratio: 1;
+  margin-top: calc(min(28%, 210px) / -2);
+  margin-left: calc(min(28%, 210px) / -2);
+  background: radial-gradient(circle, rgba(255, 220, 200, 0.4) 0%, rgba(255, 80, 60, 0.16) 45%, transparent 75%);
+  filter: blur(14px);
+}
+
+.heroLogo {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 4px 4px rgba(0, 0, 0, 0.8))
+    drop-shadow(0 2px 10px rgba(250, 250, 250, 0.3));
 }
 
 /* Selector específico para sobrescribir estilos de MUI */
@@ -498,6 +554,8 @@
   color: var(--text-primary) !important;
   font-size: var(--font-size-3xl) !important;
   font-family: var(--font-family-body) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
 }
 
 @media (min-width: 600px) {
@@ -611,6 +669,8 @@
   font-size: 1.375rem !important;
   font-family: var(--font-family-body) !important;
   line-height: 1.3 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
 }
 
 @media (min-width: 600px) {
