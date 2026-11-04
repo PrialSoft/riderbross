@@ -31,13 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={montserrat.variable}>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Creepster&family=Bebas+Neue&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body suppressHydrationWarning>
+      <body className={montserrat.className} suppressHydrationWarning>
         <MuiProvider>
           <Navbar />
           <main style={{ minHeight: 'calc(100vh - 64px)', position: 'relative', zIndex: 1 }}>

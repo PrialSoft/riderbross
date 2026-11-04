@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -22,6 +21,7 @@ import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import SpeedIcon from '@mui/icons-material/Speed';
 
 import { MarcasCarousel } from '@/components/public/MarcasCarousel/MarcasCarousel';
+import HeroLogo from '@/components/HeroLogo/HeroLogo';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -98,16 +98,7 @@ export default function Home() {
       <Box className={styles.hero}>
         <Container maxWidth={false} className={styles.heroContainer}>
           <Box className={styles.heroContent}>
-            <Box className={styles.heroLogoContainer}>
-              <Image
-                src="/images/LogoRiderBross.png"
-                alt="RiderBross Logo"
-                width={900}
-                height={900}
-                priority
-                className={styles.heroLogo}
-              />
-            </Box>
+            <HeroLogo />
             <Typography variant="h1" component="h1" className={styles.heroTitle}>
               Tu pasión merece precisión. Tu seguridad, excelencia.
             </Typography>

@@ -21,8 +21,8 @@
   
   /* Texto */
   --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-disabled: rgba(255, 255, 255, 0.5);
+  --text-secondary: rgba(255, 255, 255, 0.88);
+  --text-disabled: rgba(255, 255, 255, 0.55);
   
   /* Fondos */
   --bg-primary: #04000C;
@@ -48,17 +48,17 @@
   --spacing-2xl: 3rem;     /* 48px */
   --spacing-3xl: 4rem;     /* 64px */
   
-  /* Tipografía */
-  --font-family-headings: 'Bebas Neue', 'Creepster', sans-serif;
-  --font-family-body: var(--font-montserrat), 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Tipografía — Montserrat en toda la UI (legibilidad) */
+  --font-family-headings: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+  --font-family-body: var(--font-montserrat), 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-mono: 'Courier New', Courier, monospace;
   
   /* Tamaños de fuente (Mobile-First) */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-xs: 0.8125rem;  /* 13px */
+  --font-size-sm: 0.9375rem;  /* 15px */
+  --font-size-base: 1.0625rem; /* 17px — base más legible */
+  --font-size-lg: 1.1875rem;  /* 19px */
+  --font-size-xl: 1.3125rem;  /* 21px */
   --font-size-2xl: 1.5rem;    /* 24px */
   --font-size-3xl: 2rem;      /* 32px */
   --font-size-4xl: 2.5rem;    /* 40px */
@@ -110,24 +110,28 @@ html {
 body {
   font-family: var(--font-family-body);
   font-size: var(--font-size-base);
-  line-height: 1.5;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
   background-color: #04000C;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height para móviles */
 }
 
-/* Tipografía Responsive */
+/* Tipografía Responsive — Montserrat legible; mayúsculas como con Bebas Neue */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-headings);
-  font-weight: 400;
-  line-height: 1.2;
+  font-weight: 700;
+  line-height: 1.3;
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 h1 {
@@ -153,6 +157,8 @@ h5, h6 {
 p {
   margin-bottom: var(--spacing-md);
   color: var(--text-secondary);
+  font-weight: 400;
+  line-height: 1.7;
 }
 
 a {
