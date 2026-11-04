@@ -118,51 +118,52 @@ export default function Home() {
 
             <MarcasCarousel />
 
-            <Container maxWidth="lg" className={styles.servicesSection}>
-            <Typography 
-              component="h2" 
-              className={styles.servicesTitle}
-            >
-              Nuestros Servicios
-            </Typography>
+            <Box component="section" className={styles.servicesSection}>
+              <Typography component="h2" className={styles.servicesTitle}>
+                Nuestros Servicios
+              </Typography>
 
-            <Box className={styles.servicesContainer}>
-              {servicios.map((servicio, index) => {
-                const card = (
-                  <Card className={styles.serviceCard}>
-                    <CardContent className={styles.serviceCardContent}>
-                      <Box className={styles.serviceIcon}>
-                        {servicio.icon}
-                      </Box>
-                      <Typography variant="h5" component="h3" className={styles.serviceTitle}>
-                        {servicio.title}
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary" className={styles.serviceDescription}>
-                        {servicio.description}
-                      </Typography>
-                      {servicio.href && (
-                        <Typography variant="body2" className={styles.serviceCardMore}>
-                          Ver más...
+              <Box className={styles.servicesContainer}>
+                {servicios.map((servicio, index) => {
+                  const card = (
+                    <Card className={styles.serviceCard}>
+                      <CardContent className={styles.serviceCardContent}>
+                        <Box className={styles.serviceIcon}>{servicio.icon}</Box>
+                        <Typography variant="h5" component="h3" className={styles.serviceTitle}>
+                          {servicio.title}
                         </Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
+                        <Typography
+                          variant="body1"
+                          color="text.secondary"
+                          className={styles.serviceDescription}
+                        >
+                          {servicio.description}
+                        </Typography>
+                        <Box className={styles.serviceCardFooter}>
+                          {servicio.href ? (
+                            <Typography variant="body2" className={styles.serviceCardMore}>
+                              Ver más...
+                            </Typography>
+                          ) : null}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  );
 
-                return (
-                  <Box key={index} className={styles.serviceCardWrapper}>
-                    {servicio.href ? (
-                      <Link href={servicio.href} className={styles.serviceCardLink}>
-                        {card}
-                      </Link>
-                    ) : (
-                      card
-                    )}
-                  </Box>
-                );
-              })}
+                  return (
+                    <Box key={index} className={styles.serviceCardWrapper}>
+                      {servicio.href ? (
+                        <Link href={servicio.href} className={styles.serviceCardLink}>
+                          {card}
+                        </Link>
+                      ) : (
+                        card
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
             </Box>
-          </Container>
 
 
           {/* Buscador de Patente */}
