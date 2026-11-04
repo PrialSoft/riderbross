@@ -238,7 +238,7 @@ export default function Home() {
             <CustomButton
               variant="contained"
               size="large"
-              href="tel:+541144242784"
+              href="tel:+34602429438"
               className={styles.ctaButton}
             >
               Contactar

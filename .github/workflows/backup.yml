@@ -1,0 +1,33 @@
+name: Supabase Backup
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Se ejecuta automáticamente todos los días a la medianoche
+  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña "Actions" en GitHub
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run backup
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          mkdir -p backups
+          pg_dump "$DATABASE_URL" --format=custom --file="backups/supabase_$(date +%F_%H-%M-%S).dump"
+
+      - name: Commit and push backup
+        run: |
+          git config --global user.name "supabase-backup-bot"
+          git config --global user.email "backup@bot.com"
+          git add backups/
+          git commit -m "Automated backup: $(date +%F)" || exit 0
+          git push

@@ -156,7 +156,7 @@ export default function InspeccionPreCompraPage() {
               agendar tu turno.
             </Typography>
             <Box className={styles.ctaActions}>
-              <CustomButton variant="contained" size="large" href="tel:+541144242784">
+              <CustomButton variant="contained" size="large" href="tel:+34602429438">
                 Llamar ahora
               </CustomButton>
               <CustomButton variant="outlined" size="large" href="/#contacto">

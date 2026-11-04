@@ -115,11 +115,11 @@ export default function Footer() {
               </Box>
               {' '}
               <Link 
-                href="tel:+541144242784" 
+                href="tel:+34602429438" 
                 className={styles.contactLink}
                 style={{ color: '#FFFFFF', textDecoration: 'none' }}
               >
-                +541144242784
+                +34 602 429438
               </Link>
             </Typography>
             
@@ -134,7 +134,7 @@ export default function Footer() {
                 <span className={styles.contactLabel}>Dirección:</span>
               </Box>
               {' '}
-              Barracas, Buenos Aires, Argentina. CP1288
+              Calle Gomera, 6, Fuengirola, Málaga, España
             </Typography>
             
             <Typography 
